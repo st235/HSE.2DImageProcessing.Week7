@@ -26,6 +26,11 @@ bool IsDirectory(const std::string& path);
 void ListFiles(const std::string& dir,
                std::vector<std::string>& result);
 
+void FlatListDirectories(const std::string& dir,
+                         std::vector<std::string>& result);
+
+std::vector<std::string> SplitPath(const std::string& path);
+
 } // namespace utils
 
 #endif // FILE_UTILS_H

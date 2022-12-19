@@ -1,5 +1,7 @@
 #include "file_utils.h"
 
+#include "strings.h"
+
 namespace utils {
 
 namespace fs = std::filesystem;
@@ -83,6 +85,22 @@ void ListFiles(const std::string& dir, std::vector<std::string>& result) {
             ListFiles(raw_path, result);
         }
     }
+}
+
+void FlatListDirectories(const std::string& dir,
+                         std::vector<std::string>& result) {
+    for (const auto& entry: fs::directory_iterator(dir)) {
+        const auto& path = entry.path();
+        std::string raw_path(path.c_str());
+
+        if (IsDirectory(raw_path)) {
+            result.push_back(raw_path);
+        }
+    }
+}
+
+std::vector<std::string> SplitPath(const std::string& path) {
+    return std::Split(path, fs::path::preferred_separator);
 }
 
 } // namespace utils
