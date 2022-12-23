@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include <opencv2/face.hpp>
+#include <opencv2/ml.hpp>
 #include <opencv2/opencv.hpp>
 
 #include "args_parser.h"
@@ -128,7 +128,12 @@ void TrainModels(const std::string& dataset_root_folder,
                  const std::string& video_file,
                  const std::string& classifier_path,
                  bool is_debug) {
-    detection::BagOfWords bag_of_words;
+    cv::Ptr<cv::ml::SVM> svm = cv::ml::SVM::create();
+    svm->setType(cv::ml::SVM::C_SVC);
+    svm->setKernel(cv::ml::SVM::LINEAR);
+    svm->setTermCriteria(cv::TermCriteria(cv::TermCriteria::MAX_ITER, 1e4, 1e-6));
+
+    detection::BagOfWords bag_of_words(260, svm);
 
     std::vector<std::string> directories;
     utils::FlatListDirectories(dataset_root_folder, directories);

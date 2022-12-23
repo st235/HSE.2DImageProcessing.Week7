@@ -1,7 +1,5 @@
 #include "bag_of_words.h"
 
-#include <iostream>
-
 namespace {
 
 cv::Mat MergeDescriptors(const std::vector<cv::Mat>& images_descriptors) {
@@ -75,7 +73,7 @@ void BagOfWords::buildHistograms(cv::Mat& vocabulary,
         cv::Mat image_histogram = buildHistogram(image_descriptors, vocabulary);
 
         out_images_histogram.push_back(image_histogram);
-        out_images_labels.push_back(cv::Mat(1, 1, CV_32F, static_cast<float>(image_label)));
+        out_images_labels.push_back(cv::Mat(1, 1, CV_32S, image_label));
     }
 }
 
@@ -135,7 +133,6 @@ int BagOfWords::predict(cv::Mat& image) {
     extractFeatures(image, keypoints, descriptors);
 
     cv::Mat image_histogram = buildHistogram(descriptors, _vocabulary);
-
     return static_cast<int>(_model->predict(image_histogram));
 }
 
