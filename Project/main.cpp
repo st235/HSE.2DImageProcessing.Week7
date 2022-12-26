@@ -1,3 +1,4 @@
+#include <cmath>
 #include <exception>
 #include <iostream>
 #include <string>
@@ -13,8 +14,10 @@
 namespace {
 
 void GenerateDataset(const std::vector<std::string>& raw_files,
+                     const std::string& face_cascade_file,
+                     const std::string& right_eye_cascade_file,
+                     const std::string& left_eye_cascade_file,
                      const std::string& override_output_prefix,
-                     const std::string& classifier_path,
                      bool is_debug) {
     if (!override_output_prefix.empty() && !utils::IsDirectory(override_output_prefix)) {
         throw std::runtime_error(override_output_prefix + " is not a directory.");
@@ -35,23 +38,87 @@ void GenerateDataset(const std::vector<std::string>& raw_files,
     std::sort(files.begin(), files.end());
 
     cv::CascadeClassifier face_cascade;
-    face_cascade.load(classifier_path);
+    face_cascade.load(face_cascade_file);
+
+    cv::CascadeClassifier left_eye_cascade;
+    left_eye_cascade.load(left_eye_cascade_file);
+
+    cv::CascadeClassifier right_eye_cascade;
+    right_eye_cascade.load(right_eye_cascade_file);
 
     for (const auto& file_path: files) {
         cv::Mat image = cv::imread(file_path, cv::IMREAD_COLOR);
-
         if (image.empty()) {
             // not an image, skipping
             continue;
         }
 
-        cv::imshow(file_path, image);
+        cv::Mat greyscale_image;
+        cv::cvtColor(image, greyscale_image, cv::COLOR_BGR2GRAY);
 
         std::vector<cv::Rect> faces;
-        face_cascade.detectMultiScale(image, faces, 1.05, 6);
+        face_cascade.detectMultiScale(greyscale_image, faces, 1.1, 6);
 
         for(size_t i = 0; i < faces.size(); i++) {
-            cv::Mat cropped_image = image(faces[i]);
+            cv::Rect face = faces[i];
+            cv::Mat face_area = greyscale_image(face);
+
+            std::vector<cv::Rect> left_eyes;
+            std::vector<cv::Rect> right_eyes;
+
+            left_eye_cascade.detectMultiScale(face_area, left_eyes, 1.1, 6);
+            right_eye_cascade.detectMultiScale(face_area, right_eyes, 1.1, 6);
+
+            cv::Mat output_image = face_area;
+
+            if (left_eyes.size() != 1 && right_eyes.size() != 1) {
+                std::cout << "Skipping: " << file_path
+                          << ", left eyes: " << left_eyes.size()
+                          << ", right eyes: " << right_eyes.size() << std::endl;
+            } else {
+
+                float fx = static_cast<float>(face.x),
+                        fy = static_cast<float>(face.y),
+                        fw = static_cast<float>(face.width),
+                        fh = static_cast<float>(face.height);
+
+                cv::Rect left_eye = left_eyes[0];
+                cv::Rect right_eye = right_eyes[0];
+
+                float rx = static_cast<float>(right_eye.x),
+                        ry = static_cast<float>(right_eye.y),
+                        rw = static_cast<float>(right_eye.width),
+                        rh = static_cast<float>(right_eye.height);
+
+                float lx = static_cast<float>(left_eye.x),
+                        ly = static_cast<float>(left_eye.y),
+                        lw = static_cast<float>(left_eye.width),
+                        lh = static_cast<float>(left_eye.height);
+
+                float dx = (lx + fw / 2 + lw / 2) - (rx + rw / 2),
+                        dy = (ly + lh / 2) - (ry + rh / 2);
+
+                // tricky way to calculate pi
+                float pi = atan(1) * 4;
+
+                float angle_rad = atan2(dy, dx);
+                float angle_degree = angle_rad * 180 / pi;
+
+                std::cout << "rotating image (" << file_path << ") for: "
+                          << angle_degree << std::endl;
+
+                float face_center_x = fx + fw / 2,
+                        face_center_y = fy + fh / 2;
+
+                cv::Mat rotation_mat = cv::getRotationMatrix2D(cv::Point2f(face_center_x, face_center_y), angle_degree,
+                                                               1.0 /* scale */);
+
+                cv::warpAffine(face_area, output_image, rotation_mat, cv::Size2i(face_area.cols, face_area.rows));
+
+                // debug
+                cv::rectangle(image, cv::Point2f(fx + lx, fy + ly), cv::Point2f(fx + lx + lw, fy + ly + lh), cv::Scalar(0, 255, 0), 6, 1, 0);
+                cv::rectangle(image, cv::Point2f(fx + rx, fy + ry), cv::Point2f(fx + rx + rw, fy + ry + rh), cv::Scalar(0, 255, 0), 6, 1, 0);
+            }
 
             const auto& report_image_name = 
                 utils::GetFileName(file_path) + "_face_" + std::to_string(i)
@@ -65,9 +132,14 @@ void GenerateDataset(const std::vector<std::string>& raw_files,
                     utils::GetAbsolutePath(override_output_prefix), report_image_name });
             }
 
-            cv::imwrite(output_image_path, cropped_image);
+            cv::imwrite(output_image_path, output_image);
 
-            cv::rectangle(image, faces[i], cv::Scalar(0, 0, 255), 6, 1, 0);
+            cv::rectangle(image, face, cv::Scalar(0, 0, 255), 6, 1, 0);
+        }
+
+        if (faces.empty()) {
+            std::cout << "Skipping: " << file_path
+                      << "no faces detected" << std::endl;
         }
 
         if (is_debug) {
@@ -178,14 +250,19 @@ int main(int argc, char* argv[]) {
         args::ArgsDict args = args::ParseArgs(argc, argv);
 
         if (args::DetectArgs(args, 
-                { args::FLAG_TITLE_UNSPECIFIED, "-gd" } /* mandatory flags */,
-                { "-d", "-o", "-c" } /* optional flags */)) {
+                { args::FLAG_TITLE_UNSPECIFIED, "--ds", "-f", "-le", "-re" } /* mandatory flags */,
+                { "-d", "-o" } /* optional flags */)) {
             const auto& files = args::GetStringList(args, args::FLAG_TITLE_UNSPECIFIED);
+            const auto& face_cascade_file = args::GetString(args, "-f");
+            const auto& right_eye_cascade_file = args::GetString(args, "-re");
+            const auto& left_eye_cascade_file = args::GetString(args, "-le");
+
             const auto& output_directory = args::GetString(args, "-o", "" /* default */);
-            const auto& classifier_path = args::GetString(args, "-c", "" /* default */);
             const auto& is_debug = args::HasFlag(args, "-d");
 
-            GenerateDataset(files, output_directory, classifier_path, is_debug);
+            GenerateDataset(files,
+                            face_cascade_file, right_eye_cascade_file, left_eye_cascade_file,
+                            output_directory, is_debug);
         } else if (args::DetectArgs(args, 
                 { args::FLAG_TITLE_UNSPECIFIED, "-tr" } /* mandatory flags */,
                 { "-d", "-v", "-c" } /* optional flags */)) {
