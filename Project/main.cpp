@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <opencv2/ml.hpp>
+#include <opencv2/face.hpp>
 #include <opencv2/opencv.hpp>
 
 #include "args_parser.h"
@@ -44,7 +45,6 @@ void GenerateDataset(const std::vector<std::string>& raw_files,
             // not an image, skipping
             continue;
         }
-
 
         std::vector<cv::Mat> faces =
                 detection::extractFaces(image,
@@ -86,14 +86,13 @@ void GenerateDataset(const std::vector<std::string>& raw_files,
 }
 
 void RecognizeFaceOnVideo(const std::string& video_file,
-                          const std::string& classifier_path,
-                          detection::BagOfWords& bag_of_words,
+                          const std::string& face_cascade_file,
+                          const std::string& right_eye_cascade_file,
+                          const std::string& left_eye_cascade_file,
+                          cv::Ptr<cv::face::LBPHFaceRecognizer> recognizer,
                           bool is_debug) {
     cv::VideoCapture capture(video_file);
     cv::Mat frame;
-
-    cv::CascadeClassifier face_cascade;
-    face_cascade.load(classifier_path);
 
     if(!capture.isOpened()) {
         throw std::runtime_error("Error when reading steam_avi");
@@ -105,23 +104,17 @@ void RecognizeFaceOnVideo(const std::string& video_file,
             break;
         }
 
-        cv::Mat grey_scale;
-        cv::cvtColor(frame, grey_scale, cv::COLOR_BGR2GRAY);
-        grey_scale.convertTo(grey_scale, CV_8U);
-
-        std::vector<cv::Rect> faces;
-        face_cascade.detectMultiScale(grey_scale, faces, 1.05, 6);
+        std::vector<cv::Mat> faces =
+                detection::extractFaces(frame,
+                                        face_cascade_file,
+                                        right_eye_cascade_file,
+                                        left_eye_cascade_file,
+                                        true /* is_debug */);
 
         for(size_t i = 0; i < faces.size(); i++) {
-            cv::Mat cropped_image = grey_scale(faces[i]);
-            int id = bag_of_words.predict(cropped_image);
+            cv::Mat face = faces[i];
+            int id = recognizer->predict(face);
             std::cout << "predicted id: " << id << std::endl;
-
-            if (id == 0) {
-                cv::rectangle(frame, faces[i], cv::Scalar(0, 255, 0), 6, 1, 0);
-            } else {
-                cv::rectangle(frame, faces[i], cv::Scalar(0, 0, 255), 6, 1, 0);
-            }
         }
 
         cv::imshow("w", frame);
@@ -132,14 +125,18 @@ void RecognizeFaceOnVideo(const std::string& video_file,
 
 void TrainModels(const std::string& dataset_root_folder,
                  const std::string& video_file,
-                 const std::string& classifier_path,
+                 const std::string& face_cascade_file,
+                 const std::string& right_eye_cascade_file,
+                 const std::string& left_eye_cascade_file,
                  bool is_debug) {
     cv::Ptr<cv::ml::SVM> svm = cv::ml::SVM::create();
     svm->setType(cv::ml::SVM::C_SVC);
     svm->setKernel(cv::ml::SVM::LINEAR);
     svm->setTermCriteria(cv::TermCriteria(cv::TermCriteria::MAX_ITER, 1e4, 1e-6));
 
-    detection::BagOfWords bag_of_words(260, svm);
+    cv::Ptr<cv::face::LBPHFaceRecognizer> recognizer = cv::face::LBPHFaceRecognizer::create();
+
+    detection::BagOfWords bag_of_words(860, svm);
 
     std::vector<std::string> directories;
     utils::FlatListDirectories(dataset_root_folder, directories);
@@ -163,6 +160,8 @@ void TrainModels(const std::string& dataset_root_folder,
                 continue;
             }
 
+            cv::cvtColor(face, face, cv::COLOR_BGR2GRAY);
+
             images_labels.push_back(image_id);
             images_descriptions.push_back(face);
 
@@ -172,9 +171,12 @@ void TrainModels(const std::string& dataset_root_folder,
         image_id += 1;
     }
 
-    bag_of_words.fit(images_descriptions, images_labels);
+//    bag_of_words.fit(images_descriptions, images_labels);
+    recognizer->train(images_descriptions, images_labels);
 
-    RecognizeFaceOnVideo(video_file, classifier_path, bag_of_words, is_debug);
+    RecognizeFaceOnVideo(video_file,
+                         face_cascade_file, right_eye_cascade_file, left_eye_cascade_file,
+                         recognizer, is_debug);
 }
 
 } // namespace
@@ -198,14 +200,19 @@ int main(int argc, char* argv[]) {
                             face_cascade_file, right_eye_cascade_file, left_eye_cascade_file,
                             output_directory, is_debug);
         } else if (args::DetectArgs(args, 
-                { args::FLAG_TITLE_UNSPECIFIED, "-tr" } /* mandatory flags */,
-                { "-d", "-v", "-c" } /* optional flags */)) {
+                { args::FLAG_TITLE_UNSPECIFIED, "--train", "-v", "-f", "-re", "-le" } /* mandatory flags */,
+                { "-d" } /* optional flags */)) {
             const auto& dataset_root_folder = args::GetString(args, args::FLAG_TITLE_UNSPECIFIED);
-            const auto& video_file = args::GetString(args, "-v", "" /* default */);
-            const auto& classifier_path = args::GetString(args, "-c", "" /* default */);
+            const auto& video_file = args::GetString(args, "-v");
+            const auto& face_cascade_file = args::GetString(args, "-f");
+            const auto& right_eye_cascade_file = args::GetString(args, "-re");
+            const auto& left_eye_cascade_file = args::GetString(args, "-le");
+
             const auto& is_debug = args::HasFlag(args, "-d");
 
-            TrainModels(dataset_root_folder, video_file, classifier_path, is_debug);
+            TrainModels(dataset_root_folder, video_file,
+                        face_cascade_file, right_eye_cascade_file, left_eye_cascade_file,
+                        is_debug);
         } else {
             std::cout << "Cannot find suitable command for the given flags." << std::endl;
         }
