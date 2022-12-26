@@ -62,6 +62,8 @@ public:
   void train(std::vector<cv::Mat>& images,
              std::vector<int>& images_labels) override;
   int predict(cv::Mat& image) const override;
+
+  ~BowRecognitionModel() = default;
 };
 
 } // namespace detection

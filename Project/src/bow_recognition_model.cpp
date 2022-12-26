@@ -108,12 +108,28 @@ BowRecognitionModel& BowRecognitionModel::operator=(const BowRecognitionModel& t
 }
 
 void BowRecognitionModel::write(const std::string& file) {
-    _model->save(file);
+    cv::Ptr<cv::FileStorage> file_storage = cv::makePtr<cv::FileStorage>(file, cv::FileStorage::WRITE);
+
+    file_storage->write("_clusters_count", static_cast<int>(_clusters_count));
+    file_storage->write("_vocabulary", _vocabulary);
+    file_storage->write("_images_labels", _images_labels);
+    file_storage->write("_images_histograms", _images_histograms);
+
+    _model->write(file_storage, "_model");
 }
 
 void BowRecognitionModel::read(const std::string& file) {
-    cv::FileStorage fsRead(file, cv::FileStorage::READ);
-    _model->read(fsRead.getFirstTopLevelNode());
+    cv::FileStorage file_storage(file, cv::FileStorage::READ);
+
+    int clusters_count;
+    file_storage["_clusters_count"] >> clusters_count;
+    _clusters_count = static_cast<uint32_t>(clusters_count);
+
+    file_storage["_vocabulary"] >> _vocabulary;
+    file_storage["_images_labels"] >> _images_labels;
+    file_storage["_images_histograms"] >> _images_histograms;
+
+    _model->read(file_storage["_model"]);
 }
 
 void BowRecognitionModel::train(std::vector<cv::Mat>& images,

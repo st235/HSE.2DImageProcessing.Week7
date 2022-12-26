@@ -16,6 +16,8 @@ public:
   virtual void train(std::vector<cv::Mat>& images,
                      std::vector<int>& images_labels) = 0;
   virtual int predict(cv::Mat& image) const = 0;
+
+  virtual ~FaceRecognitionModel() = default;
 };
 
 } // namespace detection

@@ -1,6 +1,7 @@
 #include <cmath>
 #include <exception>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -123,20 +124,18 @@ void RecognizeFaceOnVideo(const std::string& video_file,
     cv::waitKey(0);
 }
 
-void TrainModels(const std::string& dataset_root_folder,
-                 const std::string& video_file,
-                 const std::string& face_cascade_file,
-                 const std::string& right_eye_cascade_file,
-                 const std::string& left_eye_cascade_file,
-                 bool is_debug) {
+void TrainModel(const std::string& dataset_root_folder,
+                const std::string& face_cascade_file,
+                const std::string& right_eye_cascade_file,
+                const std::string& left_eye_cascade_file,
+                const std::string& output_model_file) {
     cv::Ptr<cv::ml::SVM> svm = cv::ml::SVM::create();
     svm->setType(cv::ml::SVM::C_SVC);
     svm->setKernel(cv::ml::SVM::LINEAR);
     svm->setTermCriteria(cv::TermCriteria(cv::TermCriteria::MAX_ITER, 1e4, 1e-6));
 
-    cv::Ptr<cv::face::LBPHFaceRecognizer> recognizer = cv::face::LBPHFaceRecognizer::create();
-
-    detection::BowRecognitionModel bag_of_words(860, svm);
+    std::unique_ptr<detection::FaceRecognitionModel> recognizer =
+            std::make_unique<detection::BowRecognitionModel>(860, svm);
 
     std::vector<std::string> directories;
     utils::FlatListDirectories(dataset_root_folder, directories);
@@ -171,12 +170,8 @@ void TrainModels(const std::string& dataset_root_folder,
         image_id += 1;
     }
 
-//    bag_of_words.fit(images_descriptions, images_labels);
     recognizer->train(images_descriptions, images_labels);
-
-    RecognizeFaceOnVideo(video_file,
-                         face_cascade_file, right_eye_cascade_file, left_eye_cascade_file,
-                         recognizer, is_debug);
+    recognizer->write(output_model_file);
 }
 
 } // namespace
@@ -200,19 +195,17 @@ int main(int argc, char* argv[]) {
                             face_cascade_file, right_eye_cascade_file, left_eye_cascade_file,
                             output_directory, is_debug);
         } else if (args::DetectArgs(args, 
-                { args::FLAG_TITLE_UNSPECIFIED, "--train", "-v", "-f", "-re", "-le" } /* mandatory flags */,
-                { "-d" } /* optional flags */)) {
+                { args::FLAG_TITLE_UNSPECIFIED, "--train", "-f", "-re", "-le", "-om" } /* mandatory flags */,
+                { } /* optional flags */)) {
             const auto& dataset_root_folder = args::GetString(args, args::FLAG_TITLE_UNSPECIFIED);
-            const auto& video_file = args::GetString(args, "-v");
             const auto& face_cascade_file = args::GetString(args, "-f");
             const auto& right_eye_cascade_file = args::GetString(args, "-re");
             const auto& left_eye_cascade_file = args::GetString(args, "-le");
+            const auto& output_model_file = args::GetString(args, "-om");
 
-            const auto& is_debug = args::HasFlag(args, "-d");
-
-            TrainModels(dataset_root_folder, video_file,
-                        face_cascade_file, right_eye_cascade_file, left_eye_cascade_file,
-                        is_debug);
+            TrainModel(dataset_root_folder,
+                       face_cascade_file, right_eye_cascade_file, left_eye_cascade_file,
+                       output_model_file);
         } else {
             std::cout << "Cannot find suitable command for the given flags." << std::endl;
         }
