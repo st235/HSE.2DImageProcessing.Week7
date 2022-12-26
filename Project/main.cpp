@@ -9,9 +9,9 @@
 #include <opencv2/opencv.hpp>
 
 #include "args_parser.h"
+#include "bow_recognition_model.h"
 #include "face_utils.h"
 #include "file_utils.h"
-#include "bag_of_words.h"
 
 namespace {
 
@@ -136,7 +136,7 @@ void TrainModels(const std::string& dataset_root_folder,
 
     cv::Ptr<cv::face::LBPHFaceRecognizer> recognizer = cv::face::LBPHFaceRecognizer::create();
 
-    detection::BagOfWords bag_of_words(860, svm);
+    detection::BowRecognitionModel bag_of_words(860, svm);
 
     std::vector<std::string> directories;
     utils::FlatListDirectories(dataset_root_folder, directories);

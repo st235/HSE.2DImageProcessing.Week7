@@ -1,4 +1,4 @@
-#include "bag_of_words.h"
+#include "bow_recognition_model.h"
 
 namespace {
 
@@ -16,15 +16,15 @@ cv::Mat MergeDescriptors(const std::vector<cv::Mat>& images_descriptors) {
 
 namespace detection {
 
-void BagOfWords::extractFeatures(cv::Mat image,
+void BowRecognitionModel::extractFeatures(cv::Mat image,
                                  std::vector<cv::KeyPoint>& out_keypoints,
-                                 cv::Mat& out_descriptors) {
+                                 cv::Mat& out_descriptors) const {
     cv::Ptr<cv::SIFT> sift_transformer = cv::SIFT::create();
     sift_transformer->detectAndCompute(image, cv::Mat(), out_keypoints, out_descriptors);
 }
 
-cv::Mat BagOfWords::buildVocabulary(std::vector<cv::Mat>& images,
-                                    std::vector<cv::Mat>& out_images_descriptors) {
+cv::Mat BowRecognitionModel::buildVocabulary(std::vector<cv::Mat>& images,
+                                             std::vector<cv::Mat>& out_images_descriptors) const {
     for (auto& image: images) {
         cv::Mat image_descriptors;
         std::vector<cv::KeyPoint> image_keypoints;
@@ -46,8 +46,8 @@ cv::Mat BagOfWords::buildVocabulary(std::vector<cv::Mat>& images,
     return out_vocabulary;
 }
 
-cv::Mat BagOfWords::buildHistogram(cv::Mat& descriptors,
-                                   cv::Mat& vocabulary) {
+cv::Mat BowRecognitionModel::buildHistogram(const cv::Mat& descriptors,
+                                            const cv::Mat& vocabulary) const {
     cv::BFMatcher matcher;
     std::vector<cv::DMatch> matches;
     matcher.match(descriptors, vocabulary, matches);
@@ -61,11 +61,11 @@ cv::Mat BagOfWords::buildHistogram(cv::Mat& descriptors,
     return out_histogram;
 }
 
-void BagOfWords::buildHistograms(cv::Mat& vocabulary,
-                                 std::vector<cv::Mat> images_descriptors,
-                                 std::vector<int> images_labels,
-                                 cv::Mat& out_images_histogram,
-                                 cv::Mat& out_images_labels) {
+void BowRecognitionModel::buildHistograms(cv::Mat& vocabulary,
+                                          std::vector<cv::Mat> images_descriptors,
+                                          std::vector<int> images_labels,
+                                          cv::Mat& out_images_histogram,
+                                          cv::Mat& out_images_labels) const {
     for (size_t i = 0; i < images_descriptors.size(); i++) {
         auto& image_descriptors = images_descriptors[i];
         auto& image_label = images_labels[i];
@@ -77,8 +77,8 @@ void BagOfWords::buildHistograms(cv::Mat& vocabulary,
     }
 }
 
-BagOfWords::BagOfWords(size_t clusters_count,
-                       cv::Ptr<cv::ml::StatModel> model):
+BowRecognitionModel::BowRecognitionModel(size_t clusters_count,
+                                         cv::Ptr<cv::ml::StatModel> model):
     _clusters_count(clusters_count),
     _vocabulary(),
     _images_labels(),
@@ -87,7 +87,7 @@ BagOfWords::BagOfWords(size_t clusters_count,
     // empty on purpose
 }
 
-BagOfWords::BagOfWords(const BagOfWords& that) {
+BowRecognitionModel::BowRecognitionModel(const BowRecognitionModel& that) {
     this->_clusters_count = that._clusters_count;
     this->_vocabulary = that._vocabulary;
     this->_images_labels = that._images_labels;
@@ -95,7 +95,7 @@ BagOfWords::BagOfWords(const BagOfWords& that) {
     this->_model = that._model;
 }
 
-BagOfWords& BagOfWords::operator=(const BagOfWords& that) {
+BowRecognitionModel& BowRecognitionModel::operator=(const BowRecognitionModel& that) {
     if (this != &that) {
         this->_clusters_count = that._clusters_count;
         this->_vocabulary = that._vocabulary;
@@ -107,8 +107,17 @@ BagOfWords& BagOfWords::operator=(const BagOfWords& that) {
     return *this;
 }
 
-void BagOfWords::fit(std::vector<cv::Mat>& images,
-                     std::vector<int>& images_labels) {
+void BowRecognitionModel::write(const std::string& file) {
+    _model->save(file);
+}
+
+void BowRecognitionModel::read(const std::string& file) {
+    cv::FileStorage fsRead(file, cv::FileStorage::READ);
+    _model->read(fsRead.getFirstTopLevelNode());
+}
+
+void BowRecognitionModel::train(std::vector<cv::Mat>& images,
+                                std::vector<int>& images_labels) {
     if (images.size() != images_labels.size()) {
         throw std::runtime_error("Images size is not equal to labels size");
     }
@@ -127,7 +136,7 @@ void BagOfWords::fit(std::vector<cv::Mat>& images,
     _model->train(train_data);
 }
 
-int BagOfWords::predict(cv::Mat& image) {
+int BowRecognitionModel::predict(cv::Mat& image) const {
     std::vector<cv::KeyPoint> keypoints;
     cv::Mat descriptors;
     extractFeatures(image, keypoints, descriptors);
