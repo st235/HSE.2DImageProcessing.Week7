@@ -1,5 +1,5 @@
-#ifndef PROJECT_LABELS_RESOLVER_H
-#define PROJECT_LABELS_RESOLVER_H
+#ifndef LABELS_RESOLVER_H
+#define LABELS_RESOLVER_H
 
 #include <cstdint>
 #include <string>
@@ -18,13 +18,18 @@ public:
     LabelsResolver(const LabelsResolver& that);
     LabelsResolver& operator=(const LabelsResolver& that);
 
+    bool hasId(uint32_t id) const;
+
     uint32_t obtainIdByLabel(const std::string& label);
     std::string obtainLabelById(uint32_t id);
     uint32_t operator[](const std::string& label);
+
+    void write(const std::string& file) const;
+    void read(const std::string& file);
 
     ~LabelsResolver() = default;
 };
 
 } // namespace detection
 
-#endif // PROJECT_LABELS_RESOLVER_H
+#endif // LABELS_RESOLVER_H

@@ -13,6 +13,7 @@
 #include "bow_recognition_model.h"
 #include "face_utils.h"
 #include "file_utils.h"
+#include "labels_resolver.h"
 
 namespace {
 
@@ -128,7 +129,8 @@ void TrainModel(const std::string& dataset_root_folder,
                 const std::string& face_cascade_file,
                 const std::string& right_eye_cascade_file,
                 const std::string& left_eye_cascade_file,
-                const std::string& output_model_file) {
+                const std::string& output_model_file,
+                const std::string& output_label_file) {
     cv::Ptr<cv::ml::SVM> svm = cv::ml::SVM::create();
     svm->setType(cv::ml::SVM::C_SVC);
     svm->setKernel(cv::ml::SVM::LINEAR);
@@ -137,16 +139,17 @@ void TrainModel(const std::string& dataset_root_folder,
     std::unique_ptr<detection::FaceRecognitionModel> recognizer =
             std::make_unique<detection::BowRecognitionModel>(860, svm);
 
+    detection::LabelsResolver labels_resolver;
+
     std::vector<std::string> directories;
     utils::FlatListDirectories(dataset_root_folder, directories);
 
     std::vector<int> images_labels;
     std::vector<cv::Mat> images_descriptions;
 
-    size_t image_id = 0;
     for (const auto& directory: directories) {
         std::vector<std::string> paths = utils::SplitPath(directory);
-        std::string id = paths[paths.size() - 1];
+        std::string image_id = paths[paths.size() - 1];
 
         std::vector<std::string> face_files;
         utils::ListFiles(directory, face_files);
@@ -161,17 +164,14 @@ void TrainModel(const std::string& dataset_root_folder,
 
             cv::cvtColor(face, face, cv::COLOR_BGR2GRAY);
 
-            images_labels.push_back(image_id);
+            images_labels.push_back(labels_resolver.obtainIdByLabel(image_id));
             images_descriptions.push_back(face);
-
-            std::cout << image_id << ", " << id << std::endl;
         }
-
-        image_id += 1;
     }
 
     recognizer->train(images_descriptions, images_labels);
     recognizer->write(output_model_file);
+    labels_resolver.write(output_label_file);
 }
 
 } // namespace
@@ -195,17 +195,18 @@ int main(int argc, char* argv[]) {
                             face_cascade_file, right_eye_cascade_file, left_eye_cascade_file,
                             output_directory, is_debug);
         } else if (args::DetectArgs(args, 
-                { args::FLAG_TITLE_UNSPECIFIED, "--train", "-f", "-re", "-le", "-om" } /* mandatory flags */,
+                { args::FLAG_TITLE_UNSPECIFIED, "--train", "-f", "-re", "-le", "-om", "-ol" } /* mandatory flags */,
                 { } /* optional flags */)) {
             const auto& dataset_root_folder = args::GetString(args, args::FLAG_TITLE_UNSPECIFIED);
             const auto& face_cascade_file = args::GetString(args, "-f");
             const auto& right_eye_cascade_file = args::GetString(args, "-re");
             const auto& left_eye_cascade_file = args::GetString(args, "-le");
             const auto& output_model_file = args::GetString(args, "-om");
+            const auto& output_label_file = args::GetString(args, "-ol");
 
             TrainModel(dataset_root_folder,
                        face_cascade_file, right_eye_cascade_file, left_eye_cascade_file,
-                       output_model_file);
+                       output_model_file, output_label_file);
         } else {
             std::cout << "Cannot find suitable command for the given flags." << std::endl;
         }
