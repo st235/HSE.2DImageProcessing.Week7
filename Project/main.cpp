@@ -87,44 +87,6 @@ void GenerateDataset(const std::vector<std::string>& raw_files,
     cv::destroyAllWindows();
 }
 
-void RecognizeFaceOnVideo(const std::string& video_file,
-                          const std::string& face_cascade_file,
-                          const std::string& right_eye_cascade_file,
-                          const std::string& left_eye_cascade_file,
-                          cv::Ptr<cv::face::LBPHFaceRecognizer> recognizer,
-                          bool is_debug) {
-    cv::VideoCapture capture(video_file);
-    cv::Mat frame;
-
-    if(!capture.isOpened()) {
-        throw std::runtime_error("Error when reading steam_avi");
-    }
-
-    while (true) {
-        capture >> frame;
-        if(frame.empty()) {
-            break;
-        }
-
-        std::vector<cv::Mat> faces =
-                detection::extractFaces(frame,
-                                        face_cascade_file,
-                                        right_eye_cascade_file,
-                                        left_eye_cascade_file,
-                                        true /* is_debug */);
-
-        for(size_t i = 0; i < faces.size(); i++) {
-            cv::Mat face = faces[i];
-            int id = recognizer->predict(face);
-            std::cout << "predicted id: " << id << std::endl;
-        }
-
-        cv::imshow("w", frame);
-        cv::waitKey(20);
-    }
-    cv::waitKey(0);
-}
-
 void TrainModel(const std::string& dataset_root_folder,
                 const std::string& face_cascade_file,
                 const std::string& right_eye_cascade_file,
@@ -174,6 +136,72 @@ void TrainModel(const std::string& dataset_root_folder,
     labels_resolver.write(output_label_file);
 }
 
+void ProcessVideoFiles(const std::vector<std::string>& raw_files,
+                       const std::string& face_cascade_file,
+                       const std::string& right_eye_cascade_file,
+                       const std::string& left_eye_cascade_file,
+                       const std::string& input_model_file,
+                       const std::string& input_label_file,
+                       bool is_debug) {
+    std::vector<std::string> files;
+
+    for (const auto& raw_file: raw_files) {
+        if (utils::IsDirectory(raw_file)) {
+            utils::ListFiles(raw_file, files);
+        } else {
+            files.push_back(raw_file);
+        }
+    }
+
+    // always process images in the same order,
+    // it would be easier to visually debug them
+    std::sort(files.begin(), files.end());
+
+    cv::Ptr<cv::ml::SVM> svm = cv::ml::SVM::create();
+    std::unique_ptr<detection::FaceRecognitionModel> recognizer =
+            std::make_unique<detection::BowRecognitionModel>(860, svm);
+
+    detection::LabelsResolver labels_resolver;
+
+    recognizer->read(input_model_file);
+    labels_resolver.read(input_label_file);
+
+    for (const auto& file: files) {
+        cv::VideoCapture capture(file);
+        cv::Mat frame;
+
+        if(!capture.isOpened()) {
+            throw std::runtime_error("Error when reading steam_avi");
+        }
+
+        while (true) {
+            capture >> frame;
+            if(frame.empty()) {
+                break;
+            }
+
+            std::vector<cv::Mat> faces =
+                    detection::extractFaces(frame,
+                                            face_cascade_file,
+                                            right_eye_cascade_file,
+                                            left_eye_cascade_file,
+                                            is_debug /* is_debug */);
+
+            for(size_t i = 0; i < faces.size(); i++) {
+                cv::Mat face = faces[i];
+                int id = recognizer->predict(face);
+                std::cout << "predicted id: " << id << ", " << labels_resolver.obtainLabelById(id) << std::endl;
+            }
+
+            cv::imshow("w", frame);
+            cv::waitKey(20);
+        }
+    }
+
+    cv::waitKey(0);
+    cv::destroyAllWindows();
+}
+
 } // namespace
 
 int main(int argc, char* argv[]) {
@@ -207,6 +235,22 @@ int main(int argc, char* argv[]) {
             TrainModel(dataset_root_folder,
                        face_cascade_file, right_eye_cascade_file, left_eye_cascade_file,
                        output_model_file, output_label_file);
+        } else if (args::DetectArgs(args,
+                                    { args::FLAG_TITLE_UNSPECIFIED, "--process", "-f", "-re", "-le", "-il", "-im" } /* mandatory flags */,
+                                    { "-d" } /* optional flags */)) {
+            const auto& files = args::GetStringList(args, args::FLAG_TITLE_UNSPECIFIED);
+            const auto& face_cascade_file = args::GetString(args, "-f");
+            const auto& right_eye_cascade_file = args::GetString(args, "-re");
+            const auto& left_eye_cascade_file = args::GetString(args, "-le");
+            const auto& input_model_file = args::GetString(args, "-im");
+            const auto& input_label_file = args::GetString(args, "-il");
+
+            const auto& is_debug = args::HasFlag(args, "-d");
+
+            ProcessVideoFiles(files,
+                              face_cascade_file, right_eye_cascade_file, left_eye_cascade_file,
+                              input_model_file, input_label_file,
+                              is_debug);
         } else {
             std::cout << "Cannot find suitable command for the given flags." << std::endl;
         }
