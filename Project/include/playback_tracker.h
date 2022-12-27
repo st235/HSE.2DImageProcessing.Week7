@@ -14,15 +14,21 @@ struct FrameInfo {
 private:
   static const std::string UNKNOWN_LABEL;
 
-  uint32_t id;
-  std::vector<std::string> labels;
-  std::vector<Rect> face_origins;
+  uint32_t _id;
+  std::vector<std::string> _labels;
+  std::vector<Rect> _face_origins;
+
 public:
     FrameInfo(uint32_t id,
               const std::vector<std::string>& labels,
               const std::vector<Rect>& face_origins);
     FrameInfo(const FrameInfo& that);
     FrameInfo& operator=(const FrameInfo& that);
+
+    inline uint32_t id() const { return _id; }
+    inline std::vector<std::string> labels() const { return _labels; }
+    inline std::vector<Rect> face_origins() const { return _face_origins; }
+    inline size_t count() const { return _labels.size(); }
 
     ~FrameInfo() = default;
 };

@@ -12,24 +12,24 @@ const std::string FrameInfo::UNKNOWN_LABEL = "";
 FrameInfo::FrameInfo(uint32_t id,
                      const std::vector<std::string>& labels,
                      const std::vector<Rect>& face_origins):
-    id(id),
-    labels(labels),
-    face_origins(face_origins) {
+    _id(id),
+    _labels(labels),
+    _face_origins(face_origins) {
     // empty on purpose
 }
 
 FrameInfo::FrameInfo(const FrameInfo& that):
-    id(that.id),
-    labels(that.labels),
-    face_origins(that.face_origins) {
+    _id(that._id),
+    _labels(that._labels),
+    _face_origins(that._face_origins) {
     // empty on purpose
 }
 
 FrameInfo& FrameInfo::operator=(const FrameInfo& that) {
     if (this != &that) {
-        this->id = that.id;
-        this->labels = that.labels;
-        this->face_origins = that.face_origins;
+        this->_id = that._id;
+        this->_labels = that._labels;
+        this->_face_origins = that._face_origins;
     }
 
     return *this;

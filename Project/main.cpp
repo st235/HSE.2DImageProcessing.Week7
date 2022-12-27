@@ -11,6 +11,7 @@
 
 #include "args_parser.h"
 #include "bow_recognition_model.h"
+#include "confusion_matrix_tracker.h"
 #include "face_utils.h"
 #include "file_utils.h"
 #include "labels_resolver.h"
