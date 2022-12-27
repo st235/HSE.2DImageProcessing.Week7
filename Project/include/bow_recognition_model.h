@@ -22,7 +22,7 @@ constexpr size_t DEFAULT_CLUSTERS_SIZE = 800;
  * for our images will help to identify unique features for
  * the given set of images
  * 4. Train some underlying model based on histograms
- * as feature vectors
+ * as feature vectors. Default model is KNN.
 */
 class BowRecognitionModel: public FaceRecognitionModel {
 private:

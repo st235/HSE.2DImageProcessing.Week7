@@ -8,6 +8,11 @@
 
 namespace detection {
 
+/**
+ * An abstract class for a face recognition model.
+ * Any recognition model is an algorithm to extract
+ * face features and/or classification model for features.
+ */
 class FaceRecognitionModel {
 public:
   virtual void write(const std::string& file) = 0;

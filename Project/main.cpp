@@ -14,6 +14,7 @@
 #include "face_utils.h"
 #include "file_utils.h"
 #include "labels_resolver.h"
+#include "playback_tracker.h"
 
 namespace {
 
