@@ -178,7 +178,7 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
                 detection::drawFaces(frame, faces, labels);
             }
 
-            cv::imshow("w", frame);
+            cv::imshow(file, frame);
             cv::waitKey(20);
         }
     }
