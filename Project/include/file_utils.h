@@ -31,6 +31,8 @@ void FlatListDirectories(const std::string& dir,
 
 std::vector<std::string> SplitPath(const std::string& path);
 
+std::vector<std::string> FlatList(const std::vector<std::string>& raw_files);
+
 } // namespace utils
 
 #endif // FILE_UTILS_H

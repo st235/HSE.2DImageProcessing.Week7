@@ -27,20 +27,7 @@ void GenerateDataset(const std::vector<std::string>& raw_files,
         throw std::runtime_error(override_output_prefix + " is not a directory.");
     }
 
-    std::vector<std::string> files;
-
-    for (const auto& raw_file: raw_files) {
-        if (utils::IsDirectory(raw_file)) {
-            utils::ListFiles(raw_file, files);
-        } else {
-            files.push_back(raw_file);
-        }
-    }
-
-    // always process images in the same order,
-    // it would be easier to visually debug them
-    std::sort(files.begin(), files.end());
-
+    std::vector<std::string> files = utils::FlatList(raw_files);
     for (const auto& file_path: files) {
         cv::Mat image = cv::imread(file_path, cv::IMREAD_COLOR);
         if (image.empty()) {
@@ -146,19 +133,7 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
                        const std::string& input_model_file,
                        const std::string& input_label_file,
                        bool is_debug) {
-    std::vector<std::string> files;
-
-    for (const auto& raw_file: raw_files) {
-        if (utils::IsDirectory(raw_file)) {
-            utils::ListFiles(raw_file, files);
-        } else {
-            files.push_back(raw_file);
-        }
-    }
-
-    // always process images in the same order,
-    // it would be easier to visually debug them
-    std::sort(files.begin(), files.end());
+    std::vector<std::string> files = utils::FlatList(raw_files);
 
     cv::Ptr<cv::ml::SVM> svm = cv::ml::SVM::create();
     std::unique_ptr<detection::FaceRecognitionModel> recognizer =

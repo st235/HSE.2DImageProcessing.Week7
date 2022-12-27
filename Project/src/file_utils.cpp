@@ -103,4 +103,21 @@ std::vector<std::string> SplitPath(const std::string& path) {
     return std::Split(path, fs::path::preferred_separator);
 }
 
+std::vector<std::string> FlatList(const std::vector<std::string>& raw_files) {
+    std::vector<std::string> flat_files;
+
+    for (const auto& raw_file: raw_files) {
+        if (utils::IsDirectory(raw_file)) {
+            utils::ListFiles(raw_file, flat_files);
+        } else {
+            flat_files.push_back(raw_file);
+        }
+    }
+
+    // always process images in the same order,
+    // it would be easier to visually debug them
+    std::sort(flat_files.begin(), flat_files.end());
+    return flat_files;
+}
+
 } // namespace utils
