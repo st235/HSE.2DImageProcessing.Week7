@@ -2,12 +2,11 @@
 
 namespace detection {
 
-std::vector<cv::Mat> extractFaces(cv::Mat& image,
-                                  const std::string& face_cascade_file,
-                                  const std::string& right_eye_cascade_file,
-                                  const std::string& left_eye_cascade_file,
-                                  bool is_debug) {
-    std::vector<cv::Mat> result_faces;
+std::vector<Face> extractFaces(cv::Mat& image,
+                               const std::string& face_cascade_file,
+                               const std::string& right_eye_cascade_file,
+                               const std::string& left_eye_cascade_file) {
+    std::vector<Face> result_faces;
 
     cv::CascadeClassifier face_cascade;
     face_cascade.load(face_cascade_file);
@@ -28,32 +27,34 @@ std::vector<cv::Mat> extractFaces(cv::Mat& image,
         cv::Rect face = faces[i];
         cv::Mat face_area = greyscale_image(face);
 
-        std::vector <cv::Rect> left_eyes;
-        std::vector <cv::Rect> right_eyes;
+        std::vector<cv::Rect> left_eyes;
+        std::vector<cv::Rect> right_eyes;
 
         left_eye_cascade.detectMultiScale(face_area, left_eyes, 1.1, 6);
         right_eye_cascade.detectMultiScale(face_area, right_eyes, 1.1, 6);
 
+        cv::Rect left_eye;
+        cv::Rect right_eye;
         cv::Mat output_image = face_area;
 
         if (left_eyes.size() == 1 && right_eyes.size() == 1) {
             float fx = static_cast<float>(face.x),
-                    fy = static_cast<float>(face.y),
-                    fw = static_cast<float>(face.width),
-                    fh = static_cast<float>(face.height);
+                  fy = static_cast<float>(face.y),
+                  fw = static_cast<float>(face.width),
+                  fh = static_cast<float>(face.height);
 
-            cv::Rect left_eye = left_eyes[0];
-            cv::Rect right_eye = right_eyes[0];
+            left_eye = left_eyes[0];
+            right_eye = right_eyes[0];
 
             float rx = static_cast<float>(right_eye.x),
-                    ry = static_cast<float>(right_eye.y),
-                    rw = static_cast<float>(right_eye.width),
-                    rh = static_cast<float>(right_eye.height);
+                  ry = static_cast<float>(right_eye.y),
+                  rw = static_cast<float>(right_eye.width),
+                  rh = static_cast<float>(right_eye.height);
 
             float lx = static_cast<float>(left_eye.x),
-                    ly = static_cast<float>(left_eye.y),
-                    lw = static_cast<float>(left_eye.width),
-                    lh = static_cast<float>(left_eye.height);
+                  ly = static_cast<float>(left_eye.y),
+                  lw = static_cast<float>(left_eye.width),
+                  lh = static_cast<float>(left_eye.height);
 
             float dx = (lx + fw / 2 + lw / 2) - (rx + rw / 2),
                     dy = (ly + lh / 2) - (ry + rh / 2);
@@ -71,23 +72,60 @@ std::vector<cv::Mat> extractFaces(cv::Mat& image,
                                                            1.0 /* scale */);
 
             cv::warpAffine(face_area, output_image, rotation_mat, cv::Size2i(face_area.cols, face_area.rows));
-
-            if (is_debug) {
-                cv::rectangle(image, cv::Point2f(fx + lx, fy + ly), cv::Point2f(fx + lx + lw, fy + ly + lh),
-                              cv::Scalar(0, 255, 0), 6, 1, 0);
-                cv::rectangle(image, cv::Point2f(fx + rx, fy + ry), cv::Point2f(fx + rx + rw, fy + ry + rh),
-                              cv::Scalar(0, 255, 0), 6, 1, 0);
-            }
         }
 
-        if (is_debug) {
-            cv::rectangle(image, face, cv::Scalar(0, 0, 255), 6, 1, 0);
-        }
-
-        result_faces.push_back(output_image);
+        result_faces.push_back(Face(
+                output_image,
+                Rect::from(face),
+                Eyes::from(left_eye, right_eye)));
     }
 
     return result_faces;
+}
+
+void drawFaces(cv::Mat& image,
+               const std::vector<Face>& faces,
+               const std::vector<std::string>& labels) {
+    for (size_t i = 0; i < faces.size(); i++) {
+        Face face = faces[i];
+        const auto& origin = face.origin;
+
+        cv::rectangle(image,
+                      cv::Point2f(origin.x, origin.y), cv::Point2f(origin.x + origin.width, origin.y + origin.height),
+                      cv::Scalar(0, 0, 255), 6, 1, 0);
+
+        if (face.eyesDetected()) {
+            const auto& eyes = face.eyesEscapedFromFaceBasis();
+            const auto& left_eye = eyes.left;
+            const auto& right_eye = eyes.right;
+
+            cv::rectangle(image,
+                          cv::Point2f(left_eye.x, left_eye.y), cv::Point2f(left_eye.x + left_eye.width, left_eye.y + left_eye.height),
+                          cv::Scalar(0, 255, 0), 6, 1, 0);
+
+            cv::rectangle(image,
+                          cv::Point2f(right_eye.x, right_eye.y), cv::Point2f(right_eye.x + right_eye.width, right_eye.y + right_eye.height),
+                          cv::Scalar(0, 255, 0), 6, 1, 0);
+        }
+
+        if (labels.size() == faces.size()) {
+            const auto& label = labels[i];
+
+            if (label.empty()) {
+                continue;
+            }
+
+            cv::putText(image, label,
+                        cv::Point(origin.x, origin.y - 15), cv::FONT_HERSHEY_COMPLEX,
+                        1, cv::Scalar(0, 0, 255), 2, cv::LINE_8);
+        }
+    }
+}
+
+void drawFaces(cv::Mat& image,
+               const std::vector<Face>& faces) {
+    std::vector<std::string> labels;
+    drawFaces(image, faces, labels);
 }
 
 

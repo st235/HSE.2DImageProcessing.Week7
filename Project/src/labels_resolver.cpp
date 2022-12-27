@@ -3,8 +3,6 @@
 #include <fstream>
 #include <vector>
 
-#include <iostream>
-
 #include "strings.h"
 
 namespace {
@@ -93,19 +91,13 @@ void LabelsResolver::read(const std::string& file) {
 
     _next_available_id = static_cast<uint32_t>(stoi(line));
 
-    std::cout << "_next_available_id: " << _next_available_id << std::endl;
-
     while (std::getline(file_storage, line))
     {
         if (line.empty()) {
             break;
         }
 
-        std::cout << "line: " << line << std::endl;
-
         std::vector<std::string> tokens = std::Split(line, ',' /* delimiter */);
-
-        std::cout << tokens[0] << "," << tokens[1] << std::endl;
 
         std::string label = tokens[0];
         uint32_t id = static_cast<uint32_t>(stoi(tokens[1]));

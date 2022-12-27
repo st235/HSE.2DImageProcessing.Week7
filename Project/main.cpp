@@ -48,15 +48,18 @@ void GenerateDataset(const std::vector<std::string>& raw_files,
             continue;
         }
 
-        std::vector<cv::Mat> faces =
+        std::vector<detection::Face> faces =
                 detection::extractFaces(image,
                                         face_cascade_file,
                                         right_eye_cascade_file,
-                                        left_eye_cascade_file,
-                                        is_debug);
+                                        left_eye_cascade_file);
+
+        if (is_debug) {
+            detection::drawFaces(image, faces);
+        }
 
         for(size_t i = 0; i < faces.size(); i++) {
-            auto& face = faces[i];
+            auto& face = faces[i].image;
 
             const auto& report_image_name = 
                 utils::GetFileName(file_path) + "_face_" + std::to_string(i)
@@ -180,17 +183,22 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
                 break;
             }
 
-            std::vector<cv::Mat> faces =
+            std::vector<detection::Face> faces =
                     detection::extractFaces(frame,
                                             face_cascade_file,
                                             right_eye_cascade_file,
-                                            left_eye_cascade_file,
-                                            is_debug /* is_debug */);
+                                            left_eye_cascade_file);
+
+            std::vector<std::string> labels;
 
             for(size_t i = 0; i < faces.size(); i++) {
-                cv::Mat face = faces[i];
+                cv::Mat face = faces[i].image;
                 int id = recognizer->predict(face);
-                std::cout << "predicted id: " << id << ", " << labels_resolver.obtainLabelById(id) << std::endl;
+                labels.push_back(labels_resolver.obtainLabelById(id));
+            }
+
+            if (is_debug) {
+                detection::drawFaces(frame, faces, labels);
             }
 
             cv::imshow("w", frame);
