@@ -8,10 +8,10 @@
 namespace detection {
 
 struct Rect {
-  const uint32_t x;
-  const uint32_t y;
-  const uint32_t width;
-  const uint32_t height;
+  uint32_t x;
+  uint32_t y;
+  uint32_t width;
+  uint32_t height;
 
   static Rect from(const cv::Rect& that);
   double iou(const Rect& one, const Rect& another);
@@ -19,9 +19,7 @@ struct Rect {
   Rect();
   Rect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
   Rect(const Rect& that);
-  // There is no reason to assign one rect to another,
-  // especially, when all fields are const
-  Rect& operator=(const Rect& that) = delete;
+  Rect& operator=(const Rect& that);
 
   bool intersects(const Rect& that) const;
   Rect intersection(const Rect& that) const;

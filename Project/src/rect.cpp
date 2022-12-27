@@ -64,6 +64,17 @@ Rect::Rect(const Rect& that):
     // empty on purpose
 }
 
+Rect& Rect::operator=(const Rect& that) {
+    if (this != &that) {
+        this->x = that.x;
+        this->y = that.y;
+        this->width = that.width;
+        this->height = that.height;
+    }
+
+    return *this;
+}
+
 bool Rect::intersects(const Rect& that) const {
     // checking horizontal axis
     return Intersects(x, x + width, that.x, that.x + that.width) &&

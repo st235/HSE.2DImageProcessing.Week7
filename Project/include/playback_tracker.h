@@ -14,17 +14,15 @@ struct FrameInfo {
 private:
   static const std::string UNKNOWN_LABEL;
 
-  const uint32_t id;
-  const std::vector<std::string> labels;
-  const std::vector<Rect> face_origins;
+  uint32_t id;
+  std::vector<std::string> labels;
+  std::vector<Rect> face_origins;
 public:
     FrameInfo(uint32_t id,
               const std::vector<std::string>& labels,
               const std::vector<Rect>& face_origins);
     FrameInfo(const FrameInfo& that);
-    // no sense to assign FrameInfo instance
-    // as FrameInfo is immutable by design
-    FrameInfo& operator=(const FrameInfo& that) = delete;
+    FrameInfo& operator=(const FrameInfo& that);
 
     ~FrameInfo() = default;
 };

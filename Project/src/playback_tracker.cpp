@@ -7,7 +7,7 @@
 
 namespace detection {
 
-FrameInfo::UNKNOWN_LABEL = "";
+const std::string FrameInfo::UNKNOWN_LABEL = "";
 
 FrameInfo::FrameInfo(uint32_t id,
                      const std::vector<std::string>& labels,
@@ -23,6 +23,16 @@ FrameInfo::FrameInfo(const FrameInfo& that):
     labels(that.labels),
     face_origins(that.face_origins) {
     // empty on purpose
+}
+
+FrameInfo& FrameInfo::operator=(const FrameInfo& that) {
+    if (this != &that) {
+        this->id = that.id;
+        this->labels = that.labels;
+        this->face_origins = that.face_origins;
+    }
+
+    return *this;
 }
 
 PlaybackTracker::PlaybackTracker(const std::string video_file):
@@ -62,7 +72,7 @@ void PlaybackTracker::read(const std::string& file) {
 
         frame_id = static_cast<uint32_t>(stoi(line));
         if (_playback_info.find(frame_id) != _playback_info.end()) {
-            throw std::runtime_error("Frame " + frame_id
+            throw std::runtime_error("Frame " + std::to_string(frame_id)
                 + "has been declared multiple times.");
         }
 
@@ -74,7 +84,7 @@ void PlaybackTracker::read(const std::string& file) {
                 labels.clear();
                 origins.clear();
 
-                _playback_info[frame_id] = FrameInfo(frame_id, frame_labels, frame_origins);
+                _playback_info.insert({frame_id, FrameInfo(frame_id, frame_labels, frame_origins)});
                 break;
             }
 
@@ -82,32 +92,32 @@ void PlaybackTracker::read(const std::string& file) {
             const auto& label = tokens[0];
 
             if (labels.find(label) != labels.end()) {
-                throw std::runtime_error("Label " + label
-                    + " has been declared multiple times in frame " + frame_id);
+                throw std::runtime_error("Label " + std::to_string(label)
+                    + " has been declared multiple times in frame " + std::to_string(frame_id));
             }
 
             labels.insert(label);
 
             std::vector<std::string> raw_rect = std::Split(tokens[1], ',' /* delimiter */);
-            origins[label] = Rect(static_cast<uint32_t>(stoi(raw_rect[0])) /* x */,
-                                  static_cast<uint32_t>(stoi(raw_rect[1])) /* y */,
-                                  static_cast<uint32_t>(stoi(raw_rect[2])) /* width */,
-                                  static_cast<uint32_t>(stoi(raw_rect[3])) /* height */);
+            origins.push_back(Rect(static_cast<uint32_t>(stoi(raw_rect[0])) /* x */,
+                                   static_cast<uint32_t>(stoi(raw_rect[1])) /* y */,
+                                   static_cast<uint32_t>(stoi(raw_rect[2])) /* width */,
+                                   static_cast<uint32_t>(stoi(raw_rect[3])) /* height */));
         }
     }
 
-    std::vector <std::string> frame_labels(labels.begin(), labels.end());
-    std::vector <Rect> frame_origins(origins.begin(), origins.end());
+    std::vector<std::string> frame_labels(labels.begin(), labels.end());
+    std::vector<Rect> frame_origins(origins.begin(), origins.end());
 
     labels.clear();
     origins.clear();
 
-    _playback_info[frame_id] = FrameInfo(frame_id, frame_labels, frame_origins);
+    _playback_info.insert({frame_id, FrameInfo(frame_id, frame_labels, frame_origins)});
 }
 
 FrameInfo PlaybackTracker::describeFrame(uint32_t frame_id) {
     if (_playback_info.find(frame_id) != _playback_info.end()) {
-        return _playback_info[frame_id];
+        return _playback_info.find(frame_id)->second;
     }
 
     const auto& lower_bound = _playback_info.lower_bound(frame_id);
