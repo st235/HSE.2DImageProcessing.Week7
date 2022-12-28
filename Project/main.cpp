@@ -16,6 +16,7 @@
 #include "face_utils.h"
 #include "file_utils.h"
 #include "labels_resolver.h"
+#include "video_player.h"
 
 namespace {
 
@@ -147,17 +148,20 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
     labels_resolver.read(input_label_file);
 
     for (const auto& file: files) {
-        cv::VideoCapture capture(file);
+        detection::VideoPlayer video_player(file, 10 /* playback_group_size */);
         cv::Mat frame;
 
-        if(!capture.isOpened()) {
-            throw std::runtime_error("Error when reading steam_avi");
+        if(!video_player.isOpened()) {
+            throw std::runtime_error("Cannot open " + file);
         }
 
-        while (true) {
-            capture >> frame;
-            if(frame.empty()) {
-                break;
+        while (video_player.hasNextFrame()) {
+            const auto& playback_state = video_player.nextFrame(frame);
+
+            if (playback_state == detection::VideoPlayer::PlaybackGroupState::STARTING_NEW_GROUP) {
+                std::cout << "playback_state: STARTING_NEW_GROUP" << std::endl;
+            } else {
+                std::cout << "playback_state: playing existing group" << std::endl;
             }
 
             std::vector<detection::Face> faces =
