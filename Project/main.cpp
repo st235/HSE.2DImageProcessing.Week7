@@ -9,9 +9,11 @@
 #include <opencv2/face.hpp>
 #include <opencv2/opencv.hpp>
 
+#include "bow_recognition_model.h"
+#include "hog_recognition_model.h"
+
 #include "args_parser.h"
 #include "annotations_tracker.h"
-#include "bow_recognition_model.h"
 #include "confusion_matrix_tracker.h"
 #include "face_detection_model.h"
 #include "face_utils.h"
@@ -94,7 +96,7 @@ void TrainModel(const std::string& dataset_root_folder,
     svm->setTermCriteria(cv::TermCriteria(cv::TermCriteria::MAX_ITER, 1e4, 1e-6));
 
     std::unique_ptr<detection::FaceRecognitionModel> recognizer =
-            std::make_unique<detection::BowRecognitionModel>(860, svm);
+            std::make_unique<detection::HogRecognitionModel>(svm);
 
     detection::LabelsResolver labels_resolver;
 
@@ -144,7 +146,7 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
 
     cv::Ptr<cv::ml::SVM> svm = cv::ml::SVM::create();
     std::unique_ptr<detection::FaceRecognitionModel> recognizer =
-            std::make_unique<detection::BowRecognitionModel>(860, svm);
+            std::make_unique<detection::HogRecognitionModel>(svm);
 
     detection::LabelsResolver labels_resolver;
 
@@ -152,7 +154,7 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
     labels_resolver.read(input_label_file);
 
     for (const auto& file: files) {
-        detection::VideoPlayer video_player(file, 50 /* playback_group_size */);
+        detection::VideoPlayer video_player(file, 25 /* playback_group_size */);
         cv::Mat frame;
 
         if(!video_player.isOpened()) {
@@ -196,7 +198,7 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
             }
 
             cv::imshow(file, frame);
-            cv::waitKey(20);
+            cv::waitKey(5);
         }
     }
 
