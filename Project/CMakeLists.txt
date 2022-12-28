@@ -19,5 +19,12 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 
 file(GLOB CODE_FILES "./src/*.cpp")
 
+include(FetchContent)
+FetchContent_Declare(dlib
+        GIT_REPOSITORY https://github.com/davisking/dlib.git
+        GIT_TAG        v19.24
+        )
+FetchContent_MakeAvailable(dlib)
+
 add_executable(FaceDetector main.cpp ${CODE_FILES})
-target_link_libraries(FaceDetector ${OpenCV_LIBS})
+target_link_libraries(FaceDetector ${OpenCV_LIBS} dlib::dlib)
