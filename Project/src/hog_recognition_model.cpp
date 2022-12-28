@@ -3,7 +3,7 @@
 namespace detection {
 
 cv::Mat HogRecognitionModel::extractFeatures(cv::Mat image) const {
-    cv::resize(image, image, cv::Size(320, 320), cv::INTER_AREA);
+    cv::resize(image, image, cv::Size(128, 128), cv::INTER_AREA);
 
     cv::HOGDescriptor hog;
     std::vector<float> descriptors;

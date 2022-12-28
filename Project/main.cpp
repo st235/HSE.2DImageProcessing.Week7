@@ -93,7 +93,7 @@ void TrainModel(const std::string& dataset_root_folder,
     cv::Ptr<cv::ml::SVM> svm = cv::ml::SVM::create();
     svm->setType(cv::ml::SVM::C_SVC);
     svm->setKernel(cv::ml::SVM::LINEAR);
-    svm->setTermCriteria(cv::TermCriteria(cv::TermCriteria::MAX_ITER, 1e4, 1e-6));
+    svm->setTermCriteria(cv::TermCriteria(cv::TermCriteria::MAX_ITER, 1e4, 1e-4));
 
     std::unique_ptr<detection::FaceRecognitionModel> recognizer =
             std::make_unique<detection::HogRecognitionModel>(svm);
@@ -154,7 +154,7 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
     labels_resolver.read(input_label_file);
 
     for (const auto& file: files) {
-        detection::VideoPlayer video_player(file, 25 /* playback_group_size */);
+        detection::VideoPlayer video_player(file, 10 /* playback_group_size */);
         cv::Mat frame;
 
         if(!video_player.isOpened()) {
