@@ -1,4 +1,4 @@
-#include "playback_tracker.h"
+#include "annotations_tracker.h"
 
 #include <fstream>
 #include <unordered_set>
@@ -35,19 +35,19 @@ FrameInfo& FrameInfo::operator=(const FrameInfo& that) {
     return *this;
 }
 
-PlaybackTracker::PlaybackTracker(const std::string video_file):
+AnnotationsTracker::AnnotationsTracker(const std::string video_file):
     _video_file(video_file),
     _playback_info() {
     // empty on purpose
 }
 
-PlaybackTracker::PlaybackTracker(const PlaybackTracker& that):
+AnnotationsTracker::AnnotationsTracker(const AnnotationsTracker& that):
         _video_file(that._video_file),
         _playback_info(that._playback_info) {
     // empty on purpose
 }
 
-PlaybackTracker& PlaybackTracker::operator=(const PlaybackTracker& that) {
+AnnotationsTracker& AnnotationsTracker::operator=(const AnnotationsTracker& that) {
     if (this != &that) {
         this->_video_file = that._video_file;
         this->_playback_info = that._playback_info;
@@ -56,7 +56,7 @@ PlaybackTracker& PlaybackTracker::operator=(const PlaybackTracker& that) {
     return *this;
 }
 
-void PlaybackTracker::read(const std::string& file) {
+void AnnotationsTracker::read(const std::string& file) {
     std::ifstream file_storage;
     file_storage.open(file, std::ios::in);
 
@@ -115,7 +115,7 @@ void PlaybackTracker::read(const std::string& file) {
     _playback_info.insert({frame_id, FrameInfo(frame_id, frame_labels, frame_origins)});
 }
 
-FrameInfo PlaybackTracker::describeFrame(uint32_t frame_id) {
+FrameInfo AnnotationsTracker::describeFrame(uint32_t frame_id) {
     if (_playback_info.find(frame_id) != _playback_info.end()) {
         return _playback_info.find(frame_id)->second;
     }

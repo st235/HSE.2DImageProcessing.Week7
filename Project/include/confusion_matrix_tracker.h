@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "playback_tracker.h"
+#include "annotations_tracker.h"
 #include "rect.h"
 
 namespace detection {

@@ -1,5 +1,5 @@
-#ifndef PLAYBACK_TRACKER_H
-#define PLAYBACK_TRACKER_H
+#ifndef ANNOTATIONS_TRACKER_H
+#define ANNOTATIONS_TRACKER_H
 
 #include <cstdint>
 #include <map>
@@ -33,15 +33,15 @@ public:
     ~FrameInfo() = default;
 };
 
-class PlaybackTracker {
+class AnnotationsTracker {
 private:
   std::string _video_file;
   std::map<uint32_t, FrameInfo> _playback_info;
 
 public:
-    explicit PlaybackTracker(const std::string video_file);
-    PlaybackTracker(const PlaybackTracker& that);
-    PlaybackTracker& operator=(const PlaybackTracker& that);
+    explicit AnnotationsTracker(const std::string video_file);
+    AnnotationsTracker(const AnnotationsTracker& that);
+    AnnotationsTracker& operator=(const AnnotationsTracker& that);
 
     inline std::string id() const { return _video_file; }
 
@@ -72,9 +72,9 @@ public:
      */
     FrameInfo describeFrame(uint32_t frame_id);
 
-    ~PlaybackTracker() = default;
+    ~AnnotationsTracker() = default;
 };
 
 } // namespace detection
 
-#endif //PLAYBACK_TRACKER_H
+#endif //ANNOTATIONS_TRACKER_H

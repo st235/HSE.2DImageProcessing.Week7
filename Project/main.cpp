@@ -10,12 +10,12 @@
 #include <opencv2/opencv.hpp>
 
 #include "args_parser.h"
+#include "annotations_tracker.h"
 #include "bow_recognition_model.h"
 #include "confusion_matrix_tracker.h"
 #include "face_utils.h"
 #include "file_utils.h"
 #include "labels_resolver.h"
-#include "playback_tracker.h"
 
 namespace {
 
