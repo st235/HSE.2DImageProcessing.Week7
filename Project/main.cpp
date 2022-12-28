@@ -13,10 +13,12 @@
 #include "annotations_tracker.h"
 #include "bow_recognition_model.h"
 #include "confusion_matrix_tracker.h"
+#include "face_detection_model.h"
 #include "face_utils.h"
 #include "file_utils.h"
 #include "labels_resolver.h"
 #include "video_player.h"
+#include "rect.h"
 
 namespace {
 
@@ -138,6 +140,8 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
                        bool is_debug) {
     std::vector<std::string> files = utils::FlatList(raw_files);
 
+    detection::FaceDetectionModel face_tracking(detection::FaceDetectionModel::Model::KCF);
+
     cv::Ptr<cv::ml::SVM> svm = cv::ml::SVM::create();
     std::unique_ptr<detection::FaceRecognitionModel> recognizer =
             std::make_unique<detection::BowRecognitionModel>(860, svm);
@@ -148,38 +152,47 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
     labels_resolver.read(input_label_file);
 
     for (const auto& file: files) {
-        detection::VideoPlayer video_player(file, 10 /* playback_group_size */);
+        detection::VideoPlayer video_player(file, 50 /* playback_group_size */);
         cv::Mat frame;
 
         if(!video_player.isOpened()) {
             throw std::runtime_error("Cannot open " + file);
         }
 
+        std::vector<std::string> labels;
+
         while (video_player.hasNextFrame()) {
             const auto& playback_state = video_player.nextFrame(frame);
 
             if (playback_state == detection::VideoPlayer::PlaybackGroupState::STARTING_NEW_GROUP) {
-                std::cout << "playback_state: STARTING_NEW_GROUP" << std::endl;
+                labels.clear();
+                std::vector<detection::Rect> detected_faces_origins;
+
+                std::vector<detection::Face> faces =
+                        detection::extractFaces(frame,
+                                                face_cascade_file,
+                                                right_eye_cascade_file,
+                                                left_eye_cascade_file);
+
+                for(size_t i = 0; i < faces.size(); i++) {
+                    cv::Mat face = faces[i].image;
+                    int id = recognizer->predict(face);
+                    labels.push_back(labels_resolver.obtainLabelById(id));
+                    detected_faces_origins.push_back(faces[i].origin);
+                }
+
+                face_tracking.reset_tracking(frame, labels, detected_faces_origins);
+
+                if (is_debug) {
+                    detection::drawFaces(frame, faces, labels);
+                }
             } else {
-                std::cout << "playback_state: playing existing group" << std::endl;
-            }
+                std::vector<detection::Rect> detected_faces_origins;
+                face_tracking.track(frame, labels, detected_faces_origins);
 
-            std::vector<detection::Face> faces =
-                    detection::extractFaces(frame,
-                                            face_cascade_file,
-                                            right_eye_cascade_file,
-                                            left_eye_cascade_file);
-
-            std::vector<std::string> labels;
-
-            for(size_t i = 0; i < faces.size(); i++) {
-                cv::Mat face = faces[i].image;
-                int id = recognizer->predict(face);
-                labels.push_back(labels_resolver.obtainLabelById(id));
-            }
-
-            if (is_debug) {
-                detection::drawFaces(frame, faces, labels);
+                if (is_debug) {
+                    detection::drawFaces(frame, detected_faces_origins, labels);
+                }
             }
 
             cv::imshow(file, frame);

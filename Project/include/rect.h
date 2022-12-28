@@ -8,13 +8,15 @@
 namespace detection {
 
 struct Rect {
+public:
   uint32_t x;
   uint32_t y;
   uint32_t width;
   uint32_t height;
 
   static Rect from(const cv::Rect& that);
-  double iou(const Rect& one, const Rect& another);
+  static cv::Rect toCVRect(const Rect& that);
+  static double iou(const Rect& one, const Rect& another);
 
   Rect();
   Rect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);

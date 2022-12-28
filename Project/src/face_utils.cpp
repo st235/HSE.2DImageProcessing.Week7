@@ -84,6 +84,23 @@ std::vector<Face> extractFaces(cv::Mat& image,
 }
 
 void drawFaces(cv::Mat& image,
+               const std::vector<Rect>& faces_origins,
+               const std::vector<std::string>& labels) {
+    for (size_t i = 0; i < faces_origins.size(); i++) {
+        const auto& origin = faces_origins[i];
+        const auto& label = labels[i];
+
+        cv::rectangle(image,
+                      cv::Point2f(origin.x, origin.y), cv::Point2f(origin.x + origin.width, origin.y + origin.height),
+                      cv::Scalar(0, 0, 255), 6, 1, 0);
+
+        cv::putText(image, label,
+                    cv::Point(origin.x, origin.y - 15), cv::FONT_HERSHEY_COMPLEX,
+                    1, cv::Scalar(0, 0, 255), 2, cv::LINE_8);
+    }
+}
+
+void drawFaces(cv::Mat& image,
                const std::vector<Face>& faces,
                const std::vector<std::string>& labels) {
     for (size_t i = 0; i < faces.size(); i++) {

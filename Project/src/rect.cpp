@@ -31,6 +31,14 @@ Rect Rect::from(const cv::Rect& that) {
                 static_cast<uint32_t>(that.height));
 }
 
+cv::Rect Rect::toCVRect(const Rect& that) {
+    if (that.empty()) {
+        return cv::Rect();
+    }
+
+    return cv::Rect(that.x, that.y, that.width, that.height);
+}
+
 double Rect::iou(const Rect& one, const Rect& another) {
     Rect intersection = one.intersection(another);
 

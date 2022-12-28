@@ -46,7 +46,7 @@ struct Face {
   const cv::Mat image;
   const Rect origin;
   const Eyes eyes;
-  
+
   Face(const cv::Mat& image, const Rect& origin, const Eyes& eyes = Eyes()):
     image(image),
     origin(origin),
@@ -77,6 +77,10 @@ std::vector<Face> extractFaces(cv::Mat& image,
                                const std::string& face_cascade_file,
                                const std::string& right_eye_cascade_file,
                                const std::string& left_eye_cascade_file);
+
+void drawFaces(cv::Mat& image,
+               const std::vector<Rect>& faces_origins,
+               const std::vector<std::string>& labels);
 
 void drawFaces(cv::Mat& image,
                const std::vector<Face>& faces);
