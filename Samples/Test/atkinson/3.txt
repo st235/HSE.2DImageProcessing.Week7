@@ -1,0 +1,51 @@
+0
+atkinson 517,101,72,72
+
+20
+atkinson 496,93,86,86
+
+40
+atkinson 506,101,105,105
+
+60
+atkinson 498,110,86,86
+
+
+80
+atkinson 483,112,92,92
+
+100
+atkinson 462,112,100,100
+unknown 517,125,30,40
+
+120
+atkinson 438,112,87,86
+
+
+140
+unknown 189,165,72,72
+atkinson 437,125,72,72
+
+160
+unknown 189,165,72,72
+atkinson 429,121,86,87
+
+180
+unknown 189,157,72,72
+atkinson 429,125,72,72
+
+200
+unknown 237,133,72,72
+atkinson 429,125,72,72
+
+220
+unknown 237,133,72,72
+atkinson 421,125,72,72
+
+240
+unknown 237,133,72,72
+atkinson 421,125,72,72
+
+260
+unknown 237,133,72,72
+atkinson 419,121,87,87

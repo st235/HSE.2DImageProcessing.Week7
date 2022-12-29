@@ -154,12 +154,24 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
     labels_resolver.read(input_label_file);
 
     for (const auto& file: files) {
+        std::string extension;
+        extension = utils::GetFileExtension(file);
+
+        std::cout << "extension: " << extension << std::endl;
+
+        if (extension != ".mp4") {
+            std::cout << "continue" << std::endl;
+            continue;
+        }
+
         detection::VideoPlayer video_player(file, 10 /* playback_group_size */);
         cv::Mat frame;
 
         if(!video_player.isOpened()) {
             throw std::runtime_error("Cannot open " + file);
         }
+
+        std::cout << file << ", frames:" << video_player.framesCount() << std::endl;
 
         std::vector<std::string> labels;
 
