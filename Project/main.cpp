@@ -15,7 +15,7 @@
 #include "args_parser.h"
 #include "annotations_tracker.h"
 #include "confusion_matrix_tracker.h"
-#include "face_detection_model.h"
+#include "face_tracking_model.h"
 #include "face_utils.h"
 #include "file_utils.h"
 #include "labels_resolver.h"
@@ -25,9 +25,6 @@
 namespace {
 
 void GenerateDataset(const std::vector<std::string>& raw_files,
-                     const std::string& face_cascade_file,
-                     const std::string& right_eye_cascade_file,
-                     const std::string& left_eye_cascade_file,
                      const std::string& override_output_prefix,
                      bool is_debug) {
     if (!override_output_prefix.empty() && !utils::IsDirectory(override_output_prefix)) {
@@ -41,6 +38,10 @@ void GenerateDataset(const std::vector<std::string>& raw_files,
             // not an image, skipping
             continue;
         }
+
+        const std::string face_cascade_file = "haarcascade_frontalface_alt2.xml";
+        const std::string right_eye_cascade_file = "haarcascade_righteye_2splits.xml";
+        const std::string left_eye_cascade_file = "haarcascade_lefteye_2splits.xml";
 
         std::vector<detection::Face> faces =
                 detection::extractFaces(image,
@@ -85,15 +86,16 @@ void GenerateDataset(const std::vector<std::string>& raw_files,
 }
 
 void TrainModel(const std::string& dataset_root_folder,
-                const std::string& face_cascade_file,
-                const std::string& right_eye_cascade_file,
-                const std::string& left_eye_cascade_file,
                 const std::string& output_model_file,
                 const std::string& output_label_file) {
     cv::Ptr<cv::ml::SVM> svm = cv::ml::SVM::create();
     svm->setType(cv::ml::SVM::C_SVC);
     svm->setKernel(cv::ml::SVM::LINEAR);
     svm->setTermCriteria(cv::TermCriteria(cv::TermCriteria::MAX_ITER, 1e4, 1e-4));
+
+    const std::string face_cascade_file = "haarcascade_frontalface_alt2.xml";
+    const std::string right_eye_cascade_file = "haarcascade_righteye_2splits.xml";
+    const std::string left_eye_cascade_file = "haarcascade_lefteye_2splits.xml";
 
     std::unique_ptr<detection::FaceRecognitionModel> recognizer =
             std::make_unique<detection::HogRecognitionModel>(svm);
@@ -134,15 +136,16 @@ void TrainModel(const std::string& dataset_root_folder,
 }
 
 void ProcessVideoFiles(const std::vector<std::string>& raw_files,
-                       const std::string& face_cascade_file,
-                       const std::string& right_eye_cascade_file,
-                       const std::string& left_eye_cascade_file,
                        const std::string& input_model_file,
                        const std::string& input_label_file,
                        bool is_debug) {
     std::vector<std::string> files = utils::FlatList(raw_files);
 
-    detection::FaceDetectionModel face_tracking(detection::FaceDetectionModel::Model::KCF);
+    const std::string face_cascade_file = "haarcascade_frontalface_alt2.xml";
+    const std::string right_eye_cascade_file = "haarcascade_righteye_2splits.xml";
+    const std::string left_eye_cascade_file = "haarcascade_lefteye_2splits.xml";
+
+    detection::FaceTrackingModel face_tracking(detection::FaceTrackingModel::Model::KCF);
 
     cv::Ptr<cv::ml::SVM> svm = cv::ml::SVM::create();
     std::unique_ptr<detection::FaceRecognitionModel> recognizer =
@@ -156,11 +159,8 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
     for (const auto& file: files) {
         std::string extension;
         extension = utils::GetFileExtension(file);
-
-        std::cout << "extension: " << extension << std::endl;
-
+        
         if (extension != ".mp4") {
-            std::cout << "continue" << std::endl;
             continue;
         }
 
@@ -225,46 +225,34 @@ int main(int argc, char* argv[]) {
         args::ArgsDict args = args::ParseArgs(argc, argv);
 
         if (args::DetectArgs(args, 
-                { args::FLAG_TITLE_UNSPECIFIED, "--ds", "-f", "-le", "-re" } /* mandatory flags */,
+                { args::FLAG_TITLE_UNSPECIFIED, "--dataset" } /* mandatory flags */,
                 { "-d", "-o" } /* optional flags */)) {
             const auto& files = args::GetStringList(args, args::FLAG_TITLE_UNSPECIFIED);
-            const auto& face_cascade_file = args::GetString(args, "-f");
-            const auto& right_eye_cascade_file = args::GetString(args, "-re");
-            const auto& left_eye_cascade_file = args::GetString(args, "-le");
 
             const auto& output_directory = args::GetString(args, "-o", "" /* default */);
             const auto& is_debug = args::HasFlag(args, "-d");
 
             GenerateDataset(files,
-                            face_cascade_file, right_eye_cascade_file, left_eye_cascade_file,
                             output_directory, is_debug);
         } else if (args::DetectArgs(args, 
-                { args::FLAG_TITLE_UNSPECIFIED, "--train", "-f", "-re", "-le", "-om", "-ol" } /* mandatory flags */,
+                { args::FLAG_TITLE_UNSPECIFIED, "--train", "-om", "-ol" } /* mandatory flags */,
                 { } /* optional flags */)) {
             const auto& dataset_root_folder = args::GetString(args, args::FLAG_TITLE_UNSPECIFIED);
-            const auto& face_cascade_file = args::GetString(args, "-f");
-            const auto& right_eye_cascade_file = args::GetString(args, "-re");
-            const auto& left_eye_cascade_file = args::GetString(args, "-le");
             const auto& output_model_file = args::GetString(args, "-om");
             const auto& output_label_file = args::GetString(args, "-ol");
 
             TrainModel(dataset_root_folder,
-                       face_cascade_file, right_eye_cascade_file, left_eye_cascade_file,
                        output_model_file, output_label_file);
         } else if (args::DetectArgs(args,
-                                    { args::FLAG_TITLE_UNSPECIFIED, "--process", "-f", "-re", "-le", "-il", "-im" } /* mandatory flags */,
+                                    { args::FLAG_TITLE_UNSPECIFIED, "--process", "-il", "-im" } /* mandatory flags */,
                                     { "-d" } /* optional flags */)) {
             const auto& files = args::GetStringList(args, args::FLAG_TITLE_UNSPECIFIED);
-            const auto& face_cascade_file = args::GetString(args, "-f");
-            const auto& right_eye_cascade_file = args::GetString(args, "-re");
-            const auto& left_eye_cascade_file = args::GetString(args, "-le");
             const auto& input_model_file = args::GetString(args, "-im");
             const auto& input_label_file = args::GetString(args, "-il");
 
             const auto& is_debug = args::HasFlag(args, "-d");
 
             ProcessVideoFiles(files,
-                              face_cascade_file, right_eye_cascade_file, left_eye_cascade_file,
                               input_model_file, input_label_file,
                               is_debug);
         } else {

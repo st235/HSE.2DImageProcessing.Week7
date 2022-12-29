@@ -1,13 +1,13 @@
-#include "face_detection_model.h"
+#include "face_tracking_model.h"
 
 namespace {
 
-cv::Ptr<cv::Tracker> CreateTracker(detection::FaceDetectionModel::Model model) {
+cv::Ptr<cv::Tracker> CreateTracker(detection::FaceTrackingModel::Model model) {
     switch (model) {
-        case detection::FaceDetectionModel::Model::KCF: return cv::TrackerKCF::create();
-        case detection::FaceDetectionModel::Model::MIL: return cv::TrackerMIL::create();
-        case detection::FaceDetectionModel::Model::CSRT: return cv::TrackerCSRT::create();
-        case detection::FaceDetectionModel::Model::GOTURN: return cv::TrackerGOTURN::create();
+        case detection::FaceTrackingModel::Model::KCF: return cv::TrackerKCF::create();
+        case detection::FaceTrackingModel::Model::MIL: return cv::TrackerMIL::create();
+        case detection::FaceTrackingModel::Model::CSRT: return cv::TrackerCSRT::create();
+        case detection::FaceTrackingModel::Model::GOTURN: return cv::TrackerGOTURN::create();
     }
 }
 
@@ -15,19 +15,19 @@ cv::Ptr<cv::Tracker> CreateTracker(detection::FaceDetectionModel::Model model) {
 
 namespace detection {
 
-FaceDetectionModel::FaceDetectionModel(FaceDetectionModel::Model model):
+FaceTrackingModel::FaceTrackingModel(FaceTrackingModel::Model model):
     _model(model),
     _trackers() {
     // empty on purpose
 }
 
-FaceDetectionModel::FaceDetectionModel(const FaceDetectionModel& that):
+FaceTrackingModel::FaceTrackingModel(const FaceTrackingModel& that):
     _model(that._model),
     _trackers(that._trackers) {
     // empty on purpose
 }
 
-FaceDetectionModel& FaceDetectionModel::operator=(const FaceDetectionModel& that) {
+FaceTrackingModel& FaceTrackingModel::operator=(const FaceTrackingModel& that) {
     if (this != &that) {
         this->_model = that._model;
         this->_trackers = that._trackers;
@@ -36,7 +36,7 @@ FaceDetectionModel& FaceDetectionModel::operator=(const FaceDetectionModel& that
     return *this;
 }
 
-void FaceDetectionModel::reset_tracking(cv::Mat& frame,
+void FaceTrackingModel::reset_tracking(cv::Mat& frame,
                                         std::vector<std::string>& labels,
                                         std::vector<Rect>& faces_origins) {
     if (faces_origins.size() != labels.size()) {
@@ -56,7 +56,7 @@ void FaceDetectionModel::reset_tracking(cv::Mat& frame,
     }
 }
 
-void FaceDetectionModel::track(cv::Mat& frame,
+void FaceTrackingModel::track(cv::Mat& frame,
                                std::vector<std::string>& labels,
                                std::vector<Rect>& out_faces_origins) {
     for (const auto& label: labels) {

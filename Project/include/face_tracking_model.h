@@ -1,5 +1,5 @@
-#ifndef FACE_DETECTION_MODEL_H
-#define FACE_DETECTION_MODEL_H
+#ifndef FACE_TRACKING_MODEL_H
+#define FACE_TRACKING_MODEL_H
 
 #include <string>
 #include <vector>
@@ -13,7 +13,7 @@
 
 namespace detection {
 
-class FaceDetectionModel {
+class FaceTrackingModel {
 public:
   enum class Model {
       // the best balance between speed and accuracy
@@ -25,9 +25,9 @@ public:
       GOTURN
   };
 
-  explicit FaceDetectionModel(FaceDetectionModel::Model model);
-  FaceDetectionModel(const FaceDetectionModel& that);
-  FaceDetectionModel& operator=(const FaceDetectionModel& that);
+  explicit FaceTrackingModel(FaceTrackingModel::Model model);
+  FaceTrackingModel(const FaceTrackingModel& that);
+  FaceTrackingModel& operator=(const FaceTrackingModel& that);
 
   void reset_tracking(cv::Mat& frame,
                       std::vector<std::string>& labels,
@@ -37,13 +37,13 @@ public:
              std::vector<std::string>& labels,
              std::vector<Rect>& out_faces_origins);
 
-  virtual ~FaceDetectionModel() = default;
+  virtual ~FaceTrackingModel() = default;
 
 private:
-    FaceDetectionModel::Model _model;
+    FaceTrackingModel::Model _model;
     std::unordered_map<std::string, cv::Ptr<cv::Tracker>> _trackers;
 };
 
 } // namespace detection
 
-#endif //FACE_DETECTION_MODEL_H
+#endif //FACE_TRACKING_MODEL_H
