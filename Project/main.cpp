@@ -31,7 +31,7 @@ void GenerateDataset(const std::vector<std::string>& raw_files,
         throw std::runtime_error(override_output_prefix + " is not a directory.");
     }
 
-    std::vector<std::string> files = utils::FlatList(raw_files);
+    std::vector<std::string> files = utils::ListAllFiles(raw_files, { ".png", ".jpg", ".jpeg", ".webp" });
     for (const auto& file_path: files) {
         cv::Mat image = cv::imread(file_path, cv::IMREAD_COLOR);
         if (image.empty()) {
@@ -139,7 +139,7 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
                        const std::string& input_model_file,
                        const std::string& input_label_file,
                        bool is_debug) {
-    std::vector<std::string> files = utils::FlatList(raw_files);
+    std::vector<std::string> files = utils::ListAllFiles(raw_files, { ".mp4" });
 
     const std::string face_cascade_file = "haarcascade_frontalface_alt2.xml";
     const std::string right_eye_cascade_file = "haarcascade_righteye_2splits.xml";
@@ -157,13 +157,6 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
     labels_resolver.read(input_label_file);
 
     for (const auto& file: files) {
-        std::string extension;
-        extension = utils::GetFileExtension(file);
-        
-        if (extension != ".mp4") {
-            continue;
-        }
-
         detection::VideoPlayer video_player(file, 10 /* playback_group_size */);
         cv::Mat frame;
 

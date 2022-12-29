@@ -22,6 +22,24 @@ std::string Join(const std::vector<std::string>& paths) {
     return result;
 }
 
+bool IsFile(const std::string& path) {
+    const fs::path filepath(path);
+    std::error_code error_code;
+    if (fs::is_regular_file(filepath, error_code)) {
+        return true;
+    }
+    return false;
+}
+
+bool IsDirectory(const std::string& path) {
+    const fs::path filepath(path);
+    std::error_code error_code;
+    if (fs::is_directory(filepath, error_code)) {
+        return true;
+    }
+    return false;
+}
+
 std::string GetAbsolutePath(const std::string& path) {
     const fs::path filepath(path);
 
@@ -30,15 +48,6 @@ std::string GetAbsolutePath(const std::string& path) {
     }
 
     return fs::absolute(filepath);
-}
-
-bool IsFile(const std::string& path) {
-    const fs::path filepath(path);
-    std::error_code error_code;
-    if (fs::is_regular_file(filepath, error_code)) {
-        return true;
-    }
-    return false;
 }
 
 std::string GetFileName(const std::string& path) {
@@ -65,24 +74,18 @@ std::string ReplaceFilename(const std::string& path, const std::string new_name)
     return new_filepath;
 }
 
-bool IsDirectory(const std::string& path) {
-    const fs::path filepath(path);
-    std::error_code error_code;
-    if (fs::is_directory(filepath, error_code)) {
-        return true;
-    }
-    return false;
-}
-
-void ListFiles(const std::string& dir, std::vector<std::string>& result) {
+void ListFiles(const std::string& dir,
+               std::vector<std::string>& out_files,
+               const std::unordered_set<std::string>& filter_extensions) {
     for (const auto& entry: fs::directory_iterator(dir)) {
         const auto& path = entry.path();
         std::string raw_path(path.c_str());
 
-        if (IsFile(raw_path)) {
-            result.push_back(raw_path);
+        if (IsFile(raw_path) && (filter_extensions.empty() ||
+            (filter_extensions.find(GetFileExtension(raw_path)) != filter_extensions.end()))) {
+            out_files.push_back(raw_path);
         } else if (IsDirectory(raw_path)) {
-            ListFiles(raw_path, result);
+            ListFiles(raw_path, out_files);
         }
     }
 }
@@ -103,12 +106,14 @@ std::vector<std::string> SplitPath(const std::string& path) {
     return std::Split(path, fs::path::preferred_separator);
 }
 
-std::vector<std::string> FlatList(const std::vector<std::string>& raw_files) {
+std::vector<std::string> ListAllFiles(const std::vector<std::string>& raw_files,
+                                      const std::vector<std::string>& filter_extensions) {
     std::vector<std::string> flat_files;
+    std::unordered_set<std::string> extensions(filter_extensions.begin(), filter_extensions.end());
 
     for (const auto& raw_file: raw_files) {
         if (utils::IsDirectory(raw_file)) {
-            utils::ListFiles(raw_file, flat_files);
+            utils::ListFiles(raw_file, flat_files, extensions);
         } else {
             flat_files.push_back(raw_file);
         }
