@@ -15,6 +15,8 @@ namespace detection {
  */
 class FaceRecognitionModel {
 public:
+  const static int LABEL_UNKNOWN = -1;
+
   virtual void write(const std::string& file) = 0;
   virtual void read(const std::string& file) = 0;
 
