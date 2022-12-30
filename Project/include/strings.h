@@ -21,7 +21,7 @@ static std::vector<std::string> Split(const std::string& origin,
 }
 
 template <typename T>
-static std::string to_string(T value) {
+static std::string AsString(T value) {
     std::ostringstream os;
     os << value;
     return os.str();

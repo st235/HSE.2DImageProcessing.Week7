@@ -94,7 +94,7 @@ void AnnotationsTracker::read(const std::string& file) {
 
         frame_id = static_cast<uint32_t>(stoi(line));
         if (_playback_info.find(frame_id) != _playback_info.end()) {
-            throw std::runtime_error("Frame " + std::to_string(frame_id)
+            throw std::runtime_error("Frame " + std::AsString(frame_id)
                 + "has been declared multiple times.");
         }
 
@@ -115,8 +115,8 @@ void AnnotationsTracker::read(const std::string& file) {
             const auto& label = tokens[0];
 
             if (label != FrameInfo::UNKNOWN_LABEL && seen_labels.find(label) != seen_labels.end()) {
-                throw std::runtime_error("Label " + std::to_string(label)
-                    + " has been declared multiple times in frame " + std::to_string(frame_id));
+                throw std::runtime_error("Label " + std::AsString(label)
+                    + " has been declared multiple times in frame " + std::AsString(frame_id));
             }
 
             seen_labels.insert(label);
