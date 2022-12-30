@@ -107,8 +107,6 @@ void AnnotationsTracker::read(const std::string& file) {
                 labels.clear();
                 origins.clear();
 
-                std::cout << "inserting for " << frame_id << ", " << frame_labels.size()
-                          << ", " << frame_origins.size() << std::endl;
                 _playback_info.insert({frame_id, FrameInfo(frame_id, frame_labels, frame_origins)});
                 break;
             }
