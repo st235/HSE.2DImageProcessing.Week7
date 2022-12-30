@@ -14,12 +14,14 @@
 
 #include "args_parser.h"
 #include "annotations_tracker.h"
+#include "face_detection_model.h"
 #include "face_tracking_model.h"
 #include "face_utils.h"
 #include "file_utils.h"
 #include "labels_resolver.h"
 #include "metrics_tracker.h"
 #include "metrics_utils.h"
+#include "opencv_face_detection_model.h"
 #include "video_player.h"
 #include "rect.h"
 
@@ -40,15 +42,10 @@ void GenerateDataset(const std::vector<std::string>& raw_files,
             continue;
         }
 
-        const std::string face_cascade_file = "haarcascade_frontalface_alt2.xml";
-        const std::string right_eye_cascade_file = "haarcascade_righteye_2splits.xml";
-        const std::string left_eye_cascade_file = "haarcascade_lefteye_2splits.xml";
+        std::unique_ptr<detection::FaceDetectionModel> face_detection =
+                std::make_unique<detection::OpenCVFaceDetectionModel>();
 
-        std::vector<detection::Face> faces =
-                detection::extractFaces(image,
-                                        face_cascade_file,
-                                        right_eye_cascade_file,
-                                        left_eye_cascade_file);
+        std::vector<detection::Face> faces = face_detection->extractFaces(image);
 
         if (is_debug) {
             detection::drawFaces(image, faces);
@@ -93,10 +90,6 @@ void TrainModel(const std::string& dataset_root_folder,
     svm->setType(cv::ml::SVM::C_SVC);
     svm->setKernel(cv::ml::SVM::LINEAR);
     svm->setTermCriteria(cv::TermCriteria(cv::TermCriteria::MAX_ITER, 1e4, 1e-4));
-
-    const std::string face_cascade_file = "haarcascade_frontalface_alt2.xml";
-    const std::string right_eye_cascade_file = "haarcascade_righteye_2splits.xml";
-    const std::string left_eye_cascade_file = "haarcascade_lefteye_2splits.xml";
 
     std::unique_ptr<detection::FaceRecognitionModel> recognizer =
             std::make_unique<detection::HogRecognitionModel>(svm);
@@ -181,10 +174,6 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
                        bool is_debug) {
     std::vector<std::string> files = utils::ListAllFiles(raw_files, { ".mp4" });
 
-    const std::string face_cascade_file = "haarcascade_frontalface_alt2.xml";
-    const std::string right_eye_cascade_file = "haarcascade_righteye_2splits.xml";
-    const std::string left_eye_cascade_file = "haarcascade_lefteye_2splits.xml";
-
     detection::ConfusionMatrix overall_detection_metrics;
     detection::ConfusionMatrix overall_known_recognition_metrics;
     detection::ConfusionMatrix overall_unknown_recognition_metrics;
@@ -225,11 +214,10 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
                 labels.clear();
                 detected_faces_origins.clear();
 
-                std::vector<detection::Face> faces =
-                        detection::extractFaces(frame,
-                                                face_cascade_file,
-                                                right_eye_cascade_file,
-                                                left_eye_cascade_file);
+                std::unique_ptr<detection::FaceDetectionModel> face_detection =
+                        std::make_unique<detection::OpenCVFaceDetectionModel>();
+
+                std::vector<detection::Face> faces = face_detection->extractFaces(frame);
 
                 for(size_t i = 0; i < faces.size(); i++) {
                     cv::Mat face = faces[i].image;
