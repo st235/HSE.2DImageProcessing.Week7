@@ -19,6 +19,7 @@
 #include "file_utils.h"
 #include "labels_resolver.h"
 #include "metrics_tracker.h"
+#include "metrics_utils.h"
 #include "video_player.h"
 #include "rect.h"
 
@@ -184,15 +185,18 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
     const std::string right_eye_cascade_file = "haarcascade_righteye_2splits.xml";
     const std::string left_eye_cascade_file = "haarcascade_lefteye_2splits.xml";
 
+    detection::ConfusionMatrix overall_detection_metrics;
+    detection::ConfusionMatrix overall_known_recognition_metrics;
+    detection::ConfusionMatrix overall_unknown_recognition_metrics;
+
     detection::FaceTrackingModel face_tracking(detection::FaceTrackingModel::Model::KCF);
 
     cv::Ptr<cv::ml::SVM> svm = cv::ml::SVM::create();
     std::unique_ptr<detection::FaceRecognitionModel> recognizer =
             std::make_unique<detection::HogRecognitionModel>(svm);
+    recognizer->read(input_model_file);
 
     detection::LabelsResolver labels_resolver;
-
-    recognizer->read(input_model_file);
     labels_resolver.read(input_label_file);
 
     for (const auto& file: files) {
@@ -245,7 +249,7 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
 
             int window_delay = 5;
 
-            if (has_annotations && test_against_annotations) {
+            if (test_against_annotations && has_annotations) {
                 const auto& frame_info = annotations_tracker->describeFrame(frame_id);
                 metrics_tracker.keepTrackOf(frame_info, labels, detected_faces_origins);
 
@@ -259,11 +263,38 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
             cv::waitKey(window_delay);
         }
 
-        const auto& detection_annotations = metrics_tracker.overallDetectionMetrics();
-        std::cout << "detection result: tp=" << detection_annotations.tp
-                  << ", tn=" << detection_annotations.tn
-                  << ", fp=" << detection_annotations.fp
-                  << ", fn=" << detection_annotations.fn << std::endl;
+        const auto& detection_metrics = metrics_tracker.overallDetectionMetrics();
+        overall_detection_metrics += detection_metrics;
+
+        const auto& known_recognition_metrics = metrics_tracker.overallKnownRecognitionMetrics();
+        overall_known_recognition_metrics += known_recognition_metrics;
+        const auto& unknown_recognition_metrics = metrics_tracker.overallUnknownRecognitionMetrics();
+        overall_unknown_recognition_metrics += unknown_recognition_metrics;
+
+        detection::PrintConfusionMatrix("detection",
+                                        detection_metrics,
+                                        detection::PI_TPR | detection::PI_FNR | detection::PI_FPR);
+        detection::PrintConfusionMatrix("recognition for known subjects",
+                                        known_recognition_metrics,
+                                        detection::PI_ACCURACY);
+        detection::PrintConfusionMatrix("recognition for unknown subjects",
+                                        unknown_recognition_metrics,
+                                        detection::PI_TPR | detection::PI_FNR | detection::PI_FPR);
+        std::cout << std::endl;
+    }
+
+    // if there is the only video there is no reason
+    // to show overall statistics
+    if (files.size() > 1) {
+        detection::PrintConfusionMatrix("overall detection",
+                                        overall_detection_metrics,
+                                        detection::PI_TPR | detection::PI_FNR | detection::PI_FPR);
+        detection::PrintConfusionMatrix("overall recognition for known subjects",
+                                        overall_known_recognition_metrics,
+                                        detection::PI_ACCURACY);
+        detection::PrintConfusionMatrix("overall recognition for unknown subjects",
+                                        overall_unknown_recognition_metrics,
+                                        detection::PI_TPR | detection::PI_FNR | detection::PI_FPR);
     }
 
     cv::waitKey(0);

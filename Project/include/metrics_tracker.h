@@ -28,6 +28,15 @@ public:
 
   ConfusionMatrix merge(const ConfusionMatrix& that);
 
+  double tpr() const;
+  double fnr() const;
+  double tnr() const;
+  double fpr() const;
+  double precision() const;
+  double recall() const;
+  double f1() const;
+  double accuracy() const;
+
   ConfusionMatrix operator+(const ConfusionMatrix& that);
   ConfusionMatrix& operator+=(const ConfusionMatrix& that);
 
@@ -37,9 +46,21 @@ public:
 class MetricsTracker {
 private:
     std::unordered_map<uint32_t, ConfusionMatrix> _detections_per_frame_lookup;
+    std::unordered_map<uint32_t, ConfusionMatrix> _known_recognitions_per_frame_lookup;
+    std::unordered_map<uint32_t, ConfusionMatrix> _unknown_recognitions_per_frame_lookup;
 
+    /**
+     * Brute force detected rectangles match
+     * based on intersection over union.
+     * Works for O(n^2) where n is a size of matched rectangles.
+     * Should be fine to match
+     */
     void trackDetection(const FrameInfo& frame_info,
                         const std::vector<Rect>& detected_face_origins);
+
+    void trackRecognition(const FrameInfo& frame_info,
+                          const std::vector<std::string>& labels,
+                          const std::vector<Rect>& detected);
 
 public:
     MetricsTracker();
@@ -51,6 +72,12 @@ public:
                      const std::vector<Rect>& detected_face_origins);
 
     ConfusionMatrix overallDetectionMetrics() const;
+
+    ConfusionMatrix overallKnownRecognitionMetrics() const;
+
+    ConfusionMatrix overallUnknownRecognitionMetrics() const;
+
+    ConfusionMatrix overallRecognitionMetrics() const;
 
     ~MetricsTracker() = default;
 };
