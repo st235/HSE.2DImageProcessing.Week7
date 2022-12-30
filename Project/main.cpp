@@ -135,6 +135,44 @@ void TrainModel(const std::string& dataset_root_folder,
     labels_resolver.write(output_label_file);
 }
 
+void ShowConfig(const std::vector<std::string>& raw_files) {
+    std::vector<std::string> files = utils::ListAllFiles(raw_files, { ".mp4" });
+
+    for (const auto& file: files) {
+        std::unique_ptr<detection::AnnotationsTracker> annotations_tracker =
+                detection::AnnotationsTracker::LoadForVideo(file);
+        detection::VideoPlayer video_player(file, 10 /* playback_group_size */);
+        cv::Mat frame;
+
+        if(!video_player.isOpened()) {
+            throw std::runtime_error("Cannot open " + file);
+        }
+
+        std::cout << file << ", frames:" << video_player.framesCount() << std::endl;
+
+        while (video_player.hasNextFrame()) {
+            const auto& frame_id = video_player.currentFrame();
+            const auto& playback_state = video_player.nextFrame(frame);
+
+            int window_delay = 5;
+            bool hasInfo = annotations_tracker->hasInfo(frame_id);
+
+            if (hasInfo) {
+                window_delay = 1000;
+                const auto& frame_info = annotations_tracker->describeFrame(frame_id);
+                detection::drawFaces(frame, frame_info.face_origins(), frame_info.labels());
+            }
+
+
+            cv::imshow(file, frame);
+            cv::waitKey(window_delay);
+        }
+    }
+
+    cv::waitKey(0);
+    cv::destroyAllWindows();
+}
+
 void ProcessVideoFiles(const std::vector<std::string>& raw_files,
                        const std::string& input_model_file,
                        const std::string& input_label_file,
@@ -227,7 +265,12 @@ int main(int argc, char* argv[]) {
 
             GenerateDataset(files,
                             output_directory, is_debug);
-        } else if (args::DetectArgs(args, 
+        } else if (args::DetectArgs(args,
+                                    { args::FLAG_TITLE_UNSPECIFIED, "--config" } /* mandatory flags */,
+                                    { } /* optional flags */)) {
+            const auto& files = args::GetStringList(args, args::FLAG_TITLE_UNSPECIFIED);
+            ShowConfig(files);
+        } else if (args::DetectArgs(args,
                 { args::FLAG_TITLE_UNSPECIFIED, "--train", "-om", "-ol" } /* mandatory flags */,
                 { } /* optional flags */)) {
             const auto& dataset_root_folder = args::GetString(args, args::FLAG_TITLE_UNSPECIFIED);

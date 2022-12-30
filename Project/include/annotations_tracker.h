@@ -2,9 +2,10 @@
 #define ANNOTATIONS_TRACKER_H
 
 #include <cstdint>
-#include <map>
 #include <string>
+#include <memory>
 #include <vector>
+#include <unordered_map>
 
 #include "rect.h"
 
@@ -12,13 +13,14 @@ namespace detection {
 
 struct FrameInfo {
 private:
-  static const std::string UNKNOWN_LABEL;
-
   uint32_t _id;
   std::vector<std::string> _labels;
   std::vector<Rect> _face_origins;
 
 public:
+    static const std::string UNKNOWN_LABEL;
+
+    FrameInfo();
     FrameInfo(uint32_t id,
               const std::vector<std::string>& labels,
               const std::vector<Rect>& face_origins);
@@ -36,9 +38,11 @@ public:
 class AnnotationsTracker {
 private:
   std::string _video_file;
-  std::map<uint32_t, FrameInfo> _playback_info;
+  std::unordered_map<uint32_t, FrameInfo> _playback_info;
 
 public:
+    static std::unique_ptr<AnnotationsTracker> LoadForVideo(const std::string& video_file);
+
     explicit AnnotationsTracker(const std::string video_file);
     AnnotationsTracker(const AnnotationsTracker& that);
     AnnotationsTracker& operator=(const AnnotationsTracker& that);
@@ -63,14 +67,12 @@ public:
      */
     void read(const std::string& file);
 
+    bool hasInfo(uint32_t frame_id) const;
+
     /**
-     * Finds frame with the given {@code frame_id} or
-     * the closest to it lower bound. If frame was not
-     * found - which usually should not be the case -
-     * empty frame info will be returned.
-     * Works for O(log n) to support lower bound search.
+     * Finds frame with the given {@code frame_id}.
      */
-    FrameInfo describeFrame(uint32_t frame_id);
+    FrameInfo describeFrame(uint32_t frame_id) const;
 
     ~AnnotationsTracker() = default;
 };

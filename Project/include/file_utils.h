@@ -8,6 +8,8 @@
 
 namespace utils {
 
+bool Exists(const std::string& path);
+
 bool IsFile(const std::string& path);
 
 bool IsDirectory(const std::string& path);
@@ -23,6 +25,8 @@ std::string GetFileExtension(const std::string& path);
 std::string GetFileNameWithExtension(const std::string& path);
 
 std::string ReplaceFilename(const std::string& path, const std::string new_name);
+
+std::string ReplaceFilenameWithExtension(const std::string& path, const std::string new_name);
 
 void ListFiles(const std::string& dir,
                std::vector<std::string>& out_files,

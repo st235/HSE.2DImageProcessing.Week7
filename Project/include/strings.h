@@ -9,7 +9,7 @@ namespace std {
 
 static std::vector<std::string> Split(const std::string& origin,
                                       char delimiter) {
-    std::stringstream test(origin.c_str());
+    std::stringstream test(origin);
     std::string segment;
     std::vector<std::string> seglist;
 

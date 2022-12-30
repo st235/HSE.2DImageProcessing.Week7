@@ -86,6 +86,10 @@ std::vector<Face> extractFaces(cv::Mat& image,
 void drawFaces(cv::Mat& image,
                const std::vector<Rect>& faces_origins,
                const std::vector<std::string>& labels) {
+    if (labels.size() != faces_origins.size()) {
+        throw std::runtime_error("Labels size is different from faces rects size");
+    }
+
     for (size_t i = 0; i < faces_origins.size(); i++) {
         const auto& origin = faces_origins[i];
         const auto& label = labels[i];
