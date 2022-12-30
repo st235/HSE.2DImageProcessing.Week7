@@ -14,11 +14,11 @@
 
 #include "args_parser.h"
 #include "annotations_tracker.h"
-#include "confusion_matrix_tracker.h"
 #include "face_tracking_model.h"
 #include "face_utils.h"
 #include "file_utils.h"
 #include "labels_resolver.h"
+#include "metrics_tracker.h"
 #include "video_player.h"
 #include "rect.h"
 

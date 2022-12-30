@@ -1,10 +1,10 @@
-#include "confusion_matrix_tracker.h"
+#include "metrics_tracker.h"
 
 #include <unordered_map>
 
 namespace detection {
 
-ConfusionMetric::ConfusionMetric():
+ConfusionMatrix::ConfusionMatrix():
     tp(0),
     tn(0),
     fp(0),
@@ -12,7 +12,7 @@ ConfusionMetric::ConfusionMetric():
     // empty on purpose
 }
 
-ConfusionMetric::ConfusionMetric(uint32_t tp,
+ConfusionMatrix::ConfusionMatrix(uint32_t tp,
                                  uint32_t tn,
                                  uint32_t fp,
                                  uint32_t fn):
@@ -23,7 +23,7 @@ ConfusionMetric::ConfusionMetric(uint32_t tp,
     // empty on purpose
 }
 
-ConfusionMetric::ConfusionMetric(const ConfusionMetric& that):
+ConfusionMatrix::ConfusionMatrix(const ConfusionMatrix& that):
         tp(that.tp),
         tn(that.tn),
         fp(that.fp),
@@ -31,7 +31,7 @@ ConfusionMetric::ConfusionMetric(const ConfusionMetric& that):
     // empty on purpose
 }
 
-ConfusionMetric& ConfusionMetric::operator=(const ConfusionMetric& that) {
+ConfusionMatrix& ConfusionMatrix::operator=(const ConfusionMatrix& that) {
     if (this != &that) {
         this->tp = that.tp;
         this->tn = that.tn;
@@ -42,18 +42,18 @@ ConfusionMetric& ConfusionMetric::operator=(const ConfusionMetric& that) {
     return *this;
 }
 
-ConfusionMetric ConfusionMetric::merge(const ConfusionMetric& that) {
-    return ConfusionMetric(tp + that.tp,
+ConfusionMatrix ConfusionMatrix::merge(const ConfusionMatrix& that) {
+    return ConfusionMatrix(tp + that.tp,
                            tn + that.tn,
                            fp + that.fp,
                            fn + that.fn);
 }
 
-ConfusionMetric ConfusionMetric::operator+(const ConfusionMetric& that) {
+ConfusionMatrix ConfusionMatrix::operator+(const ConfusionMatrix& that) {
     return merge(that);
 }
 
-ConfusionMetric& ConfusionMetric::operator+=(const ConfusionMetric& that) {
+ConfusionMatrix& ConfusionMatrix::operator+=(const ConfusionMatrix& that) {
     this->tp += that.tp;
     this->tn += that.tn;
     this->fp += that.fp;
@@ -61,17 +61,17 @@ ConfusionMetric& ConfusionMetric::operator+=(const ConfusionMetric& that) {
     return *this;
 }
 
-ConfusionMatrixTracker::ConfusionMatrixTracker():
+MetricsTracker::MetricsTracker():
     _confusion_metric() {
     // empty on purpose
 }
 
-ConfusionMatrixTracker::ConfusionMatrixTracker(const ConfusionMatrixTracker& that):
+MetricsTracker::MetricsTracker(const MetricsTracker& that):
         _confusion_metric(that._confusion_metric) {
     // empty on purpose
 }
 
-ConfusionMatrixTracker& ConfusionMatrixTracker::operator=(const ConfusionMatrixTracker& that) {
+MetricsTracker& MetricsTracker::operator=(const MetricsTracker& that) {
     if (this != &that) {
         this->_confusion_metric = that._confusion_metric;
     }
@@ -79,7 +79,7 @@ ConfusionMatrixTracker& ConfusionMatrixTracker::operator=(const ConfusionMatrixT
     return *this;
 }
 
-void ConfusionMatrixTracker::keepTrackOf(const FrameInfo& frame_info,
+void MetricsTracker::keepTrackOf(const FrameInfo& frame_info,
                                          const std::vector<std::string>& labels,
                                          const std::vector<Rect>& face_origins) {
     std::unordered_map<std::string, Rect> references;
