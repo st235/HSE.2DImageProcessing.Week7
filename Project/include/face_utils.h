@@ -80,7 +80,8 @@ std::vector<Face> extractFaces(cv::Mat& image,
 
 void drawFaces(cv::Mat& image,
                const std::vector<Rect>& faces_origins,
-               const std::vector<std::string>& labels);
+               const std::vector<std::string>& labels,
+               const cv::Scalar& color = cv::Scalar(0, 0, 255));
 
 void drawFaces(cv::Mat& image,
                const std::vector<Face>& faces);

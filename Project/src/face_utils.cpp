@@ -85,7 +85,8 @@ std::vector<Face> extractFaces(cv::Mat& image,
 
 void drawFaces(cv::Mat& image,
                const std::vector<Rect>& faces_origins,
-               const std::vector<std::string>& labels) {
+               const std::vector<std::string>& labels,
+               const cv::Scalar& color) {
     if (labels.size() != faces_origins.size()) {
         throw std::runtime_error("Labels size is different from faces rects size");
     }
@@ -96,11 +97,11 @@ void drawFaces(cv::Mat& image,
 
         cv::rectangle(image,
                       cv::Point2f(origin.x, origin.y), cv::Point2f(origin.x + origin.width, origin.y + origin.height),
-                      cv::Scalar(0, 0, 255), 6, 1, 0);
+                      color, 6, 1, 0);
 
         cv::putText(image, label,
                     cv::Point(origin.x, origin.y - 15), cv::FONT_HERSHEY_COMPLEX,
-                    1, cv::Scalar(0, 0, 255), 2, cv::LINE_8);
+                    1, color, 2, cv::LINE_8);
     }
 }
 

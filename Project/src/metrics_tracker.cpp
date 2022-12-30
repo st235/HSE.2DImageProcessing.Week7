@@ -61,47 +61,81 @@ ConfusionMatrix& ConfusionMatrix::operator+=(const ConfusionMatrix& that) {
     return *this;
 }
 
+void MetricsTracker::trackDetection(const FrameInfo& frame_info,
+                                    const std::vector<Rect>& detected_face_origins) {
+    std::vector<Rect> annotated_faces_origins = frame_info.face_origins();
+    bool matched_annotated[annotated_faces_origins.size()];
+    bool matched_detected[detected_face_origins.size()];
+
+    uint32_t tp = 0,
+             fp = 0,
+             fn = 0;
+
+
+    for (size_t i = 0; i < annotated_faces_origins.size(); i++) {
+        matched_annotated[i] = false;
+    }
+
+    for (size_t i = 0; i < detected_face_origins.size(); i++) {
+        matched_detected[i] = false;
+    }
+
+    for (size_t i = 0; i < annotated_faces_origins.size(); i++) {
+        if (matched_annotated[i]) {
+            continue;
+        }
+
+        for (size_t j = 0; j < detected_face_origins.size(); j++) {
+            if (matched_detected[j]) {
+                continue;
+            }
+
+            if (Rect::iou(annotated_faces_origins[i], detected_face_origins[j]) > 0.6) {
+                matched_annotated[i] = true;
+                matched_detected[j] = true;
+                tp += 1;
+                break;
+            }
+        }
+    }
+
+    _detections_per_frame_lookup.insert({ frame_info.id(), ConfusionMatrix(tp, 0,
+                                                                           detected_face_origins.size() - tp /* fp */,
+                                                                           annotated_faces_origins.size() - tp /* fn */) });
+}
+
 MetricsTracker::MetricsTracker():
-    _confusion_metric() {
+    _detections_per_frame_lookup() {
     // empty on purpose
 }
 
 MetricsTracker::MetricsTracker(const MetricsTracker& that):
-        _confusion_metric(that._confusion_metric) {
+    _detections_per_frame_lookup(that._detections_per_frame_lookup) {
     // empty on purpose
 }
 
 MetricsTracker& MetricsTracker::operator=(const MetricsTracker& that) {
     if (this != &that) {
-        this->_confusion_metric = that._confusion_metric;
+        this->_detections_per_frame_lookup = that._detections_per_frame_lookup;
     }
 
     return *this;
 }
 
+ConfusionMatrix MetricsTracker::overallDetectionMetrics() const {
+    ConfusionMatrix matrix;
+
+    for (const auto& entry: _detections_per_frame_lookup) {
+        matrix += entry.second;
+    }
+
+    return matrix;
+}
+
 void MetricsTracker::keepTrackOf(const FrameInfo& frame_info,
-                                         const std::vector<std::string>& labels,
-                                         const std::vector<Rect>& face_origins) {
-    std::unordered_map<std::string, Rect> references;
-
-    // TODO(st235): handle 'unknown' cases
-    std::vector<std::string> ref_labels = frame_info.labels();
-    std::vector<Rect> ref_face_origins = frame_info.face_origins();
-
-    for (size_t i = 0; i < frame_info.count(); i++) {
-        std::string label = ref_labels[i];
-        Rect face_origin = ref_face_origins[i];
-        references[label] = face_origin;
-    }
-
-    for (size_t i = 0; i < labels.size(); i++) {
-        std::string label = labels[i];
-        Rect face_origin = face_origins[i];
-
-//        bool has_ref =
-//
-//        if (Rect::iou(face_origin, ))
-    }
+                                 const std::vector<std::string>& labels,
+                                 const std::vector<Rect>& face_origins) {
+    trackDetection(frame_info, face_origins);
 }
 
 } // namespace detection

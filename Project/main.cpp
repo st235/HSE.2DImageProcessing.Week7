@@ -176,6 +176,7 @@ void ShowConfig(const std::vector<std::string>& raw_files) {
 void ProcessVideoFiles(const std::vector<std::string>& raw_files,
                        const std::string& input_model_file,
                        const std::string& input_label_file,
+                       bool test_against_annotations,
                        bool is_debug) {
     std::vector<std::string> files = utils::ListAllFiles(raw_files, { ".mp4" });
 
@@ -195,6 +196,9 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
     labels_resolver.read(input_label_file);
 
     for (const auto& file: files) {
+        detection::MetricsTracker metrics_tracker;
+        std::unique_ptr<detection::AnnotationsTracker> annotations_tracker =
+                detection::AnnotationsTracker::LoadForVideo(file);
         detection::VideoPlayer video_player(file, 10 /* playback_group_size */);
         cv::Mat frame;
 
@@ -205,13 +209,17 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
         std::cout << file << ", frames:" << video_player.framesCount() << std::endl;
 
         std::vector<std::string> labels;
+        std::vector<detection::Rect> detected_faces_origins;
 
         while (video_player.hasNextFrame()) {
+            const auto& frame_id = video_player.currentFrame();
+            bool has_annotations = annotations_tracker->hasInfo(frame_id);
+
             const auto& playback_state = video_player.nextFrame(frame);
 
             if (playback_state == detection::VideoPlayer::PlaybackGroupState::STARTING_NEW_GROUP) {
                 labels.clear();
-                std::vector<detection::Rect> detected_faces_origins;
+                detected_faces_origins.clear();
 
                 std::vector<detection::Face> faces =
                         detection::extractFaces(frame,
@@ -227,22 +235,35 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
                 }
 
                 face_tracking.reset_tracking(frame, labels, detected_faces_origins);
-
-                if (is_debug) {
-                    detection::drawFaces(frame, faces, labels);
-                }
+                detection::drawFaces(frame, faces, labels);
             } else {
-                std::vector<detection::Rect> detected_faces_origins;
+                detected_faces_origins.clear();
+
                 face_tracking.track(frame, labels, detected_faces_origins);
+                detection::drawFaces(frame, detected_faces_origins, labels);
+            }
+
+            int window_delay = 5;
+
+            if (has_annotations && test_against_annotations) {
+                const auto& frame_info = annotations_tracker->describeFrame(frame_id);
+                metrics_tracker.keepTrackOf(frame_info, labels, detected_faces_origins);
 
                 if (is_debug) {
-                    detection::drawFaces(frame, detected_faces_origins, labels);
+                    window_delay = 1000;
+                    detection::drawFaces(frame, frame_info.face_origins(), frame_info.labels(), cv::Scalar(255, 0, 0));
                 }
             }
 
             cv::imshow(file, frame);
-            cv::waitKey(5);
+            cv::waitKey(window_delay);
         }
+
+        const auto& detection_annotations = metrics_tracker.overallDetectionMetrics();
+        std::cout << "detection result: tp=" << detection_annotations.tp
+                  << ", tn=" << detection_annotations.tn
+                  << ", fp=" << detection_annotations.fp
+                  << ", fn=" << detection_annotations.fn << std::endl;
     }
 
     cv::waitKey(0);
@@ -281,15 +302,17 @@ int main(int argc, char* argv[]) {
                        output_model_file, output_label_file);
         } else if (args::DetectArgs(args,
                                     { args::FLAG_TITLE_UNSPECIFIED, "--process", "-il", "-im" } /* mandatory flags */,
-                                    { "-d" } /* optional flags */)) {
+                                    { "-t", "-d" } /* optional flags */)) {
             const auto& files = args::GetStringList(args, args::FLAG_TITLE_UNSPECIFIED);
             const auto& input_model_file = args::GetString(args, "-im");
             const auto& input_label_file = args::GetString(args, "-il");
 
+            const auto& should_test_against_annotations = args::HasFlag(args, "-t");
             const auto& is_debug = args::HasFlag(args, "-d");
 
             ProcessVideoFiles(files,
                               input_model_file, input_label_file,
+                              should_test_against_annotations,
                               is_debug);
         } else {
             std::cout << "Cannot find suitable command for the given flags." << std::endl;
