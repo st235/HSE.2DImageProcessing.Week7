@@ -47,6 +47,9 @@ using face_recognition_dnn_model = dlib::loss_metric<dlib::fc_no_bias<128,dlib::
     >
 >>>;
 
+const std::string LANDMARK_MODEL_FILE_PATH = "shape_predictor_68_face_landmarks.dat";
+const std::string DNN_MODEL_FILE_PATH = "dlib_face_recognition_resnet_model_v1.dat";
+
 } // namespace
 
 namespace detection {
@@ -69,8 +72,8 @@ private:
   std::vector<double> extractFeatures(const cv::Mat& mat) const;
 
 public:
-  DnnRecognitionModel(const std::string& landmarks_model_file = "shape_predictor_68_face_landmarks.dat",
-                      const std::string& dnn_model_file = "dlib_face_recognition_resnet_model_v1.dat");
+  DnnRecognitionModel(const std::string& landmarks_model_file = LANDMARK_MODEL_FILE_PATH,
+                      const std::string& dnn_model_file = DNN_MODEL_FILE_PATH);
   DnnRecognitionModel(const DnnRecognitionModel& that);
   DnnRecognitionModel& operator=(const DnnRecognitionModel& that);
 
