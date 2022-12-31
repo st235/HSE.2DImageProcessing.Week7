@@ -6,20 +6,12 @@
 #include <dlib/image_io.h>
 #include <opencv2/opencv.hpp>
 
-#include <iostream>
-
 namespace detection {
 
-/**
- * Perhaps, a temporary method until I do
- * a permanent solution.
- */
 static dlib::array2d<dlib::rgb_pixel> AsRGBOpenCVMatrix(const cv::Mat& mat) {
     cv::Mat clone = mat.clone();
     dlib::array2d<dlib::rgb_pixel> dlib_mat(clone.rows, clone.cols);
     cv::cvtColor(clone, clone, cv::COLOR_GRAY2BGR);
-
-//    std::cout << clone.rows << "/" << clone.cols << std::endl;
 
     for (size_t i = 0; i < clone.rows; i++) {
         for (size_t j = 0; j < clone.cols; j++) {
