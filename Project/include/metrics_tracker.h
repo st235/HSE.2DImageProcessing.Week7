@@ -50,7 +50,7 @@ private:
     std::unordered_map<uint32_t, ConfusionMatrix> _unknown_recognitions_per_frame_lookup;
 
     /**
-     * Brute force detected rectangles match
+     * Brute forces detected rectangles match
      * based on intersection over union.
      * Works for O(n^2) where n is a size of matched rectangles.
      * Should be fine to match
