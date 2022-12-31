@@ -1,7 +1,6 @@
 #include "dnn_recognition_model.h"
 
 #include <algorithm>
-#include <iostream>
 
 #include <dlib/image_processing/render_face_detections.h>
 
@@ -57,7 +56,7 @@ DnnRecognitionModel::DnnRecognitionModel(const DnnRecognitionModel& that):
         _shape_predictor(that._shape_predictor),
         _face_recognition_dnn_model(that._face_recognition_dnn_model),
         _knearest(that._knearest) {
-    // empty on purpose
+    _knearest->setDefaultK(100);
     _knearest->setIsClassifier(true);
 }
 
@@ -163,7 +162,6 @@ int DnnRecognitionModel::predict(cv::Mat& image) const {
     // let's reverse the distance and get
     // prediction
     double prediction = 1 - distance;
-    std::cout << prediction << std::endl;
 
     if (prediction < 0.7) {
         return FaceRecognitionModel::LABEL_UNKNOWN;
