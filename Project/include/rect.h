@@ -9,8 +9,8 @@ namespace detection {
 
 struct Rect {
 public:
-  uint32_t x;
-  uint32_t y;
+  int32_t x;
+  int32_t y;
   uint32_t width;
   uint32_t height;
 
@@ -19,7 +19,7 @@ public:
   static double iou(const Rect& one, const Rect& another);
 
   Rect();
-  Rect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+  Rect(int32_t x, int32_t y, uint32_t width, uint32_t height);
   Rect(const Rect& that);
   Rect& operator=(const Rect& that);
 

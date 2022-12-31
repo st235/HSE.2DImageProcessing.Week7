@@ -4,14 +4,14 @@
 
 namespace {
 
-bool Intersects(uint32_t s1, uint32_t f1,
-                uint32_t s2, uint32_t f2) {
+bool Intersects(int32_t s1, int32_t f1,
+                int32_t s2, int32_t f2) {
     return std::max(s1, s2) < std::min(f1, f2);
 }
 
-void Merge(uint32_t s1, uint32_t f1,
-           uint32_t s2, uint32_t f2,
-           uint32_t& s_out, uint32_t& f_out) {
+void Merge(int32_t s1, int32_t f1,
+           int32_t s2, int32_t f2,
+           int32_t& s_out, int32_t& f_out) {
     s_out = std::max(s1, s2);
     f_out = std::min(f1, f2);
 }
@@ -25,8 +25,8 @@ Rect Rect::from(const cv::Rect& that) {
         return Rect();
     }
 
-    return Rect(static_cast<uint32_t>(that.x),
-                static_cast<uint32_t>(that.y),
+    return Rect(static_cast<int32_t>(that.x),
+                static_cast<int32_t>(that.y),
                 static_cast<uint32_t>(that.width),
                 static_cast<uint32_t>(that.height));
 }
@@ -60,7 +60,7 @@ Rect::Rect():
     // empty on purpose
 }
 
-Rect::Rect(uint32_t x, uint32_t y, uint32_t width, uint32_t height):
+Rect::Rect(int32_t x, int32_t y, uint32_t width, uint32_t height):
     x(x),
     y(y),
     width(width),
@@ -95,8 +95,8 @@ bool Rect::intersects(const Rect& that) const {
 }
 
 Rect Rect::intersection(const Rect& that) const {
-    uint32_t sx, fx;
-    uint32_t sy, fy;
+    int32_t sx, fx;
+    int32_t sy, fy;
 
     Merge(x, x + width, that.x, that.x + that.width, sx, fx);
     Merge(y, y + height, that.y, that.y + that.height, sy, fy);

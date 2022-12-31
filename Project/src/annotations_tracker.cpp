@@ -123,8 +123,8 @@ void AnnotationsTracker::read(const std::string& file) {
             labels.push_back(label);
 
             std::vector<std::string> raw_rect = std::Split(tokens[1], ',' /* delimiter */);
-            origins.push_back(Rect(static_cast<uint32_t>(stoi(raw_rect[0])) /* x */,
-                                   static_cast<uint32_t>(stoi(raw_rect[1])) /* y */,
+            origins.push_back(Rect(static_cast<int32_t>(stoi(raw_rect[0])) /* x */,
+                                   static_cast<int32_t>(stoi(raw_rect[1])) /* y */,
                                    static_cast<uint32_t>(stoi(raw_rect[2])) /* width */,
                                    static_cast<uint32_t>(stoi(raw_rect[3])) /* height */));
         }
