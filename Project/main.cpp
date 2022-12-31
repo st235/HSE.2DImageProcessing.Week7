@@ -13,6 +13,9 @@
 #include "hog_recognition_model.h"
 #include "dnn_recognition_model.h"
 
+#include "dlib_face_detection_model.h"
+#include "opencv_face_detection_model.h"
+
 #include "args_parser.h"
 #include "annotations_tracker.h"
 #include "face_detection_model.h"
@@ -22,7 +25,6 @@
 #include "labels_resolver.h"
 #include "metrics_tracker.h"
 #include "metrics_utils.h"
-#include "opencv_face_detection_model.h"
 #include "strings.h"
 #include "video_player.h"
 #include "rect.h"

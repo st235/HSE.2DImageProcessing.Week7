@@ -7,18 +7,18 @@
 
 namespace detection {
 
-class DlibFaceDetectionModel: public FaceDetectionModel {
+class DLibFaceDetectionModel: public FaceDetectionModel {
 private:
     dlib::frontal_face_detector _detector;
 
 public:
-    DlibFaceDetectionModel();
-    DlibFaceDetectionModel(const DlibFaceDetectionModel& that);
-    DlibFaceDetectionModel& operator=(const DlibFaceDetectionModel& that);
+    DLibFaceDetectionModel();
+    DLibFaceDetectionModel(const DLibFaceDetectionModel& that);
+    DLibFaceDetectionModel& operator=(const DLibFaceDetectionModel& that);
 
     std::vector<Face> extractFaces(cv::Mat& image) override;
 
-    ~DlibFaceDetectionModel() = default;
+    ~DLibFaceDetectionModel() = default;
 };    
     
 } // namespace detection

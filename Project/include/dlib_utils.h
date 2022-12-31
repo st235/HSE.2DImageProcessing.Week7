@@ -10,8 +10,14 @@ namespace detection {
 
 static dlib::array2d<dlib::rgb_pixel> AsRGBOpenCVMatrix(const cv::Mat& mat) {
     cv::Mat clone = mat.clone();
+
+    // we need to convert grey images back
+    // to rgb
+    if (mat.channels() == 1) {
+        cv::cvtColor(clone, clone, cv::COLOR_GRAY2BGR);
+    }
+
     dlib::array2d<dlib::rgb_pixel> dlib_mat(clone.rows, clone.cols);
-    cv::cvtColor(clone, clone, cv::COLOR_GRAY2BGR);
 
     for (size_t i = 0; i < clone.rows; i++) {
         for (size_t j = 0; j < clone.cols; j++) {
