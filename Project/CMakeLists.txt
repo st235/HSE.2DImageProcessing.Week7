@@ -11,6 +11,8 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/misc/haarcascade_frontalface_alt2.xml DEST
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/misc/haarcascade_frontalface_default.xml DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/misc/haarcascade_lefteye_2splits.xml DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/misc/haarcascade_righteye_2splits.xml DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/misc/shape_predictor_68_face_landmarks.dat DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/misc/dlib_face_recognition_resnet_model_v1.dat DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 include_directories(include)
 

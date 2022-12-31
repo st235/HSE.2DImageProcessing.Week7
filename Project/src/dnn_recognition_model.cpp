@@ -25,25 +25,23 @@ void ShowImage(const dlib::array2d<dlib::rgb_pixel>& image) {
 
 
 std::vector<double> DnnRecognitionModel::extractFeatures(const cv::Mat& mat) const {
-    dlib::frontal_face_detector detector = dlib::get_frontal_face_detector();
+//    dlib::frontal_face_detector detector = dlib::get_frontal_face_detector();
 
     dlib::array2d<dlib::rgb_pixel> image = AsRGBOpenCVMatrix(mat);
     dlib::pyramid_up(image);
 
     std::vector<dlib::matrix<dlib::rgb_pixel>> face_images;
-    std::vector<dlib::rectangle> face_rectangles = detector(image);
+//    std::vector<dlib::rectangle> face_rectangles = detector(image);
+    dlib::rectangle face_rectangle(0, 0, image.nc(), image.nr());
 
     std::vector<dlib::full_object_detection> faces_landmarks;
-    for (const auto& face_rectangle: face_rectangles) {
-        dlib::full_object_detection landmarks = _shape_predictor(image, face_rectangle);
-        faces_landmarks.push_back(landmarks);
+    dlib::full_object_detection landmarks = _shape_predictor(image, face_rectangle);
+    faces_landmarks.push_back(landmarks);
 
-        dlib::matrix<dlib::rgb_pixel> face_image;
-        dlib::extract_image_chip(image, dlib::get_face_chip_details(landmarks, 150, 0.25), face_image);
+    dlib::matrix<dlib::rgb_pixel> face_image;
+    dlib::extract_image_chip(image, dlib::get_face_chip_details(landmarks, 150, 0.25), face_image);
 
-        face_images.push_back(std::move(face_image));
-
-    }
+    face_images.push_back(std::move(face_image));
 
 //    dlib::image_window win;
 //    win.set_image(image);
@@ -107,8 +105,8 @@ void DnnRecognitionModel::train(std::vector<cv::Mat>& images,
 
         cv::Mat row = cv::Mat::zeros(1, 128, CV_32F);
 
-        std::cout << label << ", " << i << ", " << features.size() << std::endl;
-
+        // we were not able to detect anything in this
+        // frame
         if (features.size() != 128) {
             continue;
         }
