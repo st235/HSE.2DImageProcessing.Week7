@@ -270,7 +270,7 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
 
             detection::PrintConfusionMatrix("detection",
                                             detection_metrics,
-                                            detection::PI_TPR | detection::PI_FNR | detection::PI_FPR);
+                                            detection::PI_TPR | detection::PI_FNR | detection::PI_FPR  | detection::PI_CONFUSION_SCORES);
             detection::PrintConfusionMatrix("recognition for known subjects",
                                             known_recognition_metrics,
                                             detection::PI_ACCURACY);
