@@ -3,6 +3,8 @@
 
 #include <dlib/image_processing/frontal_face_detector.h>
 
+#include "face_detection_model.h"
+
 namespace detection {
 
 class DlibFaceDetectionModel: public FaceDetectionModel {

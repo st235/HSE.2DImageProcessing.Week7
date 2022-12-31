@@ -27,16 +27,14 @@ std::vector<Face> DlibFaceDetectionModel::extractFaces(cv::Mat& raw_image) {
     dlib::pyramid_up(image);
 
     std::vector<Face> result_faces;
-    std::vector<cv::Rect> faces;
-    _face_cascade.detectMultiScale(greyscale_image, faces, 1.1, 6);
-
+    std::vector<dlib::rectangle> faces = _detector(image);
     for(size_t i = 0; i < faces.size(); i++) {
         const auto& face = faces[i];
         cv::Rect face_rect(face.left(), face.top(), (face.right() - face.left()), (face.top() - face.bottom()));
         cv::Mat face_area = raw_image(face_rect);
 
         result_faces.push_back(Face(
-                output_image,
+                face_area,
                 Rect::from(face_rect),
                 Eyes()));
     }
