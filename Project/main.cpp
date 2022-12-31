@@ -191,7 +191,7 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
     labels_resolver.read(input_label_file);
 
     for (const auto& file: files) {
-        detection::MetricsTracker metrics_tracker;
+        detection::MetricsTracker metrics_tracker(labels_resolver.getLabels());
         std::unique_ptr<detection::AnnotationsTracker> annotations_tracker =
                 detection::AnnotationsTracker::LoadForVideo(file);
         detection::VideoPlayer video_player(file, 10 /* playback_group_size */);

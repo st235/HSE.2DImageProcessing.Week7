@@ -58,6 +58,19 @@ bool LabelsResolver::hasId(int32_t id) const {
     return _id_to_label_lookup_table.find(id) != _id_to_label_lookup_table.end();
 }
 
+std::vector<std::string> LabelsResolver::getLabels() const {
+    std::vector<std::string> labels;
+    labels.push_back(UNKNOWN_LABEL);
+    for (const auto& entry: _label_to_id_lookup_table) {
+        labels.push_back(entry.first);
+    }
+    return labels;
+}
+
+uint32_t LabelsResolver::size() const {
+    return _id_to_label_lookup_table.size();
+}
+
 int32_t LabelsResolver::obtainIdByLabel(const std::string& label) {
     if (label == UNKNOWN_LABEL) {
         return UNKNOWN_LABEL_ID;

@@ -2,6 +2,12 @@
 
 #include <unordered_map>
 
+namespace {
+
+const static std::string UNKNOWN_LABEL = "unknown";
+
+}
+
 namespace detection {
 
 ConfusionMatrix::ConfusionMatrix():
@@ -159,10 +165,6 @@ void MetricsTracker::trackRecognition(const FrameInfo& frame_info,
         matched_annotated[i] = false;
     }
 
-    for (size_t i = 0; i < detected_face_origins.size(); i++) {
-        matched_detected[i] = false;
-    }
-
     for (size_t i = 0; i < annotated_faces_origins.size(); i++) {
         if (matched_annotated[i]) {
             continue;
@@ -176,9 +178,8 @@ void MetricsTracker::trackRecognition(const FrameInfo& frame_info,
             if (Rect::iou(annotated_faces_origins[i], detected_face_origins[j]) > 0.6
                 && annotated_faces_labels[i] == labels[j]) {
                 matched_annotated[i] = true;
-                matched_detected[j] = true;
 
-                if (annotated_faces_labels[i] == "unknown") {
+                if (annotated_faces_labels[i] == UNKNOWN_LABEL) {
                     unknown_matched += 1;
                 } else {
                     known_matched += 1;
@@ -204,23 +205,11 @@ void MetricsTracker::trackRecognition(const FrameInfo& frame_info,
             }
             unknown_overall_count += 1;
         } else {
+            // !is_unknown
             if (is_matched) {
                 known_detected_count += 1;
             }
             known_overall_count += 1;
-        }
-    }
-
-    for (size_t i = 0; i < detected_face_origins.size(); i++) {
-        bool is_unknown = annotated_faces_labels[i] == "unknown";
-        bool is_matched = matched_annotated[i];
-
-        if (!is_matched) {
-            if (is_unknown) {
-                unknown_overall_count += 1;
-            } else {
-                known_overall_count += 1;
-            }
         }
     }
 
@@ -237,7 +226,8 @@ void MetricsTracker::trackRecognition(const FrameInfo& frame_info,
             unknown_overall_count - unknown_detected_count - unknown_matched /* fn */) });
 }
 
-MetricsTracker::MetricsTracker():
+MetricsTracker::MetricsTracker(std::vector<std::string> labels):
+    _labels(labels),
     _detections_per_frame_lookup(),
     _known_recognitions_per_frame_lookup(),
     _unknown_recognitions_per_frame_lookup() {
@@ -245,6 +235,7 @@ MetricsTracker::MetricsTracker():
 }
 
 MetricsTracker::MetricsTracker(const MetricsTracker& that):
+    _labels(that._labels),
     _detections_per_frame_lookup(that._detections_per_frame_lookup),
     _known_recognitions_per_frame_lookup(that._known_recognitions_per_frame_lookup),
     _unknown_recognitions_per_frame_lookup(that._unknown_recognitions_per_frame_lookup) {
@@ -253,6 +244,7 @@ MetricsTracker::MetricsTracker(const MetricsTracker& that):
 
 MetricsTracker& MetricsTracker::operator=(const MetricsTracker& that) {
     if (this != &that) {
+        this->_labels = that._labels;
         this->_detections_per_frame_lookup = that._detections_per_frame_lookup;
         this->_known_recognitions_per_frame_lookup = that._known_recognitions_per_frame_lookup;
         this->_unknown_recognitions_per_frame_lookup = that._unknown_recognitions_per_frame_lookup;

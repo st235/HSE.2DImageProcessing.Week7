@@ -45,6 +45,7 @@ public:
 
 class MetricsTracker {
 private:
+    std::vector<std::string> _labels;
     std::unordered_map<uint32_t, ConfusionMatrix> _detections_per_frame_lookup;
     std::unordered_map<uint32_t, ConfusionMatrix> _known_recognitions_per_frame_lookup;
     std::unordered_map<uint32_t, ConfusionMatrix> _unknown_recognitions_per_frame_lookup;
@@ -63,7 +64,7 @@ private:
                           const std::vector<Rect>& detected);
 
 public:
-    MetricsTracker();
+    explicit MetricsTracker(std::vector<std::string> labels);
     MetricsTracker(const MetricsTracker& that);
     MetricsTracker& operator=(const MetricsTracker& that);
 

@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 #include <unordered_map>
 
 namespace detection {
@@ -22,6 +23,10 @@ public:
     LabelsResolver& operator=(const LabelsResolver& that);
 
     bool hasId(int32_t id) const;
+
+    std::vector<std::string> getLabels() const;
+
+    uint32_t size() const;
 
     int32_t obtainIdByLabel(const std::string& label);
     std::string obtainLabelById(int32_t id);
