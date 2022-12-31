@@ -40,6 +40,10 @@ cv::Rect Rect::toCVRect(const Rect& that) {
 }
 
 double Rect::iou(const Rect& one, const Rect& another) {
+    if (!one.intersects(another)) {
+        return 0.0;
+    }
+
     Rect intersection = one.intersection(another);
 
     double intersection_area = static_cast<double>(intersection.area());

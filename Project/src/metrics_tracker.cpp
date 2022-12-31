@@ -2,6 +2,8 @@
 
 #include <unordered_map>
 
+#include "strings.h"
+
 namespace {
 
 const static std::string UNKNOWN_LABEL = "unknown";
@@ -132,17 +134,33 @@ void MetricsTracker::trackDetection(const FrameInfo& frame_info,
             continue;
         }
 
+        double max_iou = 0;
+        int32_t max_index = -1;
+
         for (size_t j = 0; j < detected_face_origins.size(); j++) {
             if (matched_detected[j]) {
                 continue;
             }
 
-            if (Rect::iou(annotated_faces_origins[i], detected_face_origins[j]) > 0.6) {
-                matched_annotated[i] = true;
-                matched_detected[j] = true;
-                matched += 1;
+            double iou = Rect::iou(annotated_faces_origins[i], detected_face_origins[j]);
+
+            if (iou > 1.0) {
+                // assert iou always within the [0.0, 1.0]
+                throw std::runtime_error("IOU exceed 1.0 that is impossible, iou was:" + std::AsString(iou));
+            }
+
+            if (iou >= 0.5 &&
+                    iou > max_iou) {
+                max_iou = iou;
+                max_index = j;
                 break;
             }
+        }
+
+        if (max_index != -1) {
+            matched_annotated[i] = true;
+            matched_detected[max_index] = true;
+            matched += 1;
         }
     }
 
@@ -177,17 +195,33 @@ void MetricsTracker::trackRecognition(const FrameInfo& frame_info,
             continue;
         }
 
+        double max_iou = 0;
+        int32_t max_index = -1;
+
         for (size_t j = 0; j < detected_face_origins.size(); j++) {
             if (matched_detected[j]) {
                 continue;
             }
 
-            if (Rect::iou(annotated_faces_origins[i], detected_face_origins[j]) > 0.6) {
-                matches[i] = j;
-                matched_annotated[i] = true;
-                matched_detected[j] = true;
+            double iou = Rect::iou(annotated_faces_origins[i], detected_face_origins[j]);
+
+            if (iou > 1.0) {
+                // assert iou always within the [0.0, 1.0]
+                throw std::runtime_error("IOU exceed 1.0 that is impossible, iou was:" + std::AsString(iou));
+            }
+
+            if (iou >= 0.5 &&
+                iou > max_iou) {
+                max_iou = iou;
+                max_index = j;
                 break;
             }
+        }
+
+        if (max_index != -1) {
+            matches[i] = max_index;
+            matched_annotated[i] = true;
+            matched_detected[max_index] = true;
         }
     }
 
