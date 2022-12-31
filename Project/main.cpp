@@ -194,10 +194,15 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
 
     for (const auto& file: files) {
         detection::MetricsTracker metrics_tracker(labels_resolver.getLabels());
-        std::unique_ptr<detection::AnnotationsTracker> annotations_tracker =
-                detection::AnnotationsTracker::LoadForVideo(file);
+        std::unique_ptr<detection::AnnotationsTracker> annotations_tracker;
         detection::VideoPlayer video_player(file, 10 /* playback_group_size */);
         cv::Mat frame;
+
+        // only initialise annotations tracker
+        // if it has been requested
+        if (test_against_annotations) {
+            annotations_tracker = detection::AnnotationsTracker::LoadForVideo(file);
+        }
 
         if(!video_player.isOpened()) {
             throw std::runtime_error("Cannot open " + file);
@@ -210,8 +215,6 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
 
         while (video_player.hasNextFrame()) {
             const auto& frame_id = video_player.currentFrame();
-            bool has_annotations = annotations_tracker->hasInfo(frame_id);
-
             const auto& playback_state = video_player.nextFrame(frame);
 
             if (playback_state == detection::VideoPlayer::PlaybackGroupState::STARTING_NEW_GROUP) {
@@ -241,7 +244,7 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
 
             int window_delay = 5;
 
-            if (test_against_annotations && has_annotations) {
+            if (test_against_annotations && annotations_tracker->hasInfo(frame_id)) {
                 const auto& frame_info = annotations_tracker->describeFrame(frame_id);
                 metrics_tracker.keepTrackOf(frame_info, labels, detected_faces_origins);
 
