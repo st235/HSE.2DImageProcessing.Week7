@@ -26,6 +26,11 @@ static void PrintConfusionMatrix(const std::string& title,
     std::string indent = "    ";
     std::cout << title << ":" << std::endl;
 
+    if (matrix.empty()) {
+        std::cout << indent << "metrics have not been observed" << std::endl;
+        return;
+    }
+
     if ((flags & PI_CONFUSION_SCORES) != 0) {
         std::cout << indent
             << "tp=" << matrix.tp

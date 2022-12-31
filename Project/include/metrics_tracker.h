@@ -37,6 +37,8 @@ public:
   double f1() const;
   double accuracy() const;
 
+  bool empty() const;
+
   ConfusionMatrix operator+(const ConfusionMatrix& that);
   ConfusionMatrix& operator+=(const ConfusionMatrix& that);
 

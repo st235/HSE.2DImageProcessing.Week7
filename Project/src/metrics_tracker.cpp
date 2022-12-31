@@ -95,6 +95,10 @@ double ConfusionMatrix::accuracy() const {
     return n / d;
 }
 
+bool ConfusionMatrix::empty() const {
+    return tp == 0 && tn == 0 && fp == 0 && fn == 0;
+}
+
 ConfusionMatrix ConfusionMatrix::operator+(const ConfusionMatrix& that) {
     return merge(that);
 }
@@ -155,14 +159,17 @@ void MetricsTracker::trackRecognition(const FrameInfo& frame_info,
                                       const std::vector<Rect>& detected_face_origins) {
     std::vector<std::string> annotated_faces_labels = frame_info.labels();
     std::vector<Rect> annotated_faces_origins = frame_info.face_origins();
+    int32_t matches[annotated_faces_origins.size()];
     bool matched_annotated[annotated_faces_origins.size()];
     bool matched_detected[detected_face_origins.size()];
 
-    uint32_t unknown_matched = 0,
-             known_matched = 0;
-
     for (size_t i = 0; i < annotated_faces_origins.size(); i++) {
+        matches[i] = -1;
         matched_annotated[i] = false;
+    }
+
+    for (size_t i = 0; i < detected_face_origins.size(); i++) {
+        matched_detected[i] = false;
     }
 
     for (size_t i = 0; i < annotated_faces_origins.size(); i++) {
@@ -175,55 +182,76 @@ void MetricsTracker::trackRecognition(const FrameInfo& frame_info,
                 continue;
             }
 
-            if (Rect::iou(annotated_faces_origins[i], detected_face_origins[j]) > 0.6
-                && annotated_faces_labels[i] == labels[j]) {
+            if (Rect::iou(annotated_faces_origins[i], detected_face_origins[j]) > 0.6) {
+                matches[i] = j;
                 matched_annotated[i] = true;
-
-                if (annotated_faces_labels[i] == UNKNOWN_LABEL) {
-                    unknown_matched += 1;
-                } else {
-                    known_matched += 1;
-                }
-
+                matched_detected[j] = true;
                 break;
             }
         }
     }
 
-    uint32_t unknown_overall_count = 0,
-             unknown_detected_count = 0,
-             known_overall_count = 0,
-             known_detected_count = 0;
+    ConfusionMatrix overall_known_metric;
 
-    for (size_t i = 0; i < annotated_faces_origins.size(); i++) {
-        bool is_unknown = annotated_faces_labels[i] == "unknown";
-        bool is_matched = matched_annotated[i];
+    for (const auto& class_label: _labels) {
+        bool is_unknown = (class_label == UNKNOWN_LABEL);
+
+        // true positive
+        bool detected_correctly = 0,
+             // true negative
+             not_a_class_everywhere = 0,
+             // false positive
+             detected_by_us_but_annotated_differently = 0,
+             // false negative
+             annotated_but_not_detected = 0;
+
+        for (size_t i = 0; i < annotated_faces_origins.size(); i++) {
+            // matched by detection algorithm
+            bool detection_matched = matched_annotated[i];
+
+            if (!detection_matched) {
+                // do not consider anything else as
+                // it will reflect the quality of detection
+                // rather recognition.
+                continue;
+            }
+
+            if (annotated_faces_labels[i] == class_label &&
+                    labels[matches[i]] == class_label) {
+                // detected correctly,
+                // classes match and within
+                // the current group.
+                detected_correctly += 1;
+            } else if (annotated_faces_labels[i] == class_label &&
+                        labels[matches[i]] != class_label) {
+                // we detected something different here
+                // but was expecting a specific class
+                annotated_but_not_detected += 1;
+            } else if (annotated_faces_labels[i] != class_label &&
+                       labels[matches[i]] == class_label) {
+                // we detected a class but annotation
+                // says there is no such a class
+                detected_by_us_but_annotated_differently += 1;
+            } else {
+                // not a class and we agree on it with
+                // annotations
+                not_a_class_everywhere += 1;
+            }
+        }
+
+        ConfusionMatrix metrics(detected_correctly /* tp */,
+                                not_a_class_everywhere /* tn */,
+                                detected_by_us_but_annotated_differently /* fp */,
+                                annotated_but_not_detected /* fn */);
 
         if (is_unknown) {
-            if (is_matched) {
-                unknown_detected_count += 1;
-            }
-            unknown_overall_count += 1;
+            _unknown_recognitions_per_frame_lookup.insert({ frame_info.id(), metrics });
         } else {
-            // !is_unknown
-            if (is_matched) {
-                known_detected_count += 1;
-            }
-            known_overall_count += 1;
+            overall_known_metric += metrics;
         }
     }
 
-    _known_recognitions_per_frame_lookup.insert({ frame_info.id(), ConfusionMatrix(
-            known_matched,
-            0 /* tn */,
-            known_detected_count - known_matched /* fp */,
-            known_overall_count - known_detected_count - known_matched /* fn */) });
-
-    _unknown_recognitions_per_frame_lookup.insert({ frame_info.id(), ConfusionMatrix(
-            unknown_matched,
-            0 /* tn */,
-            unknown_detected_count - unknown_matched /* fp */,
-            unknown_overall_count - unknown_detected_count - unknown_matched /* fn */) });
+    _known_recognitions_per_frame_lookup.insert({ frame_info.id(), overall_known_metric });
 }
 
 MetricsTracker::MetricsTracker(std::vector<std::string> labels):
