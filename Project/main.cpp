@@ -11,6 +11,7 @@
 
 #include "bow_recognition_model.h"
 #include "hog_recognition_model.h"
+#include "dnn_recognition_model.h"
 
 #include "args_parser.h"
 #include "annotations_tracker.h"
@@ -93,7 +94,7 @@ void TrainModel(const std::string& dataset_root_folder,
     svm->setTermCriteria(cv::TermCriteria(cv::TermCriteria::MAX_ITER, 1e4, 1e-4));
 
     std::unique_ptr<detection::FaceRecognitionModel> recognizer =
-            std::make_unique<detection::HogRecognitionModel>(svm);
+            std::make_unique<detection::DnnRecognitionModel>();
 
     detection::LabelsResolver labels_resolver;
 
@@ -183,7 +184,7 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
 
     cv::Ptr<cv::ml::SVM> svm = cv::ml::SVM::create();
     std::unique_ptr<detection::FaceRecognitionModel> recognizer =
-            std::make_unique<detection::HogRecognitionModel>(svm);
+            std::make_unique<detection::DnnRecognitionModel>();
     recognizer->read(input_model_file);
 
     detection::LabelsResolver labels_resolver;

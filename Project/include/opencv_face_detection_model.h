@@ -3,11 +3,15 @@
 
 #include "face_detection_model.h"
 
-namespace detection {
+namespace {
 
 const std::string FACE_CASCADE_FILE_PATH = "haarcascade_frontalface_alt2.xml";
 const std::string RIGHT_EYE_CASCADE_FILE_PATH = "haarcascade_righteye_2splits.xml";
 const std::string LEFT_EYE_CASCADE_FILE_PATH = "haarcascade_lefteye_2splits.xml";
+
+} // namespace
+
+namespace detection {
 
 class OpenCVFaceDetectionModel: public FaceDetectionModel {
 private:

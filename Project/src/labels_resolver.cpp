@@ -23,6 +23,9 @@ void WriteMap(std::ofstream& stream, const std::unordered_map<K, V>& map) {
 
 namespace detection {
 
+const int LabelsResolver::UNKNOWN_LABEL_ID = -1;
+const std::string LabelsResolver::UNKNOWN_LABEL = "unknown";
+
 LabelsResolver::LabelsResolver():
     _next_available_id(0),
     _label_to_id_lookup_table(),
@@ -47,11 +50,19 @@ LabelsResolver& LabelsResolver::operator=(const LabelsResolver& that) {
     return *this;
 }
 
-bool LabelsResolver::hasId(uint32_t id) const {
+bool LabelsResolver::hasId(int32_t id) const {
+    if (id == UNKNOWN_LABEL_ID) {
+        // we always have unknown label
+        return true;
+    }
     return _id_to_label_lookup_table.find(id) != _id_to_label_lookup_table.end();
 }
 
-uint32_t LabelsResolver::obtainIdByLabel(const std::string& label) {
+int32_t LabelsResolver::obtainIdByLabel(const std::string& label) {
+    if (label == UNKNOWN_LABEL) {
+        return UNKNOWN_LABEL_ID;
+    }
+
     if (_label_to_id_lookup_table.find(label) == _label_to_id_lookup_table.end()) {
         _label_to_id_lookup_table[label] = _next_available_id;
         _id_to_label_lookup_table[_next_available_id] = label;
@@ -61,7 +72,11 @@ uint32_t LabelsResolver::obtainIdByLabel(const std::string& label) {
     return _label_to_id_lookup_table[label];
 }
 
-std::string LabelsResolver::obtainLabelById(uint32_t id) {
+std::string LabelsResolver::obtainLabelById(int32_t id) {
+    if (id == UNKNOWN_LABEL_ID) {
+        return UNKNOWN_LABEL;
+    }
+
     if (_id_to_label_lookup_table.find(id) == _id_to_label_lookup_table.end()) {
         throw std::runtime_error("Cannot find the given id.");
     }
@@ -69,7 +84,7 @@ std::string LabelsResolver::obtainLabelById(uint32_t id) {
     return _id_to_label_lookup_table[id];
 }
 
-uint32_t LabelsResolver::operator[](const std::string& label) {
+int32_t LabelsResolver::operator[](const std::string& label) {
     return this->obtainIdByLabel(label);
 }
 
@@ -89,7 +104,7 @@ void LabelsResolver::read(const std::string& file) {
     std::string line;
     std::getline(file_storage, line);
 
-    _next_available_id = static_cast<uint32_t>(stoi(line));
+    _next_available_id = static_cast<int32_t>(stoi(line));
 
     while (std::getline(file_storage, line))
     {
@@ -100,7 +115,7 @@ void LabelsResolver::read(const std::string& file) {
         std::vector<std::string> tokens = std::Split(line, ',' /* delimiter */);
 
         std::string label = tokens[0];
-        uint32_t id = static_cast<uint32_t>(stoi(tokens[1]));
+        int32_t id = static_cast<int32_t>(stoi(tokens[1]));
 
         _label_to_id_lookup_table[label] = id;
     }
@@ -113,7 +128,7 @@ void LabelsResolver::read(const std::string& file) {
 
         std::vector<std::string> tokens = std::Split(line, ',' /* delimiter */);
 
-        uint32_t id = static_cast<uint32_t>(stoi(tokens[0]));
+        int32_t id = static_cast<int32_t>(stoi(tokens[0]));
         std::string label = tokens[1];
 
         _id_to_label_lookup_table[id] = label;
