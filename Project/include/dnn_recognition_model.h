@@ -56,18 +56,21 @@ namespace detection {
 */
 class DnnRecognitionModel: public FaceRecognitionModel {
 private:
+  static const uint32_t DEFAULT_VECTOR_SIZE = 128;
+
+  std::string _dnn_model_file;
+  std::string _landmarks_model_file;
   dlib::shape_predictor _shape_predictor;
   face_recognition_dnn_model _face_recognition_dnn_model;
-  std::string _dnn_model_file;
 
-  cv::Ptr<cv::ml::StatModel> _model;
+
+  cv::Ptr<cv::ml::KNearest> _knearest;
 
   std::vector<double> extractFeatures(const cv::Mat& mat) const;
 
 public:
   DnnRecognitionModel(const std::string& landmarks_model_file = "shape_predictor_68_face_landmarks.dat",
-                      const std::string& dnn_model_file = "dlib_face_recognition_resnet_model_v1.dat",
-                      cv::Ptr<cv::ml::StatModel> model = cv::ml::KNearest::create());
+                      const std::string& dnn_model_file = "dlib_face_recognition_resnet_model_v1.dat");
   DnnRecognitionModel(const DnnRecognitionModel& that);
   DnnRecognitionModel& operator=(const DnnRecognitionModel& that);
 

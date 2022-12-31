@@ -65,27 +65,56 @@ std::vector<double> DnnRecognitionModel::extractFeatures(const cv::Mat& mat) con
 }
 
 DnnRecognitionModel::DnnRecognitionModel(const std::string& landmarks_model_file,
-                                         const std::string& dnn_model_file,
-                                         cv::Ptr<cv::ml::StatModel> model):
+                                         const std::string& dnn_model_file):
+    _dnn_model_file(dnn_model_file),
+    _landmarks_model_file(landmarks_model_file),
     _shape_predictor(),
     _face_recognition_dnn_model(),
-    _model(model) {
+    _knearest(cv::ml::KNearest::create()) {
     dlib::deserialize(landmarks_model_file) >> _shape_predictor;
     dlib::deserialize(dnn_model_file) >> _face_recognition_dnn_model;
 }
 
-DnnRecognitionModel::DnnRecognitionModel(const DnnRecognitionModel& that) = default;
+DnnRecognitionModel::DnnRecognitionModel(const DnnRecognitionModel& that):
+        _dnn_model_file(that._dnn_model_file),
+        _landmarks_model_file(that._landmarks_model_file),
+        _shape_predictor(that._shape_predictor),
+        _face_recognition_dnn_model(that._face_recognition_dnn_model),
+        _knearest(that._knearest) {
+    // empty on purpose
+}
 
-DnnRecognitionModel& DnnRecognitionModel::operator=(const DnnRecognitionModel& that) = default;
+DnnRecognitionModel& DnnRecognitionModel::operator=(const DnnRecognitionModel& that) {
+    if (this != &that) {
+        this->_dnn_model_file = that._dnn_model_file;
+        this->_landmarks_model_file = that._landmarks_model_file;
+        this->_shape_predictor = that._shape_predictor;
+        this->_face_recognition_dnn_model = that._face_recognition_dnn_model;
+        this->_knearest = that._knearest;
+    }
+
+    return *this;
+}
 
 void DnnRecognitionModel::write(const std::string& file) {
     cv::Ptr<cv::FileStorage> file_storage = cv::makePtr<cv::FileStorage>(file, cv::FileStorage::WRITE);
-    _model->write(file_storage, "_model");
+
+    file_storage->write("_dnn_model_file", _dnn_model_file);
+    file_storage->write("_landmarks_model_file", _landmarks_model_file);
+
+    _knearest->write(file_storage, "_knearest");
 }
 
 void DnnRecognitionModel::read(const std::string& file) {
     cv::FileStorage file_storage(file, cv::FileStorage::READ);
-    _model->read(file_storage["_model"]);
+
+    file_storage["_dnn_model_file"] >> _dnn_model_file;
+    file_storage["_landmarks_model_file"] >> _landmarks_model_file;
+
+    dlib::deserialize(_landmarks_model_file) >> _shape_predictor;
+    dlib::deserialize(_dnn_model_file) >> _face_recognition_dnn_model;
+
+    _knearest->read(file_storage["_knearest"]);
 }
 
 void DnnRecognitionModel::train(std::vector<cv::Mat>& images,
@@ -103,11 +132,11 @@ void DnnRecognitionModel::train(std::vector<cv::Mat>& images,
 
         std::vector<double> features = extractFeatures(image);
 
-        cv::Mat row = cv::Mat::zeros(1, 128, CV_32F);
+        cv::Mat row = cv::Mat::zeros(1, DEFAULT_VECTOR_SIZE, CV_32F);
 
         // we were not able to detect anything in this
         // frame
-        if (features.size() != 128) {
+        if (features.size() != DEFAULT_VECTOR_SIZE) {
             continue;
         }
 
@@ -122,7 +151,7 @@ void DnnRecognitionModel::train(std::vector<cv::Mat>& images,
     cv::Ptr<cv::ml::TrainData> train_data =
             cv::ml::TrainData::create(data, cv::ml::ROW_SAMPLE, train_labels);
 
-    _model->train(train_data);
+    _knearest->train(train_data);
 }
 
 int DnnRecognitionModel::predict(cv::Mat& image) const {
@@ -130,16 +159,18 @@ int DnnRecognitionModel::predict(cv::Mat& image) const {
 
     std::vector<double> features = extractFeatures(image);
 
-    cv::Mat data = cv::Mat::zeros(1, 128, CV_32F);
+    cv::Mat data = cv::Mat::zeros(1, DEFAULT_VECTOR_SIZE, CV_32F);
 
-    if (features.size() == 128) {
-        for (size_t i = 0; i < 128; i++) {
-            data.at<float>(0, i) = static_cast<float>(features[i]);
-        }
+    if (features.size() != DEFAULT_VECTOR_SIZE) {
+        return FaceRecognitionModel::LABEL_UNKNOWN;
+    }
+
+    for (size_t i = 0; i < DEFAULT_VECTOR_SIZE; i++) {
+        data.at<float>(0, i) = static_cast<float>(features[i]);
     }
 
     train_data.push_back(data);
-    return static_cast<int>(_model->predict(train_data));
+    return static_cast<int>(_knearest->predict(train_data));
 }
 
 } // namespace detection
