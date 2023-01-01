@@ -153,7 +153,8 @@ void ShowConfig(const std::vector<std::string>& raw_files) {
             if (hasInfo) {
                 window_delay = 1000;
                 const auto& frame_info = annotations_tracker->describeFrame(frame_id);
-                detection::DrawFaces(frame, frame_info.face_origins(), frame_info.labels());
+                cv::putText(frame, std::AsString(frame_id), cv::Point(5, 40), cv::FONT_HERSHEY_COMPLEX, 1, cv::Scalar(255, 0, 0), 2, cv::LINE_8);
+                detection::DrawFaces(frame, frame_info.face_origins(), frame_info.labels(), cv::Scalar(255, 0, 0));
             }
 
 
