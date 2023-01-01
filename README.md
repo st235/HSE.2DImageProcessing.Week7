@@ -303,9 +303,9 @@ The recognition works in a few steps:
 1. Using a random forest to find [68 facial landmarks](https://www.researchgate.net/figure/68-facial-landmarks_fig1_338048224)
 2. Using a dnn model to convert these 68 points to 128D vector
 
-| Extracted features example, Lincoln       | Extracted features example, Cohen        | Extracted features example, Cohen        |
-|-------------------------------------------|------------------------------------------|------------------------------------------|
-| ![Lincoln](./Resources/dnn_feature_1.png) | ![Cohen](./Resources/dnn_feature_2.png) | ![Cohen](./Resources/dnn_feature_3.jpeg) |
+| Extracted features example, Lincoln       | Extracted features example, Cohen         | Extracted features example, Atkinson       | Extracted features example, Pegg           |
+|-------------------------------------------|-------------------------------------------|--------------------------------------------|--------------------------------------------|
+| ![Lincoln](./Resources/dnn_feature_1.png) | ![Cohen](./Resources/dnn_feature_2.png)   | ![Atkinson](./Resources/dnn_feature_3.png) | ![Pegg](./Resources/dnn_feature_4.png) |
 
 This model works much better than the others.
 
