@@ -362,6 +362,15 @@ the example below:
 
 ## Performance considerations
 
+To save some computational resources and save some processing time the app performs face detection and
+recognition every **10** frames, in between the app tries to keep track of already detected frames.
+
+There are a few image trackers implemented in the project:
+- KCF: fast and do a few mistakes
+- MIL: slow but accurate, slower than `KCF`
+- CSRT: fast but makes a lot of errors
+- GOTURN: not observed any differences from `KCF`
+
 ## Annotations
 
 ### Make your own annotations
@@ -385,6 +394,8 @@ You can see an example under `Samples/Test`, for example, [`atkinson/1.txt`](htt
 
 Please, do keep in mind, to make the automagic 🪄 work you need to put this annotations file in the same folder where you
 video sample is located **and** give it exactly the same name with a different extension - `.txt`.
+
+For example, your video sample is `a/b/c/amazing_video.mp4` the annotations file should be `a/b/c/amazing_video.txt`.
 
 ### Verify your annotations
 
