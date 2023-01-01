@@ -36,7 +36,12 @@ std::vector<Face> DLibFaceDetectionModel::extractFaces(const Rect& viewport, cv:
             continue;
         }
 
-        cv::Mat face_area = raw_image(Rect::toCVRect(face_origin));
+        // dlib can detect faces that are outside the viewport
+        // however opencv cannot extract such areas, therefore
+        // we need to find intersection with a viewport
+        Rect face_origin_within_viewport = face_origin.intersection(viewport);
+
+        cv::Mat face_area = raw_image(Rect::toCVRect(face_origin_within_viewport));
 
         result_faces.push_back(Face(
                 face_area,

@@ -1,0 +1,26 @@
+@startuml
+
+class FaceDetectionModel {
++ virtual std::vector<Face> extractFaces(const Rect& viewport, cv::Mat& image) = 0;
++ virtual ~FaceDetectionModel();
+}
+
+class OpenCVFaceDetectionModel {
+- cv::CascadeClassifier _face_cascade;
+- cv::CascadeClassifier _right_eye_cascade;
+- cv::CascadeClassifier _left_eye_cascade;
+
++ std::vector<Face> extractFaces(const Rect& viewport, cv::Mat& image) override;
++ ~OpenCVFaceDetectionModel();
+}
+
+class DLibFaceDetectionModel {
+- dlib::frontal_face_detector _detector;
++ std::vector<Face> extractFaces(const Rect& viewport, cv::Mat& image) override;
++ ~DLibFaceDetectionModel() = default;
+}
+
+FaceDetectionModel <|-- OpenCVFaceDetectionModel
+FaceDetectionModel <|-- DLibFaceDetectionModel
+
+@enduml

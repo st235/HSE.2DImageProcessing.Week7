@@ -1,6 +1,6 @@
 # Face Detector
 
-Hello! This project is a intented to be a final project for 2D Image Processing Course.
+Hello! This project is intended to be a final project for 2D Image Processing Course.
 
 ## Build
 
@@ -88,9 +88,96 @@ To rotate the image back to "normal" position we need to find an angle between t
 angle=arctan(\frac{dx}{dy})
 ```
 
-You can find the correspoding code in [OpenCVFaceDetectionModel](https://github.com/st235/HSE.2DImageProcessing.Week7/blob/main/Project/src/opencv_face_detection_model.cpp#L81).
+You can find the corresponding code in [OpenCVFaceDetectionModel](https://github.com/st235/HSE.2DImageProcessing.Week7/blob/main/Project/src/opencv_face_detection_model.cpp#L81).
 
-### A breif implementation overview
+### A brief implementation overview
+
+![Original](./Resources/uml_face_detection.png)
+
+The base class [FaceDetectionModel](https://github.com/st235/HSE.2DImageProcessing.Week7/blob/main/Project/include/face_detection_model.h#L76) abstracts different approaches to face detection:
+- [OpenCVFaceDetectionModel](https://github.com/st235/HSE.2DImageProcessing.Week7/blob/main/Project/include/opencv_face_detection_model.h#L17) uses opencv Haar-like features cascade classifier and accepts face cascades files
+to provide more flexibility for trying different classifiers 
+- [DLibFaceDetection](https://github.com/st235/HSE.2DImageProcessing.Week7/blob/main/Project/include/dlib_face_detection_model.h#L10) uses HOG-based classifier and allows to detect sides of the face in addition to
+frontal face detection. It seems like a more powerful technique but usually comes with
+additional performance overhead
+
+### Different approaches comparison
+
+#### Classifier: `OpenCVFaceDetectionModel` + `haarcascade_frontalface_default.xml`
+
+Pros:
+- Fast and can work in runtime
+
+Cons:
+- Classifier has a lot of false-positive detections, therefore not accurate.
+
+| Not a face detected                                 | Not a face detected                                 |
+|-----------------------------------------------------|-----------------------------------------------------|
+| ![Original](./Resources/opencv_default_issue_1.png) | ![Original](./Resources/opencv_default_issue_2.png) |
+
+| Metric | Score |
+| ---- | ---- |
+| Recall | 0.755 |
+
+#### Classifier: `OpenCVFaceDetectionModel` + `haarcascade_frontalface_alt.xml`
+
+Pros:
+- Fast and can work in runtime
+- Detects much less false-positive faces
+
+Cons:
+- Still has some false-positive detections
+- Detects fewer faces: sometimes ignores the face that looks visible and just fine
+
+| Face was not detected                           | Not a face detected                             |
+|-------------------------------------------------|-------------------------------------------------|
+| ![Original](./Resources/opencv_alt_issue_1.png) | ![Original](./Resources/opencv_alt_issue_2.png) |
+
+| Metric   | Score |
+|----------|-------|
+| Recall   | 0.788 |
+
+#### Classifier: `OpenCVFaceDetectionModel` + `haarcascade_frontalface_alt2.xml`
+
+Pros:
+- Fast and can work in runtime
+- Detects more faces than `frontalface_alt`
+- Detects more false-positive faces than `frontalface_alt` but fewer than `default` classifier
+
+Cons:
+- Has some false-positive detections
+- Sometimes does not detect faces as the `frontalface_alt` but amount of undetected faces is a bit smaller
+
+| Not a face detected                              | Face was not detected                            |
+|--------------------------------------------------|--------------------------------------------------|
+| ![Original](./Resources/opencv_alt2_issue_1.png) | ![Original](./Resources/opencv_alt2_issue_2.png) |
+
+| Metric   | Score |
+|----------|-------|
+| Recall   | 0.830 |
+
+#### Classifier: `DLibFaceDetection`
+
+Pros:
+- Still can work in runtime but works slower than the other classifiers
+- Can find faces even if they are partially outside of viewport bound
+
+Cons:
+- Has false-positive detections
+- Finds fewer "small" faces
+
+| Frontal face                              | Face detected however the lighting conditions are not perfect |
+|-------------------------------------------|---------------------------------------------------------------|
+| ![Original](./Resources/dlib_issue_1.png) | ![Original](./Resources/dlib_issue_2.png)                     |
+
+| Metric   | Score |
+|----------|-------|
+| Recall   | 0.854 |
+
+#### Conclusion
+
+Perhaps in this work I will use `frontalface_alt2` cascade classifier from OpenCV even
+if it works a bit worse than a dlib classifier as it feels a bit performance-wise faster.
 
 ## Training
 
