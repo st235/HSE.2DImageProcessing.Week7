@@ -2,6 +2,7 @@
 #define OPENCV_FACE_DETECTION_MODEL_H
 
 #include "face_detection_model.h"
+#include "rect.h"
 
 namespace {
 
@@ -26,7 +27,7 @@ public:
  OpenCVFaceDetectionModel(const OpenCVFaceDetectionModel& that);
  OpenCVFaceDetectionModel& operator=(const OpenCVFaceDetectionModel& that);
 
- std::vector<Face> extractFaces(cv::Mat& image) override;
+ std::vector<Face> extractFaces(const Rect& viewport, cv::Mat& image) override;
 
  ~OpenCVFaceDetectionModel() = default;
 };

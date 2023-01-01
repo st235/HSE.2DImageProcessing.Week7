@@ -2,6 +2,7 @@
 #define RECT_H
 
 #include <cstdint>
+#include <ostream>
 
 #include <opencv2/opencv.hpp>
 
@@ -31,6 +32,8 @@ public:
   uint64_t area() const;
 
   bool empty() const;
+
+  friend std::ostream& operator<<(std::ostream& os, const Rect& rect);
 
   ~Rect() = default;
 };

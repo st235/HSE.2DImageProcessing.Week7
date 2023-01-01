@@ -2,7 +2,7 @@
 
 namespace detection {
 
-void drawFaces(cv::Mat& image,
+void DrawFaces(cv::Mat& image,
                const std::vector<Rect>& faces_origins,
                const std::vector<std::string>& labels,
                const cv::Scalar& color) {
@@ -24,7 +24,7 @@ void drawFaces(cv::Mat& image,
     }
 }
 
-void drawFaces(cv::Mat& image,
+void DrawFaces(cv::Mat& image,
                const std::vector<Face>& faces,
                const std::vector<std::string>& labels) {
     for (size_t i = 0; i < faces.size(); i++) {
@@ -63,10 +63,10 @@ void drawFaces(cv::Mat& image,
     }
 }
 
-void drawFaces(cv::Mat& image,
+void DrawFaces(cv::Mat& image,
                const std::vector<Face>& faces) {
     std::vector<std::string> labels;
-    drawFaces(image, faces, labels);
+    DrawFaces(image, faces, labels);
 }
 
 

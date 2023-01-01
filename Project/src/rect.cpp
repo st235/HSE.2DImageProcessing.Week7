@@ -20,6 +20,12 @@ void Merge(int32_t s1, int32_t f1,
 
 namespace detection {
 
+std::ostream& operator<<(std::ostream& os, const Rect& rect) {
+    os << "Rect{x=" << rect.x << ",y=" << rect.y
+       << ",width=" << rect.width << ",height=" << rect.height;
+    return os;
+}
+
 Rect Rect::from(const cv::Rect& that) {
     if (that.empty()) {
         return Rect();

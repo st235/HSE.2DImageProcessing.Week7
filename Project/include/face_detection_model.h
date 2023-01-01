@@ -74,8 +74,12 @@ struct Face {
 };
 
 class FaceDetectionModel {
+protected:
+  bool shouldClip(const Rect& viewport, const Rect& face_origin) const;
+
 public:
-  virtual std::vector<Face> extractFaces(cv::Mat& image) = 0;
+  virtual std::vector<Face> extractFaces(const Rect& viewport, cv::Mat& image) = 0;
+
   virtual ~FaceDetectionModel() = default;
 };
 

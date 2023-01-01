@@ -1,16 +1,17 @@
 #include "dlib_face_detection_model.h"
 
 #include "dlib_utils.h"
+#include "rect.h"
 
 namespace detection {
 
 DLibFaceDetectionModel::DLibFaceDetectionModel():
-        _detector(dlib::get_frontal_face_detector()) {
+    _detector(dlib::get_frontal_face_detector()) {
     // empty on purpose
 }
 
 DLibFaceDetectionModel::DLibFaceDetectionModel(const DLibFaceDetectionModel& that):
-        _detector(that._detector) {
+    _detector(that._detector) {
     // empty on purpose
 }
 
@@ -22,19 +23,24 @@ DLibFaceDetectionModel& DLibFaceDetectionModel::operator=(const DLibFaceDetectio
     return *this;
 }
 
-std::vector<Face> DLibFaceDetectionModel::extractFaces(cv::Mat& raw_image) {
+std::vector<Face> DLibFaceDetectionModel::extractFaces(const Rect& viewport, cv::Mat& raw_image) {
     dlib::array2d<dlib::rgb_pixel> image = AsRGBOpenCVMatrix(raw_image);
 
     std::vector<Face> result_faces;
     std::vector<dlib::rectangle> faces = _detector(image);
     for(size_t i = 0; i < faces.size(); i++) {
         const auto& face = faces[i];
-        cv::Rect face_rect(face.left(), face.top(), (face.right() - face.left()), (face.bottom() - face.top()));
-        cv::Mat face_area = raw_image(face_rect);
+        Rect face_origin(face.left(), face.top(), (face.right() - face.left()), (face.bottom() - face.top()));
+
+        if (shouldClip(viewport, face_origin)) {
+            continue;
+        }
+
+        cv::Mat face_area = raw_image(Rect::toCVRect(face_origin));
 
         result_faces.push_back(Face(
                 face_area,
-                Rect::from(face_rect),
+                face_origin,
                 Eyes()));
     }
 

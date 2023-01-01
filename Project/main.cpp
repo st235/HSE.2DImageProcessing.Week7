@@ -38,7 +38,11 @@ void GenerateDataset(const std::vector<std::string>& raw_files,
         throw std::runtime_error(override_output_prefix + " is not a directory.");
     }
 
+    std::unique_ptr<detection::FaceDetectionModel> face_detection =
+            std::make_unique<detection::OpenCVFaceDetectionModel>();
+
     std::vector<std::string> files = utils::ListAllFiles(raw_files, { ".png", ".jpg", ".jpeg", ".webp" });
+
     for (const auto& file_path: files) {
         cv::Mat image = cv::imread(file_path, cv::IMREAD_COLOR);
         if (image.empty()) {
@@ -46,13 +50,11 @@ void GenerateDataset(const std::vector<std::string>& raw_files,
             continue;
         }
 
-        std::unique_ptr<detection::FaceDetectionModel> face_detection =
-                std::make_unique<detection::OpenCVFaceDetectionModel>();
-
-        std::vector<detection::Face> faces = face_detection->extractFaces(image);
+        detection::Rect viewport(0, 0, image.cols, image.rows);
+        std::vector<detection::Face> faces = face_detection->extractFaces(viewport, image);
 
         if (is_debug) {
-            detection::drawFaces(image, faces);
+            detection::DrawFaces(image, faces);
         }
 
         for(size_t i = 0; i < faces.size(); i++) {
@@ -158,7 +160,7 @@ void ShowConfig(const std::vector<std::string>& raw_files) {
             if (hasInfo) {
                 window_delay = 1000;
                 const auto& frame_info = annotations_tracker->describeFrame(frame_id);
-                detection::drawFaces(frame, frame_info.face_origins(), frame_info.labels());
+                detection::DrawFaces(frame, frame_info.face_origins(), frame_info.labels());
             }
 
 
@@ -181,6 +183,9 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
     detection::ConfusionMatrix overall_detection_metrics;
     detection::ConfusionMatrix overall_known_recognition_metrics;
     detection::ConfusionMatrix overall_unknown_recognition_metrics;
+
+    std::unique_ptr<detection::FaceDetectionModel> face_detection =
+            std::make_unique<detection::OpenCVFaceDetectionModel>();
 
     detection::FaceTrackingModel face_tracking(detection::FaceTrackingModel::Model::KCF);
 
@@ -221,10 +226,8 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
                 labels.clear();
                 detected_faces_origins.clear();
 
-                std::unique_ptr<detection::FaceDetectionModel> face_detection =
-                        std::make_unique<detection::OpenCVFaceDetectionModel>();
-
-                std::vector<detection::Face> faces = face_detection->extractFaces(frame);
+                detection::Rect viewport(0, 0, frame.cols, frame.rows);
+                std::vector<detection::Face> faces = face_detection->extractFaces(viewport, frame);
 
                 for(size_t i = 0; i < faces.size(); i++) {
                     cv::Mat face = faces[i].image;
@@ -234,12 +237,12 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
                 }
 
                 face_tracking.reset_tracking(frame, labels, detected_faces_origins);
-                detection::drawFaces(frame, faces, labels);
+                detection::DrawFaces(frame, faces, labels);
             } else {
                 detected_faces_origins.clear();
 
                 face_tracking.track(frame, labels, detected_faces_origins);
-                detection::drawFaces(frame, detected_faces_origins, labels);
+                detection::DrawFaces(frame, detected_faces_origins, labels);
             }
 
             int window_delay = 5;
@@ -251,7 +254,7 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
                 if (is_debug) {
                     window_delay = 1000;
                     cv::putText(frame, std::AsString(frame_id), cv::Point(5, 40), cv::FONT_HERSHEY_COMPLEX, 1, cv::Scalar(255, 0, 0), 2, cv::LINE_8);
-                    detection::drawFaces(frame, frame_info.face_origins(), frame_info.labels(), cv::Scalar(255, 0, 0));
+                    detection::DrawFaces(frame, frame_info.face_origins(), frame_info.labels(), cv::Scalar(255, 0, 0));
                 }
             }
 

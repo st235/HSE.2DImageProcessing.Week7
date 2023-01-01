@@ -14,9 +14,9 @@ OpenCVFaceDetectionModel::OpenCVFaceDetectionModel(const std::string& face_casca
 }
 
 OpenCVFaceDetectionModel::OpenCVFaceDetectionModel(const OpenCVFaceDetectionModel& that):
-        _face_cascade(that._face_cascade),
-        _right_eye_cascade(that._right_eye_cascade),
-        _left_eye_cascade(that._left_eye_cascade) {
+    _face_cascade(that._face_cascade),
+    _right_eye_cascade(that._right_eye_cascade),
+    _left_eye_cascade(that._left_eye_cascade) {
     // empty on purpose
 }
 
@@ -30,7 +30,7 @@ OpenCVFaceDetectionModel& OpenCVFaceDetectionModel::operator=(const OpenCVFaceDe
     return *this;
 }
 
-std::vector<Face> OpenCVFaceDetectionModel::extractFaces(cv::Mat& image) {
+std::vector<Face> OpenCVFaceDetectionModel::extractFaces(const Rect& viewport, cv::Mat& image) {
     std::vector<Face> result_faces;
 
     cv::Mat greyscale_image;
@@ -42,6 +42,11 @@ std::vector<Face> OpenCVFaceDetectionModel::extractFaces(cv::Mat& image) {
     for(size_t i = 0; i < faces.size(); i++) {
         cv::Rect face = faces[i];
         cv::Mat face_area = greyscale_image(face);
+        const auto& face_origin = Rect::from(face);
+
+        if (shouldClip(viewport, face_origin)) {
+            continue;
+        }
 
         std::vector<cv::Rect> left_eyes;
         std::vector<cv::Rect> right_eyes;
@@ -92,7 +97,7 @@ std::vector<Face> OpenCVFaceDetectionModel::extractFaces(cv::Mat& image) {
 
         result_faces.push_back(Face(
                 output_image,
-                Rect::from(face),
+                face_origin,
                 Eyes::from(left_eye, right_eye)));
     }
 

@@ -16,7 +16,7 @@ public:
     DLibFaceDetectionModel(const DLibFaceDetectionModel& that);
     DLibFaceDetectionModel& operator=(const DLibFaceDetectionModel& that);
 
-    std::vector<Face> extractFaces(cv::Mat& image) override;
+    std::vector<Face> extractFaces(const Rect& viewport, cv::Mat& image) override;
 
     ~DLibFaceDetectionModel() = default;
 };    
