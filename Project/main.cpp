@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 
-#include <opencv2/ml.hpp>
-#include <opencv2/face.hpp>
 #include <opencv2/opencv.hpp>
 
 #include "bow_recognition_model.h"
@@ -92,11 +90,6 @@ void GenerateDataset(const std::vector<std::string>& raw_files,
 void TrainModel(const std::string& dataset_root_folder,
                 const std::string& output_model_file,
                 const std::string& output_label_file) {
-    cv::Ptr<cv::ml::SVM> svm = cv::ml::SVM::create();
-    svm->setType(cv::ml::SVM::C_SVC);
-    svm->setKernel(cv::ml::SVM::LINEAR);
-    svm->setTermCriteria(cv::TermCriteria(cv::TermCriteria::MAX_ITER, 1e4, 1e-4));
-
     std::unique_ptr<detection::FaceRecognitionModel> recognizer =
             std::make_unique<detection::DnnRecognitionModel>();
 
@@ -189,7 +182,6 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
 
     detection::FaceTrackingModel face_tracking(detection::FaceTrackingModel::Model::KCF);
 
-    cv::Ptr<cv::ml::SVM> svm = cv::ml::SVM::create();
     std::unique_ptr<detection::FaceRecognitionModel> recognizer =
             std::make_unique<detection::DnnRecognitionModel>();
     recognizer->read(input_model_file);
