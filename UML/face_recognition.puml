@@ -1,0 +1,63 @@
+@startuml
+
+abstract class FaceRecognitionModel {
++ virtual void write(const std::string& file) = 0;
++ virtual void read(const std::string& file) = 0;
+
++ virtual void train(std::vector<cv::Mat>& images, std::vector<int>& images_labels) = 0;
++ virtual int predict(cv::Mat& image) const = 0;
+
++ virtual ~FaceRecognitionModel();
+}
+
+class BowRecognitionModel {
+- size_t _clusters_count;
+- cv::Mat _vocabulary;
+- cv::Mat _images_labels;
+- cv::Mat _images_histograms;
+- cv::Ptr<cv::ml::StatModel> _model;
+
+- void extractFeatures(...) const;
+- cv::Mat buildVocabulary(...) const;
+- cv::Mat buildHistogram(...) const;
+- void buildHistograms(...) const;
+
++ void write(const std::string& file) override;
++ void read(const std::string& file) override;
+
++ void train(std::vector<cv::Mat>& images, std::vector<int>& images_labels) override;
++ int predict(cv::Mat& image) const override;
+}
+
+class HogRecognitionModel {
+- cv::Ptr<cv::ml::StatModel> _model;
+- cv::Mat extractFeatures(cv::Mat image) const;
+
++ void write(const std::string& file) override;
++ void read(const std::string& file) override;
+
++ void train(std::vector<cv::Mat>& images, std::vector<int>& images_labels) override;
++ int predict(cv::Mat& image) const override;
+}
+
+class DnnRecognitionModel {
+- std::string _dnn_model_file;
+- std::string _landmarks_model_file;
+- dlib::shape_predictor _shape_predictor;
+- face_recognition_dnn_model _face_recognition_dnn_model;
+- cv::Ptr<cv::ml::KNearest> _knearest;
+
+- std::vector<double> extractFeatures(const cv::Mat& mat) const;
+
++ void write(const std::string& file) override;
++ void read(const std::string& file) override;
+
++ void train(std::vector<cv::Mat>& images, std::vector<int>& images_labels) override;
++ int predict(cv::Mat& image) const override;
+}
+
+FaceRecognitionModel <|-- BowRecognitionModel
+FaceRecognitionModel <|-- HogRecognitionModel
+FaceRecognitionModel <|-- DnnRecognitionModel
+
+@enduml

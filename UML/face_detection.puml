@@ -1,6 +1,6 @@
 @startuml
 
-class FaceDetectionModel {
+abstract class FaceDetectionModel {
 + virtual std::vector<Face> extractFaces(const Rect& viewport, cv::Mat& image) = 0;
 + virtual ~FaceDetectionModel();
 }

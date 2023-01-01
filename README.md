@@ -78,6 +78,9 @@ The command accepts a list of image files and/or folder containing image files a
 |-d| *Debug flag*: if specified then the app displays detected face on the image. |
 |-o| *Output folder*: specifies the final directory for output images. All images will be named in the following order `\*original file name\*_face_\*id of a face\*. |
 
+**Note: I am using face detection at this step therefore I want to give you a 
+heads-up about face detection and "normalisation" logic under the hood.**
+
 ### Face rotation explained
 
 ![Original](./Resources/face_rotation_explained.png)
@@ -180,6 +183,46 @@ Perhaps in this work I will use `frontalface_alt2` cascade classifier from OpenC
 if it works a bit worse than a dlib classifier as it feels a bit performance-wise faster.
 
 ## Training
+
+After we pre-processed our faces and saved them to the disk we can train our recognition model.
+We can do using the command below:
+
+```bash
+./bin/FaceDetector ../../TrainSet --train -om ./output_model.yml -ol ./output_labels.txt
+```
+
+As you can see this command accepts a folder with images followed by mode `--train` and **2 mandatory flags**: 
+output model file `-om` and output labels file `-ol`.
+
+Please, do keep in mind that **a label** for the face will be extracted 
+from the name of folder where the image lays.
+
+For example, if your image lays within `a/b/c/image.png` then the label for
+this image will be `c`.
+
+After execution command creates 2 files: `model` and `labels`.
+
+I am using preprocessed data from the previous step located in 
+the [`TrainSet`](https://github.com/st235/HSE.2DImageProcessing.Week7/tree/main/TrainSet)
+folder.
+
+The content of this folder looks like the images below:
+
+| Face 1                                      | Face 2                                    | Face 3                                     | Face 4                                  | Face 5                                    |
+|---------------------------------------------|-------------------------------------------|--------------------------------------------|-----------------------------------------|-------------------------------------------|
+| ![Face1](./TrainSet/atkinson/11_face_0.jpg) | ![Face2](./TrainSet/laurie/04_face_0.jpg) | ![Face3](./TrainSet/freeman/04_face_0.jpg) | ![Face4](./TrainSet/pegg/11_face_0.jpg) | ![Face5](./TrainSet/clarke/29_face_0.jpg) |
+
+### Implementation considerations
+
+![Original](./Resources/uml_face_recognition.png)
+
+Base class [FaceRecognitionModel]()
+
+## Performance considerations
+
+## Annotations
+
+## Metrics calculation
 
 ## Processing videos
 
