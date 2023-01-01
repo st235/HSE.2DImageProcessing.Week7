@@ -73,10 +73,10 @@ This step can be performed automagically 🪄 by using the command below:
 
 The command accepts a list of image files and/or folder containing image files as the first parameter immediately followed by `--dataset` flag that specifies the mode. Although this arguments are making a complete command you can also find useful a few extra flags:
 
-|Argument|Desciption|
-|-----|-----|
-|-d| *Debug flag*: if specified then the app displays detected face on the image. |
-|-o| *Output folder*: specifies the final directory for output images. All images will be named in the following order `\*original file name\*_face_\*id of a face\*. |
+| Argument | Desciption                                                                                                                                                       |
+|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `-d`       | *Debug flag*: if specified then the app displays detected face on the image.                                                                                     |
+| `-o`       | *Output folder*: specifies the final directory for output images. All images will be named in the following order `\*original file name\*_face_\*id of a face\*. |
 
 **Note: I am using face detection at this step therefore I want to give you a 
 heads-up about face detection and "normalisation" logic under the hood.**
@@ -119,7 +119,7 @@ Cons:
 | ![Original](./Resources/opencv_default_issue_1.png) | ![Original](./Resources/opencv_default_issue_2.png) |
 
 | Metric | Score |
-| ---- | ---- |
+|--------|-------|
 | Recall | 0.755 |
 
 #### Classifier: `OpenCVFaceDetectionModel` + `haarcascade_frontalface_alt.xml`
@@ -321,12 +321,84 @@ This model works much better than the others.
 |---------------------------------------------------------|-------------------------------------------------------|
 | ![Result](./Resources/dnn_recognition_quality_5.jpeg)   | ![Result](./Resources/dnn_recognition_quality_6.jpeg) |
 
+I will bear with this approach as the approach is the most accurate.
+
+## Processing videos
+
+It is time to see how the app works.
+To start the app one may use the command below:
+
+```bash
+./bin/FaceDetector ../../Samples/Test --process -im ../../Samples/model_dnn_knn.yml -il ../../Samples/mapping_labels.dat -t [-d optional]
+```
+
+As you've seen earlier the command accepts a directory with images and/or images
+list separated by space and followed by `--process` mode. The command has 2 mandatory
+and 2 optional arguments.
+
+| Argument | Optional | Desciption                                                                         |
+|----------|---------|-----------------------------------------------------------------------------------|
+| `-im`      | ❌       | *Input model*:  your trained model from the previous step.                         |
+| `-il`      | ❌       | *Input labels*: your labels from the previous step.                                |
+| `-t`       | ✅       | *Test against annotations*: test your videos against annotations and see the score. |
+| `-d`       | ✅       | *Debug*: slows down the video when matching against some frame.                    |
+
+After running the command you will see the video output.
+
+![Result](./Resources/processing_result.png)
+
+Here is the example of running the command with a `debug` flag and testing against some config.
+
+```bash
+./bin/FaceDetector ../../Samples/Test/atkinson/2.mp4 --process -im ../../Samples/model_dnn_knn.yml -il ../../Samples/mapping_labels.dat -t -d
+```
+
+When debugging you will see app detections in **red** and annotations in **blue**. See
+the example below:
+
+| Frame 50                                             | Frame 150                                            |
+|------------------------------------------------------|------------------------------------------------------|
+| ![Result](./Resources/processing_result_debug_1.png) | ![Result](./Resources/processing_result_debug_2.png) |
+
 ## Performance considerations
 
 ## Annotations
 
+### Make your own annotations
+
+To make your own annotations file your file need to follow the annotations
+structure given below:
+
+```bash
+ frame_index_1
+ label1 rect1.x,rect1.y,rect1.width,rect1.height
+ label2 rect2.x,rect2.y,rect2.width,rect2.height
+ 
+ ...
+ 
+ frame_index_n
+ labeln rectn.x,rectn.y,rectn.width,rectn.height
+ ...
+```
+
+You can see an example under `Samples/Test`, for example, [`atkinson/1.txt`](https://github.com/st235/HSE.2DImageProcessing.Week7/blob/main/Samples/Test/atkinson/1.txt).
+
+Please, do keep in mind, to make the automagic 🪄 work you need to put this annotations file in the same folder where you
+video sample is located **and** give it exactly the same name with a different extension - `.txt`.
+
+### Verify your annotations
+
+To verify your annotations you may run the command with in a specific `--config` mode:
+
+```bash
+./bin/FaceDetector ../../Samples/Test/pegg/3.mp4 --config
+```
+
+You will see something similar to the image below. It means that you created annotations config successfully. Congratulations!
+
+![Result](./Resources/config_mode.png)
+
 ## Metrics calculation
 
-## Processing videos
 
 ## Quality
