@@ -76,28 +76,24 @@ The command accepts a list of image files and/or folder containing image files a
 |Argument|Desciption|
 |-----|-----|
 |-d| *Debug flag*: if specified then the app displays detected face on the image. |
-|-o| *Output folder*: specifies the final directory for output images. All images will be named in the following order `\*original file name\*_face_\*id of a face\* |
+|-o| *Output folder*: specifies the final directory for output images. All images will be named in the following order `\*original file name\*_face_\*id of a face\*. |
 
 ### Face rotation explained
 
 ![Original](./Resources/face_rotation_explained.png)
 
+To rotate the image back to "normal" position we need to find an angle between the x-axis and the line connecting two eyes' centers. A bit of school math and the angle can be calculated as:
+
+```math
+angle=arctan(\frac{dx}{dy})
+```
+
+You can find the correspoding code in [OpenCVFaceDetectionModel](https://github.com/st235/HSE.2DImageProcessing.Week7/blob/main/Project/src/opencv_face_detection_model.cpp#L81).
 
 ### A breif implementation overview
 
+## Training
 
+## Processing videos
 
-
-## Possible commands
-
-Generate dataset
-
-```bash
-./bin/FaceDetector ../../Samples/Training/pegg --ds -f ../../Samples/Training/haarcascade_frontalface_alt2.xml -re ../../Samples/Training/haarcascade_righteye_2splits.xml -le ../../Samples/Training/haarcascade_lefteye_2splits.xml -o ../../Dataset/pegg
-```
-
-Train model
-
-```bash
-./bin/FaceDetector ../../Dataset --train -f ../../Samples/Training/haarcascade_frontalface_alt2.xml -re ../../Samples/Training/haarcascade_righteye_2splits.xml -le ../../Samples/Training/haarcascade_lefteye_2splits.xml -om ../../Dataset/bow_svm_model.yml -ol ../../Dataset/labels_mapping.dat
-```
+## Quality
