@@ -278,6 +278,9 @@ try to consider extracted features as a face descriptor.
 Frankly speaking, this approach works much better than Bag of Visual Words although
 far away from ideal.
 
+To normalise the HOG vector I am scaling all images to the same size [128x128]
+without preserving aspect ratio to preserve possible image features.
+
 A few examples are given below:
 
 | Correct: Atkinson                                      | Correct: Atkinson, however, has a few errors           |
