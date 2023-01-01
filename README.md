@@ -305,7 +305,7 @@ The recognition works in a few steps:
 
 | Extracted features example, Lincoln       | Extracted features example, Cohen        | Extracted features example, Cohen        |
 |-------------------------------------------|------------------------------------------|------------------------------------------|
-| ![Lincoln](./Resources/dnn_feature_1.png) | ![Cohen](./Resources/dnn_feature_2.png) | ![Cohen](./Resources/dnn_feature_3.png) |
+| ![Lincoln](./Resources/dnn_feature_1.png) | ![Cohen](./Resources/dnn_feature_2.png) | ![Cohen](./Resources/dnn_feature_3.jpeg) |
 
 This model works much better than the others.
 
