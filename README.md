@@ -169,7 +169,7 @@ Cons:
 - Has false-positive detections
 - Finds fewer "small" faces
 
-| Frontal face                              | Face detected however the lighting conditions are not perfect |
+| Face from the side                        | Face detected however the lighting conditions are not perfect |
 |-------------------------------------------|---------------------------------------------------------------|
 | ![Original](./Resources/dlib_issue_1.png) | ![Original](./Resources/dlib_issue_2.png)                     |
 
@@ -216,7 +216,107 @@ The content of this folder looks like the images below:
 
 ![Original](./Resources/uml_face_recognition.png)
 
-Base class [FaceRecognitionModel]()
+Base class [FaceRecognitionModel](https://github.com/st235/HSE.2DImageProcessing.Week7/blob/main/Project/include/face_recognition_model.h)
+represents an abstract recognition model. Every model supports 4 basic
+operations:
+- **write:** to serialise the internal representation of the model into some file
+- **read:** to deserialise model's representation from file 
+- **train:** used to teach your model on some data, however, if your model has
+been deserialised from file it should be fine to do not call `train` if has been
+called before
+- **predict:** predicts the class of the given face
+
+Every recognition model represents a recognition algorithm that can be represented in
+2 major steps:
+1. Extract features from the image as a vector or vectors; 
+2. Use any machine learning technique to spot relationship between the extracted
+vector and projected classes.
+
+In there project were considered a few approaches with different outcomes.
+
+#### BowRecognitionModel
+
+Bag of visual words: pretty classic approach to analyse different classes of objects.
+
+I was using SIFT to extract features from the face and then tried to apply
+K Nearest Neighbours clustering algorithm to extract specific features from the
+given vectors.
+
+
+| Extracted features example, Atkinson        | Extracted features example, Cohen           |
+|---------------------------------------------|---------------------------------------------|
+| ![Atkinson](./Resources/bow_feature_1.jpeg) | ![Atkinson](./Resources/bow_feature_2.jpeg) |
+
+
+Pros:
+- Not observed
+
+Cons:
+- Prediction quality is quite low: my explanation for this result is 
+because all faces have pretty close visual features and it is really
+hard to spot any distinct qualities unless the face under observation
+has some distinct features: scars, tattoo, hair patterns, and so on
+- Bad performance: mapping extracted features to the specific visual words
+is an expensive operation and can be hardly applied in runtime, moreover,
+clustering during the training process on extracted features takes a lot 
+of time during training as well.
+
+For my case every object has been recognised as Emilia Clarke
+
+| Atkinson                                               | Atkinson                                               | Cohen                                               |
+|--------------------------------------------------------|--------------------------------------------------------|-----------------------------------------------------|
+| ![Atkinson](./Resources/bow_recognition_quality_1.png) | ![Atkinson](./Resources/bow_recognition_quality_2.png) | ![Face1](./Resources/bow_recognition_quality_3.png) |
+
+I think this is almost useless to calculate the metrics when you have the only
+classification result.
+
+#### HogRecognitionModel
+
+Instead of extracting features and combining them into visual words we can
+try to consider extracted features as a face descriptor. 
+
+Frankly speaking, this approach works much better than Bag of Visual Words although
+far away from ideal.
+
+A few examples are given below:
+
+| Correct: Atkinson                                      | Correct: Atkinson, however, has a few errors           |
+|--------------------------------------------------------|--------------------------------------------------------|
+| ![Atkinson](./Resources/hog_recognition_quality_6.png) | ![Atkinson](./Resources/hog_recognition_quality_2.png) |
+
+| Correct: Knightley                                      | Incorrect: Knightley                                    |
+|---------------------------------------------------------|---------------------------------------------------------|
+| ![Knightley](./Resources/hog_recognition_quality_4.png) | ![Knightley](./Resources/hog_recognition_quality_5.png) |
+
+| Incorrect. Was: Laurie, shoud be: Clarke                | Correct: Cohen                                          |
+|---------------------------------------------------------|---------------------------------------------------------|
+| ![Knightley](./Resources/hog_recognition_quality_1.png) | ![Knightley](./Resources/hog_recognition_quality_3.png) |
+
+#### DnnRecognitionModel
+
+This is a Deep Neural Network model from DLib library.
+The recognition works in a few steps:
+
+1. Using a random forest to find [68 facial landmarks](https://www.researchgate.net/figure/68-facial-landmarks_fig1_338048224)
+2. Using a dnn model to convert these 68 points to 128D vector
+
+| Extracted features example, Lincoln         | Extracted features example, Cohen        | Extracted features example, Cohen        |
+|---------------------------------------------|------------------------------------------|------------------------------------------|
+| ![Lincoln](./Resources/dnn_feature_1.jpeg) | ![Cohen](./Resources/dnn_feature_2.jpeg) | ![Cohen](./Resources/dnn_feature_3.jpeg) |
+
+This model works much better than the others.
+
+| Correct: Forst, Pegg, Unknown                         | Correct: Freeman                                      |
+|-------------------------------------------------------|-------------------------------------------------------|
+| ![Result](./Resources/dnn_recognition_quality_1.jpeg) | ![Result](./Resources/dnn_recognition_quality_2.jpeg) |
+
+| Correct: Pegg, Unknown                                | Correct: Cumberbatch                                     |
+|-------------------------------------------------------|----------------------------------------------------------|
+| ![Result](./Resources/dnn_recognition_quality_3.jpeg) | ![Result](./Resources/dnn_recognition_quality_4.jpeg) |
+
+| Correct: Freeman                                        | Correct: Laurie                                       |
+|---------------------------------------------------------|-------------------------------------------------------|
+| ![Result](./Resources/dnn_recognition_quality_5.jpeg)   | ![Result](./Resources/dnn_recognition_quality_6.jpeg) |
 
 ## Performance considerations
 
