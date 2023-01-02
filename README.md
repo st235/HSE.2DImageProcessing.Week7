@@ -412,7 +412,7 @@ Cons:
 
 | Metric   | Score  |
 |----------|--------|
-| Recall   | ~0.829 |
+| Recall   | ~0.828 |
 
 ### MIL
 

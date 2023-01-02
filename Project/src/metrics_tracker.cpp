@@ -2,13 +2,40 @@
 
 #include <limits>
 #include <unordered_map>
-#include <iostream>
 
 #include "strings.h"
 
 namespace {
 
 const static std::string UNKNOWN_LABEL = "unknown";
+
+void PairwiseSort(std::vector<std::string>& labels,
+                  std::vector<detection::Rect>& face_origins) {
+    size_t n = labels.size();
+    std::vector<std::pair<std::string, detection::Rect>> pairs_vector;
+
+    for (size_t i = 0; i < n; i++) {
+        pairs_vector.push_back(std::make_pair(labels[i], face_origins[i]));
+    }
+
+    std::sort(pairs_vector.begin(), pairs_vector.end(),
+              [](const std::pair<std::string, detection::Rect>& one,
+                 const std::pair<std::string, detection::Rect>& another) {
+       detection::Rect one_origin = one.second;
+       detection::Rect another_origin = another.second;
+
+       if (one_origin.x == another_origin.x) {
+           return one_origin.y < another_origin.y;
+       }
+
+       return one_origin.x < another_origin.x;
+    });
+
+    for (size_t i = 0; i < n; i++) {
+        labels[i] = pairs_vector[i].first;
+        face_origins[i] = pairs_vector[i].second;
+    }
+}
 
 int32_t AddWithInf(int32_t a, int32_t b, int32_t inf) {
     if (a == inf || b == inf) {
@@ -527,8 +554,15 @@ BinaryClassificationMatrix MetricsTracker::overallUnknownRecognitionMetrics() co
 void MetricsTracker::keepTrackOf(const FrameInfo& frame_info,
                                  const std::vector<std::string>& labels,
                                  const std::vector<Rect>& face_origins) {
-    trackDetection(frame_info, face_origins);
-    trackRecognition(frame_info, labels, face_origins);
+    // let's always match data
+    // in the same ordering to prevent
+    // any influence on the match results
+    std::vector<std::string> final_labels(labels.begin(), labels.end());
+    std::vector<Rect> final_face_origins(face_origins.begin(), face_origins.end());
+    PairwiseSort(final_labels, final_face_origins);
+
+    trackDetection(frame_info, final_face_origins);
+    trackRecognition(frame_info, final_labels, final_face_origins);
 }
 
 } // namespace detection

@@ -1,4 +1,4 @@
-$ ./bin/FaceDetector ../../Samples/Test --process -im ../../Samples/model_dnn_knn.yml -il ../../Samples/mapping_labels.dat -t
+$ ./bin/FaceDetector ../../Samples/Test --process -im ../../Samples/model_dnn_knn.yml -il ../../Samples/mapping_labels.dat -t 
 
 ../../Samples/Test/atkinson/1.mp4, frames:366
 detection:
@@ -254,17 +254,17 @@ recognition for unknown subjects:
 
 ../../Samples/Test/laurie/3.mp4, frames:203
 detection:
-    tp=127, tn=∞, fp=82, fn=49
-    recall (aka TPR)=0.721591
-    FNR=0.278409
+    tp=136, tn=∞, fp=73, fn=40
+    recall (aka TPR)=0.772727
+    FNR=0.227273
     FPR=0
 recognition for known subjects:
     accuracy=1
 recognition for unknown subjects:
-    tp=66, tn=119, fp=8, fn=0
+    tp=75, tn=128, fp=8, fn=0
     recall (aka TPR)=1
     FNR=0
-    FPR=0.0629921
+    FPR=0.0588235
 
 ../../Samples/Test/lincoln/1.mp4, frames:140
 detection:
@@ -296,14 +296,14 @@ recognition for unknown subjects:
 
 ../../Samples/Test/pegg/1.mp4, frames:142
 detection:
-    tp=22, tn=∞, fp=49, fn=56
-    recall (aka TPR)=0.282051
-    FNR=0.717949
+    tp=13, tn=∞, fp=58, fn=65
+    recall (aka TPR)=0.166667
+    FNR=0.833333
     FPR=0
 recognition for known subjects:
     accuracy=1
 recognition for unknown subjects:
-    tp=11, tn=22, fp=0, fn=0
+    tp=2, tn=13, fp=0, fn=0
     recall (aka TPR)=1
     FNR=0
     FPR=0
