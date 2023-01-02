@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include <unordered_map>
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/tracking.hpp>
@@ -29,9 +28,9 @@ public:
   FaceTrackingModel(const FaceTrackingModel& that);
   FaceTrackingModel& operator=(const FaceTrackingModel& that);
 
-  void reset_tracking(cv::Mat& frame,
-                      std::vector<std::string>& labels,
-                      std::vector<Rect>& faces_origins);
+  void resetTracking(cv::Mat& frame,
+                     std::vector<std::string>& labels,
+                     std::vector<Rect>& faces_origins);
 
   void track(cv::Mat& frame,
              std::vector<std::string>& labels,
@@ -41,7 +40,7 @@ public:
 
 private:
     FaceTrackingModel::Model _model;
-    std::unordered_map<std::string, cv::Ptr<cv::Tracker>> _trackers;
+    std::vector<cv::Ptr<cv::Tracker>> _trackers;
 };
 
 } // namespace detection

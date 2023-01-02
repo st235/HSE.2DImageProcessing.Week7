@@ -36,9 +36,9 @@ FaceTrackingModel& FaceTrackingModel::operator=(const FaceTrackingModel& that) {
     return *this;
 }
 
-void FaceTrackingModel::reset_tracking(cv::Mat& frame,
-                                        std::vector<std::string>& labels,
-                                        std::vector<Rect>& faces_origins) {
+void FaceTrackingModel::resetTracking(cv::Mat& frame,
+                                      std::vector<std::string>& labels,
+                                      std::vector<Rect>& faces_origins) {
     if (faces_origins.size() != labels.size()) {
         throw std::runtime_error("Faces and labels have different sizes.");
     }
@@ -52,22 +52,27 @@ void FaceTrackingModel::reset_tracking(cv::Mat& frame,
         cv::Ptr<cv::Tracker> tracker = CreateTracker(_model);
         tracker->init(frame, Rect::toCVRect(face_origin));
 
-        _trackers[label] = tracker;
+        _trackers.push_back(tracker);
     }
 }
 
 void FaceTrackingModel::track(cv::Mat& frame,
-                               std::vector<std::string>& labels,
-                               std::vector<Rect>& out_faces_origins) {
-    for (const auto& label: labels) {
-        if (_trackers.find(label) == _trackers.end()) {
-            out_faces_origins.push_back(Rect());
-            continue;
-        }
+                              std::vector<std::string>& labels,
+                              std::vector<Rect>& out_faces_origins) {
+    if (labels.size() != _trackers.size()) {
+        throw std::runtime_error("Labels and _trackers have different sizes.");
+    }
 
+    for (size_t i = 0; i < labels.size(); i++) {
         cv::Rect out_face;
-        _trackers[label]->update(frame, out_face);
-        out_faces_origins.push_back(Rect::from(out_face));
+        if (_trackers[i]->update(frame, out_face)) {
+            out_faces_origins.push_back(Rect::from(out_face));
+        } else {
+            // tracking for the given object has
+            // failed, let's put empty Rect in
+            // this case
+            out_faces_origins.push_back(Rect());
+        }
     }
 }
 

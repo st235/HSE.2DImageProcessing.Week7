@@ -230,7 +230,7 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
                     detected_faces_origins.push_back(faces[i].origin);
                 }
 
-                face_tracking.reset_tracking(frame, labels, detected_faces_origins);
+                face_tracking.resetTracking(frame, labels, detected_faces_origins);
                 detection::DrawFaces(frame, faces, labels);
             } else {
                 detected_faces_origins.clear();
