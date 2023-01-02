@@ -116,13 +116,13 @@ angle=arctan(\frac{dx}{dy})
 where
 
 ```math
-dx = |left_eye.x - right_eye.x|
+dx = |left\_eye.x - right\_eye.x|
 ```
 
 and
 
 ```math
-dy = |left_eye.y - right_eye.y|
+dy = |left\_eye.y - right\_eye.y|
 ```
 
 You can find the corresponding code in [OpenCVFaceDetectionModel](./Project/src/opencv_face_detection_model.cpp#L81).
