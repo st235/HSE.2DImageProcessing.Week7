@@ -174,10 +174,6 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
                        bool is_debug) {
     std::vector<std::string> files = utils::ListAllFiles(raw_files, { ".mp4" });
 
-    detection::ConfusionMatrix overall_detection_metrics;
-    detection::ConfusionMatrix overall_known_recognition_metrics;
-    detection::ConfusionMatrix overall_unknown_recognition_metrics;
-
     std::unique_ptr<detection::FaceDetectionModel> face_detection =
             std::make_unique<detection::OpenCVFaceDetectionModel>();
 
@@ -189,6 +185,11 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
 
     detection::LabelsResolver labels_resolver;
     labels_resolver.read(input_label_file);
+
+    detection::BinaryClassificationMatrix overall_detection_metrics;
+    // labels_resolver does not have 'unknown'
+    detection::MultiClassificationMatrix overall_known_recognition_metrics(labels_resolver.size());
+    detection::BinaryClassificationMatrix overall_unknown_recognition_metrics;
 
     for (const auto& file: files) {
         detection::MetricsTracker metrics_tracker(labels_resolver.getLabels());
@@ -259,20 +260,21 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
         overall_detection_metrics += detection_metrics;
 
         if (test_against_annotations) {
-            const auto &known_recognition_metrics = metrics_tracker.overallKnownRecognitionMetrics();
+            const auto& known_recognition_metrics = metrics_tracker.overallKnownRecognitionMetrics();
             overall_known_recognition_metrics += known_recognition_metrics;
-            const auto &unknown_recognition_metrics = metrics_tracker.overallUnknownRecognitionMetrics();
+
+            const auto& unknown_recognition_metrics = metrics_tracker.overallUnknownRecognitionMetrics();
             overall_unknown_recognition_metrics += unknown_recognition_metrics;
 
-            detection::PrintConfusionMatrix("detection",
-                                            detection_metrics,
-                                            detection::PI_TPR | detection::PI_FNR | detection::PI_FPR  | detection::PI_CONFUSION_SCORES);
-            detection::PrintConfusionMatrix("recognition for known subjects",
-                                            known_recognition_metrics,
-                                            detection::PI_ACCURACY);
-            detection::PrintConfusionMatrix("recognition for unknown subjects",
-                                            unknown_recognition_metrics,
-                                            detection::PI_TPR | detection::PI_FNR | detection::PI_FPR);
+            detection::PrintBinaryMatrix("detection",
+                                         detection_metrics,
+                                         detection::PB_TPR | detection::PB_FNR | detection::PB_FPR  | detection::PB_CONFUSION_SCORES);
+            detection::PrintMulticlassMatrix("recognition for known subjects",
+                                             known_recognition_metrics,
+                                             detection::MB_ACCURACY);
+            detection::PrintBinaryMatrix("recognition for unknown subjects",
+                                         unknown_recognition_metrics,
+                                         detection::PB_CONFUSION_SCORES | detection::PB_TPR | detection::PB_FNR | detection::PB_FPR);
             std::cout << std::endl;
         }
     }
@@ -280,15 +282,15 @@ void ProcessVideoFiles(const std::vector<std::string>& raw_files,
     // if there is the only video there is no reason
     // to show overall statistics
     if (test_against_annotations && files.size() > 1) {
-        detection::PrintConfusionMatrix("overall detection",
-                                        overall_detection_metrics,
-                                        detection::PI_TPR | detection::PI_FNR | detection::PI_FPR);
-        detection::PrintConfusionMatrix("overall recognition for known subjects",
-                                        overall_known_recognition_metrics,
-                                        detection::PI_ACCURACY);
-        detection::PrintConfusionMatrix("overall recognition for unknown subjects",
-                                        overall_unknown_recognition_metrics,
-                                        detection::PI_TPR | detection::PI_FNR | detection::PI_FPR);
+        detection::PrintBinaryMatrix("overall detection",
+                                     overall_detection_metrics,
+                                     detection::PB_TPR | detection::PB_FNR | detection::PB_FPR);
+        detection::PrintMulticlassMatrix("overall recognition for known subjects",
+                                         overall_known_recognition_metrics,
+                                         detection::MB_ACCURACY);
+        detection::PrintBinaryMatrix("overall recognition for unknown subjects",
+                                     overall_unknown_recognition_metrics,
+                                     detection::PB_TPR | detection::PB_FNR | detection::PB_FPR);
     }
 
     cv::waitKey(0);

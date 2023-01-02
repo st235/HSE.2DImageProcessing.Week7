@@ -12,7 +12,184 @@ const static std::string UNKNOWN_LABEL = "unknown";
 
 namespace detection {
 
-ConfusionMatrix::ConfusionMatrix():
+MultiClassificationMatrix::MultiClassificationMatrix(uint32_t number_of_classes):
+    _number_of_classes(number_of_classes) {
+    _classification_matrix = new uint32_t[_number_of_classes * _number_of_classes];
+
+    for (uint32_t i = 0; i < _number_of_classes; i++) {
+        for (uint32_t j = 0; j < _number_of_classes; j++) {
+            _classification_matrix[i * _number_of_classes + j] = 0;
+        }
+    }
+}
+
+MultiClassificationMatrix::MultiClassificationMatrix(const MultiClassificationMatrix& that):
+    _number_of_classes(that._number_of_classes) {
+    _classification_matrix = new uint32_t[_number_of_classes * _number_of_classes];
+
+    for (uint32_t i = 0; i < _number_of_classes; i++) {
+        for (uint32_t j = 0; j < _number_of_classes; j++) {
+            _classification_matrix[i * _number_of_classes + j] =
+                    that._classification_matrix[i * _number_of_classes + j];
+        }
+    }
+}
+
+MultiClassificationMatrix& MultiClassificationMatrix::operator=(const MultiClassificationMatrix& that) {
+    if (this != &that) {
+        this->_number_of_classes = that._number_of_classes;
+
+        delete[] _classification_matrix;
+        this->_classification_matrix = new uint32_t[_number_of_classes * _number_of_classes];
+        for (uint32_t i = 0; i < _number_of_classes; i++) {
+            for (uint32_t j = 0; j < _number_of_classes; j++) {
+                this->_classification_matrix[i * _number_of_classes + j] =
+                        that._classification_matrix[i * _number_of_classes + j];
+            }
+        }
+    }
+
+    return *this;
+}
+
+uint32_t MultiClassificationMatrix::classesSize() const {
+    return _number_of_classes;
+}
+
+uint32_t MultiClassificationMatrix::metricAt(uint32_t i, uint32_t j) const {
+    return _classification_matrix[i * _number_of_classes + j];
+}
+
+double MultiClassificationMatrix::accuracy() const {
+    double n = 0;
+    double d = 0;
+
+    for (uint32_t i = 0; i < _number_of_classes; i++) {
+        for (uint32_t j = 0; j < _number_of_classes; j++) {
+            double value = static_cast<double>(_classification_matrix[i * _number_of_classes + j]);
+            if (i == j) {
+                n += value;
+            }
+            d += value;
+        }
+    }
+
+    return n / d;
+}
+
+void MultiClassificationMatrix::track(uint32_t annotated_label_id,
+                                      uint32_t detected_label_id) {
+    if (annotated_label_id < 0 || annotated_label_id >= _number_of_classes) {
+        throw std::runtime_error("Annotated label is invalid: " + std::AsString(annotated_label_id));
+    }
+
+    if (detected_label_id < 0 || detected_label_id >= _number_of_classes) {
+        throw std::runtime_error("Detected label is invalid: " + std::AsString(detected_label_id));
+    }
+
+    _classification_matrix[annotated_label_id * _number_of_classes + detected_label_id] += 1;
+}
+
+BinaryClassificationMatrix MultiClassificationMatrix::getBinaryMatrix(uint32_t label_id) const {
+    if (label_id < 0 || label_id >= _number_of_classes) {
+        throw std::runtime_error("Label is invalid: " + std::AsString(label_id));
+    }
+
+    uint32_t tp = 0,
+             tn = 0,
+             fp = 0,
+             fn = 0;
+
+    for (uint32_t i = 0; i < _number_of_classes; i++) {
+        for (uint32_t j = 0; j < _number_of_classes; j++) {
+            double value = static_cast<double>(_classification_matrix[i * _number_of_classes + j]);
+
+            // true positive
+            if (i == label_id && j == label_id) {
+                tp += value;
+            } if (i == label_id && j != label_id) {
+                fn += value;
+            } if (i != label_id && j == label_id) {
+                fp += value;
+            } else {
+                tn += value;
+            }
+        }
+    }
+
+    return BinaryClassificationMatrix(tp, tn, fp, fn);
+}
+
+MultiClassificationMatrix MultiClassificationMatrix::remove(uint32_t label_id) const {
+    if (label_id < 0 || label_id >= _number_of_classes) {
+        throw std::runtime_error("Label is invalid: " + std::AsString(label_id));
+    }
+
+    MultiClassificationMatrix result(_number_of_classes - 1);
+
+    for (uint32_t i = 0; i < _number_of_classes; i++) {
+        int ri = i;
+
+        if (i == label_id) {
+            continue;
+        }
+
+        if (i > label_id) {
+            ri -= 1;
+        }
+
+        for (uint32_t j = 0; j < _number_of_classes; j++) {
+            int rj = j;
+
+            if (j == label_id) {
+                continue;
+            }
+
+            if (j > label_id) {
+                rj -= 1;
+            }
+
+            result._classification_matrix[ri * (_number_of_classes - 1) + rj] =
+                _classification_matrix[i * _number_of_classes + j];
+        }
+    }
+
+    return result;
+}
+
+MultiClassificationMatrix MultiClassificationMatrix::operator+(const MultiClassificationMatrix& that) {
+    if (_number_of_classes != that._number_of_classes) {
+        throw std::runtime_error("Number of classes are different: " +
+            std::AsString(_number_of_classes) + " vs. " + std::AsString(that._number_of_classes));
+    }
+
+    MultiClassificationMatrix result(_number_of_classes);
+
+    for (uint32_t i = 0; i < _number_of_classes * _number_of_classes; i++) {
+        result._classification_matrix[i] = _classification_matrix[i] + that._classification_matrix[i];
+    }
+
+    return result;
+}
+
+MultiClassificationMatrix& MultiClassificationMatrix::operator+=(const MultiClassificationMatrix& that) {
+    if (_number_of_classes != that._number_of_classes) {
+        throw std::runtime_error("Number of classes are different: " +
+                                 std::AsString(_number_of_classes) + " vs. " + std::AsString(that._number_of_classes));
+    }
+
+    for (uint32_t i = 0; i < _number_of_classes * _number_of_classes; i++) {
+        _classification_matrix[i] += that._classification_matrix[i];
+    }
+
+    return *this;
+}
+
+MultiClassificationMatrix::~MultiClassificationMatrix() {
+    delete[] _classification_matrix;
+}
+
+BinaryClassificationMatrix::BinaryClassificationMatrix():
     tp(0),
     tn(0),
     fp(0),
@@ -20,10 +197,10 @@ ConfusionMatrix::ConfusionMatrix():
     // empty on purpose
 }
 
-ConfusionMatrix::ConfusionMatrix(uint32_t tp,
-                                 uint32_t tn,
-                                 uint32_t fp,
-                                 uint32_t fn):
+BinaryClassificationMatrix::BinaryClassificationMatrix(int32_t tp,
+                                                       int32_t tn,
+                                                       int32_t fp,
+                                                       int32_t fn):
         tp(tp),
         tn(tn),
         fp(fp),
@@ -31,7 +208,7 @@ ConfusionMatrix::ConfusionMatrix(uint32_t tp,
     // empty on purpose
 }
 
-ConfusionMatrix::ConfusionMatrix(const ConfusionMatrix& that):
+BinaryClassificationMatrix::BinaryClassificationMatrix(const BinaryClassificationMatrix& that):
         tp(that.tp),
         tn(that.tn),
         fp(that.fp),
@@ -39,7 +216,7 @@ ConfusionMatrix::ConfusionMatrix(const ConfusionMatrix& that):
     // empty on purpose
 }
 
-ConfusionMatrix& ConfusionMatrix::operator=(const ConfusionMatrix& that) {
+BinaryClassificationMatrix& BinaryClassificationMatrix::operator=(const BinaryClassificationMatrix& that) {
     if (this != &that) {
         this->tp = that.tp;
         this->tn = that.tn;
@@ -50,44 +227,44 @@ ConfusionMatrix& ConfusionMatrix::operator=(const ConfusionMatrix& that) {
     return *this;
 }
 
-ConfusionMatrix ConfusionMatrix::merge(const ConfusionMatrix& that) {
-    return ConfusionMatrix(tp + that.tp,
+BinaryClassificationMatrix BinaryClassificationMatrix::merge(const BinaryClassificationMatrix& that) {
+    return BinaryClassificationMatrix(tp + that.tp,
                            tn + that.tn,
                            fp + that.fp,
                            fn + that.fn);
 }
 
-double ConfusionMatrix::tpr() const {
+double BinaryClassificationMatrix::tpr() const {
     return recall();
 }
 
-double ConfusionMatrix::fnr() const {
+double BinaryClassificationMatrix::fnr() const {
     return static_cast<double>(fn) / (static_cast<double>(tp) + static_cast<double>(fn));
 }
 
-double ConfusionMatrix::tnr() const {
+double BinaryClassificationMatrix::tnr() const {
     return static_cast<double>(tn) / (static_cast<double>(tn) + static_cast<double>(fp));
 }
 
-double ConfusionMatrix::fpr() const {
+double BinaryClassificationMatrix::fpr() const {
     return static_cast<double>(fp) / (static_cast<double>(fp) + static_cast<double>(tn));
 }
 
-double ConfusionMatrix::precision() const {
+double BinaryClassificationMatrix::precision() const {
     return static_cast<double>(tp) / (static_cast<double>(tp) + static_cast<double>(fp));
 }
 
-double ConfusionMatrix::recall() const {
+double BinaryClassificationMatrix::recall() const {
     return static_cast<double>(tp) / (static_cast<double>(tp) + static_cast<double>(fn));
 }
 
-double ConfusionMatrix::f1() const {
+double BinaryClassificationMatrix::f1() const {
     double p = precision();
     double r = recall();
     return 2.0 * (p * r) / (p + r);
 }
 
-double ConfusionMatrix::accuracy() const {
+double BinaryClassificationMatrix::accuracy() const {
     double n = static_cast<double>(tp) +
                static_cast<double>(tn);
     double d = static_cast<double>(tp) +
@@ -97,15 +274,15 @@ double ConfusionMatrix::accuracy() const {
     return n / d;
 }
 
-bool ConfusionMatrix::empty() const {
+bool BinaryClassificationMatrix::empty() const {
     return tp == 0 && tn == 0 && fp == 0 && fn == 0;
 }
 
-ConfusionMatrix ConfusionMatrix::operator+(const ConfusionMatrix& that) {
+BinaryClassificationMatrix BinaryClassificationMatrix::operator+(const BinaryClassificationMatrix& that) {
     return merge(that);
 }
 
-ConfusionMatrix& ConfusionMatrix::operator+=(const ConfusionMatrix& that) {
+BinaryClassificationMatrix& BinaryClassificationMatrix::operator+=(const BinaryClassificationMatrix& that) {
     this->tp += that.tp;
     this->tn += that.tn;
     this->fp += that.fp;
@@ -165,7 +342,7 @@ void MetricsTracker::trackDetection(const FrameInfo& frame_info,
     }
 
     _detections_per_frame_lookup.insert({ frame_info.id(),
-                  ConfusionMatrix(
+                  BinaryClassificationMatrix(
                           matched,
                           0 /* tn, not applicable for the project */,
                           detected_face_origins.size() - matched /* fp */,
@@ -225,98 +402,55 @@ void MetricsTracker::trackRecognition(const FrameInfo& frame_info,
         }
     }
 
-    ConfusionMatrix overall_known_metric;
+    MultiClassificationMatrix recognition_matrix(_labels.size());
 
-    for (const auto& class_label: _labels) {
-        bool is_unknown = (class_label == UNKNOWN_LABEL);
+    for (size_t i = 0; i < annotated_faces_origins.size(); i++) {
+        bool is_matched = matched_annotated[i];
 
-        // true positive
-        bool detected_correctly = 0,
-             // true negative
-             not_a_class_everywhere = 0,
-             // false positive
-             detected_by_us_but_annotated_differently = 0,
-             // false negative
-             annotated_but_not_detected = 0;
-
-        for (size_t i = 0; i < annotated_faces_origins.size(); i++) {
-            // matched by detection algorithm
-            bool detection_matched = matched_annotated[i];
-
-            if (!detection_matched) {
-                // do not consider anything else as
-                // it will reflect the quality of detection
-                // rather recognition.
-                continue;
-            }
-
-            if (annotated_faces_labels[i] == class_label &&
-                    labels[matches[i]] == class_label) {
-                // detected correctly,
-                // classes match and within
-                // the current group.
-                detected_correctly += 1;
-            } else if (annotated_faces_labels[i] == class_label &&
-                        labels[matches[i]] != class_label) {
-                // we detected something different here
-                // but was expecting a specific class
-                annotated_but_not_detected += 1;
-            } else if (annotated_faces_labels[i] != class_label &&
-                       labels[matches[i]] == class_label) {
-                // we detected a class but annotation
-                // says there is no such a class
-                detected_by_us_but_annotated_differently += 1;
-            } else {
-                // not a class and we agree on it with
-                // annotations
-                not_a_class_everywhere += 1;
-            }
+        if (!is_matched) {
+            continue;
         }
 
-        ConfusionMatrix metrics(detected_correctly /* tp */,
-                                not_a_class_everywhere /* tn */,
-                                detected_by_us_but_annotated_differently /* fp */,
-                                annotated_but_not_detected /* fn */);
+        const auto& annotated_id = _labels_to_ids_lookup[annotated_faces_labels[i]];
+        const auto& detected_id = _labels_to_ids_lookup[labels[matches[i]]];
 
-        if (is_unknown) {
-            _unknown_recognitions_per_frame_lookup.insert({ frame_info.id(), metrics });
-        } else {
-            overall_known_metric += metrics;
-        }
+        recognition_matrix.track(annotated_id, detected_id);
     }
 
-    _known_recognitions_per_frame_lookup.insert({ frame_info.id(), overall_known_metric });
+    _recognitions_per_frame_lookup.insert({ frame_info.id(), recognition_matrix });
 }
 
 MetricsTracker::MetricsTracker(std::vector<std::string> labels):
     _labels(labels),
+    _labels_to_ids_lookup(),
     _detections_per_frame_lookup(),
-    _known_recognitions_per_frame_lookup(),
-    _unknown_recognitions_per_frame_lookup() {
-    // empty on purpose
+    _recognitions_per_frame_lookup(labels.size()) {
+    for (uint32_t i = 0; i < labels.size(); i++) {
+        _labels_to_ids_lookup.insert({ labels[i], i });
+    }
 }
 
 MetricsTracker::MetricsTracker(const MetricsTracker& that):
     _labels(that._labels),
+    _labels_to_ids_lookup(that._labels_to_ids_lookup),
     _detections_per_frame_lookup(that._detections_per_frame_lookup),
-    _known_recognitions_per_frame_lookup(that._known_recognitions_per_frame_lookup),
-    _unknown_recognitions_per_frame_lookup(that._unknown_recognitions_per_frame_lookup) {
+    _recognitions_per_frame_lookup(that._recognitions_per_frame_lookup) {
     // empty on purpose
 }
 
 MetricsTracker& MetricsTracker::operator=(const MetricsTracker& that) {
     if (this != &that) {
         this->_labels = that._labels;
+        this->_labels_to_ids_lookup = that._labels_to_ids_lookup;
         this->_detections_per_frame_lookup = that._detections_per_frame_lookup;
-        this->_known_recognitions_per_frame_lookup = that._known_recognitions_per_frame_lookup;
-        this->_unknown_recognitions_per_frame_lookup = that._unknown_recognitions_per_frame_lookup;
+        this->_recognitions_per_frame_lookup = that._recognitions_per_frame_lookup;
     }
 
     return *this;
 }
 
-ConfusionMatrix MetricsTracker::overallDetectionMetrics() const {
-    ConfusionMatrix matrix;
+BinaryClassificationMatrix MetricsTracker::overallDetectionMetrics() const {
+    BinaryClassificationMatrix matrix;
 
     for (const auto& entry: _detections_per_frame_lookup) {
         matrix += entry.second;
@@ -325,31 +459,27 @@ ConfusionMatrix MetricsTracker::overallDetectionMetrics() const {
     return matrix;
 }
 
-ConfusionMatrix MetricsTracker::overallKnownRecognitionMetrics() const {
-    ConfusionMatrix matrix;
+MultiClassificationMatrix MetricsTracker::overallKnownRecognitionMetrics() const {
+    MultiClassificationMatrix matrix(_labels.size() - 1);
 
-    for (const auto& entry: _known_recognitions_per_frame_lookup) {
-        matrix += entry.second;
+    for (const auto& entry: _recognitions_per_frame_lookup) {
+        const auto& frame_matrix = entry.second;
+        uint32_t unknown_label_id = _labels_to_ids_lookup.at(UNKNOWN_LABEL);
+        matrix += frame_matrix.remove(unknown_label_id);
     }
 
     return matrix;
 }
 
-ConfusionMatrix MetricsTracker::overallUnknownRecognitionMetrics() const {
-    ConfusionMatrix matrix;
+BinaryClassificationMatrix MetricsTracker::overallUnknownRecognitionMetrics() const {
+    MultiClassificationMatrix matrix(_labels.size());
 
-    for (const auto& entry: _unknown_recognitions_per_frame_lookup) {
+    for (const auto& entry: _recognitions_per_frame_lookup) {
         matrix += entry.second;
     }
 
-    return matrix;
-}
-
-ConfusionMatrix MetricsTracker::overallRecognitionMetrics() const {
-    ConfusionMatrix matrix;
-    matrix += overallKnownRecognitionMetrics();
-    matrix += overallUnknownRecognitionMetrics();
-    return matrix;
+    uint32_t unknown_label_id = _labels_to_ids_lookup.at(UNKNOWN_LABEL);
+    return matrix.getBinaryMatrix(unknown_label_id);
 }
 
 void MetricsTracker::keepTrackOf(const FrameInfo& frame_info,

@@ -11,46 +11,73 @@
 
 namespace detection {
 
-struct ConfusionMatrix {
+struct BinaryClassificationMatrix {
 public:
-  uint32_t tp;
-  uint32_t tn;
-  uint32_t fp;
-  uint32_t fn;
+    int32_t tp;
+    int32_t tn;
+    int32_t fp;
+    int32_t fn;
 
-  ConfusionMatrix();
-  ConfusionMatrix(uint32_t tp,
-                  uint32_t tn,
-                  uint32_t fp,
-                  uint32_t fn);
-  ConfusionMatrix(const ConfusionMatrix& that);
-  ConfusionMatrix& operator=(const ConfusionMatrix& that);
+    BinaryClassificationMatrix();
+    BinaryClassificationMatrix(int32_t tp,
+                               int32_t tn,
+                               int32_t fp,
+                               int32_t fn);
+    BinaryClassificationMatrix(const BinaryClassificationMatrix& that);
+    BinaryClassificationMatrix& operator=(const BinaryClassificationMatrix& that);
 
-  ConfusionMatrix merge(const ConfusionMatrix& that);
+    BinaryClassificationMatrix merge(const BinaryClassificationMatrix& that);
 
-  double tpr() const;
-  double fnr() const;
-  double tnr() const;
-  double fpr() const;
-  double precision() const;
-  double recall() const;
-  double f1() const;
+    double tpr() const;
+    double fnr() const;
+    double tnr() const;
+    double fpr() const;
+    double precision() const;
+    double recall() const;
+    double f1() const;
+    double accuracy() const;
+
+    bool empty() const;
+
+    BinaryClassificationMatrix operator+(const BinaryClassificationMatrix& that);
+    BinaryClassificationMatrix& operator+=(const BinaryClassificationMatrix& that);
+
+    ~BinaryClassificationMatrix() = default;
+};
+
+struct MultiClassificationMatrix {
+private:
+  uint32_t _number_of_classes;
+  uint32_t* _classification_matrix;
+
+public:
+  MultiClassificationMatrix(uint32_t number_of_classes);
+  MultiClassificationMatrix(const MultiClassificationMatrix& that);
+  MultiClassificationMatrix& operator=(const MultiClassificationMatrix& that);
+
+  uint32_t classesSize() const;
+  uint32_t metricAt(uint32_t i, uint32_t j) const;
+
+  void track(uint32_t annotated_label_id,
+             uint32_t detected_label_id);
+
   double accuracy() const;
 
-  bool empty() const;
+  BinaryClassificationMatrix getBinaryMatrix(uint32_t label_id) const;
+  MultiClassificationMatrix remove(uint32_t label_id) const;
 
-  ConfusionMatrix operator+(const ConfusionMatrix& that);
-  ConfusionMatrix& operator+=(const ConfusionMatrix& that);
+  MultiClassificationMatrix operator+(const MultiClassificationMatrix& that);
+  MultiClassificationMatrix& operator+=(const MultiClassificationMatrix& that);
 
-  ~ConfusionMatrix() = default;
+  ~MultiClassificationMatrix();
 };
 
 class MetricsTracker {
 private:
     std::vector<std::string> _labels;
-    std::unordered_map<uint32_t, ConfusionMatrix> _detections_per_frame_lookup;
-    std::unordered_map<uint32_t, ConfusionMatrix> _known_recognitions_per_frame_lookup;
-    std::unordered_map<uint32_t, ConfusionMatrix> _unknown_recognitions_per_frame_lookup;
+    std::unordered_map<std::string, uint32_t> _labels_to_ids_lookup;
+    std::unordered_map<uint32_t, BinaryClassificationMatrix> _detections_per_frame_lookup;
+    std::unordered_map<uint32_t, MultiClassificationMatrix> _recognitions_per_frame_lookup;
 
     /**
      * Brute forces detected rectangles match
@@ -74,13 +101,11 @@ public:
                      const std::vector<std::string>& detected_labels,
                      const std::vector<Rect>& detected_face_origins);
 
-    ConfusionMatrix overallDetectionMetrics() const;
+    BinaryClassificationMatrix overallDetectionMetrics() const;
 
-    ConfusionMatrix overallKnownRecognitionMetrics() const;
+    MultiClassificationMatrix overallKnownRecognitionMetrics() const;
 
-    ConfusionMatrix overallUnknownRecognitionMetrics() const;
-
-    ConfusionMatrix overallRecognitionMetrics() const;
+    BinaryClassificationMatrix overallUnknownRecognitionMetrics() const;
 
     ~MetricsTracker() = default;
 };
