@@ -525,6 +525,7 @@ FNR=1-TPR
 ```
 
 which actually looks correct using data from app reports.
+However, I will calculate this metric using the original formulae.
 
 #### FPR
 
@@ -542,13 +543,44 @@ Adding this metric to the final report will create unnecessary noise, therefore 
 Taking into considerations the logic above we can modify `FPR` formulae
 
 ```math
-TN \rightarrow \infty\\
-FPR = \frac{FP}{TN+FP} = lim_{x \rightarrow \infty}\frac{FP}{x+FP} = 1
+TN \rightarrow \infty
 ```
 
-So, `FPR` will be always `1` and it does not seem reasonable to keep track of the metric.
+```math
+FPR = \frac{FP}{TN+FP} = lim_{x \rightarrow +\infty}\frac{FP}{x+FP} = 0
+```
 
+It does not seem reasonable to keep track of the metric. So, `FPR` will be always `0` in my report.
 
 ### Recognition quality
 
+For recognition there are 2 sets:
+- __People we know.__ I am using multiclass confusion matrix.
+- __Unknown people.__ I am using a confusion matrix for binary classification.
+
 ## Quality
+
+### Detection
+
+| Metric   | Score  |
+|----------|--------|
+| Recall   | ~0.434 |
+
+### Recognition
+
+#### Closed set of people (people we know)
+
+| Metric   | Score  |
+|----------|--------|
+| Recall   | ~0.434 |
+
+#### Unknown people
+
+| Metric   | Score  |
+|----------|--------|
+| Recall   | ~0.434 |
+
+Full report can be found in (the report file)[./REPORT]
+
+Wow! You've really made this through the document. Thank you for reading!
+

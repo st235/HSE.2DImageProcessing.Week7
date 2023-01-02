@@ -1,0 +1,488 @@
+$ ./bin/FaceDetector ../../Samples/Test --process -im ../../Samples/model_dnn_knn.yml -il ../../Samples/mapping_labels.dat -t
+
+../../Samples/Test/atkinson/1.mp4, frames:366
+detection:
+    tp=35, tn=∞, fp=3, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=0, tn=35, fp=0, fn=0
+    recall (aka TPR)= cannot be calculated (ㅠ﹏ㅠ)
+    FNR= cannot be calculated (ㅠ﹏ㅠ)
+    FPR=0
+
+../../Samples/Test/atkinson/2.mp4, frames:298
+detection:
+    tp=35, tn=∞, fp=2, fn=7
+    recall (aka TPR)=0.833333
+    FNR=0.166667
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=28, tn=35, fp=0, fn=1
+    recall (aka TPR)=0.965517
+    FNR=0.0344828
+    FPR=0
+
+../../Samples/Test/atkinson/3.mp4, frames:292
+detection:
+    tp=12, tn=∞, fp=4, fn=8
+    recall (aka TPR)=0.6
+    FNR=0.4
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=3, tn=11, fp=1, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0.0833333
+
+../../Samples/Test/clarke/1.mp4, frames:266
+detection:
+    tp=19, tn=∞, fp=3, fn=3
+    recall (aka TPR)=0.863636
+    FNR=0.136364
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=15, tn=16, fp=3, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0.157895
+
+../../Samples/Test/clarke/2.mp4, frames:439
+detection:
+    tp=21, tn=∞, fp=1, fn=9
+    recall (aka TPR)=0.7
+    FNR=0.3
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=3, tn=17, fp=4, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0.190476
+
+../../Samples/Test/cohen/1.mp4, frames:918
+detection:
+    tp=10, tn=∞, fp=0, fn=3
+    recall (aka TPR)=0.769231
+    FNR=0.230769
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=1, tn=10, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+
+../../Samples/Test/cohen/2.mp4, frames:222
+detection:
+    tp=20, tn=∞, fp=8, fn=13
+    recall (aka TPR)=0.606061
+    FNR=0.393939
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=11, tn=20, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+
+../../Samples/Test/cohen/3.mp4, frames:234
+detection:
+    tp=16, tn=∞, fp=1, fn=1
+    recall (aka TPR)=0.941176
+    FNR=0.0588235
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=1, tn=16, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+
+../../Samples/Test/cumberbatch/1.mp4, frames:293
+detection:
+    tp=25, tn=∞, fp=0, fn=13
+    recall (aka TPR)=0.657895
+    FNR=0.342105
+    FPR=0
+recognition for known subjects:
+    accuracy= cannot be calculated (ㅠ﹏ㅠ)
+recognition for unknown subjects:
+    tp=25, tn=25, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+
+../../Samples/Test/cumberbatch/2.mp4, frames:233
+detection:
+    tp=42, tn=∞, fp=0, fn=20
+    recall (aka TPR)=0.677419
+    FNR=0.322581
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=41, tn=42, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+
+../../Samples/Test/freeman/1.mp4, frames:583
+detection:
+    tp=16, tn=∞, fp=1, fn=9
+    recall (aka TPR)=0.64
+    FNR=0.36
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=7, tn=16, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+
+../../Samples/Test/freeman/2.mp4, frames:358
+detection:
+    tp=64, tn=∞, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=17, tn=64, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+
+../../Samples/Test/frost/1.mp4, frames:428
+detection:
+    tp=15, tn=∞, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=0, tn=15, fp=0, fn=0
+    recall (aka TPR)= cannot be calculated (ㅠ﹏ㅠ)
+    FNR= cannot be calculated (ㅠ﹏ㅠ)
+    FPR=0
+
+../../Samples/Test/frost/2.mp4, frames:320
+detection:
+    tp=41, tn=∞, fp=0, fn=12
+    recall (aka TPR)=0.773585
+    FNR=0.226415
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=0, tn=31, fp=10, fn=0
+    recall (aka TPR)= cannot be calculated (ㅠ﹏ㅠ)
+    FNR= cannot be calculated (ㅠ﹏ㅠ)
+    FPR=0.243902
+
+../../Samples/Test/knightley/1.mp4, frames:128
+detection:
+    tp=84, tn=∞, fp=30, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=0, tn=84, fp=0, fn=0
+    recall (aka TPR)= cannot be calculated (ㅠ﹏ㅠ)
+    FNR= cannot be calculated (ㅠ﹏ㅠ)
+    FPR=0
+
+../../Samples/Test/knightley/2.mp4, frames:269
+detection:
+    tp=121, tn=∞, fp=11, fn=10
+    recall (aka TPR)=0.923664
+    FNR=0.0763359
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=70, tn=121, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+
+../../Samples/Test/laurie/1.mp4, frames:219
+detection:
+    tp=22, tn=∞, fp=0, fn=6
+    recall (aka TPR)=0.785714
+    FNR=0.214286
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=0, tn=12, fp=10, fn=0
+    recall (aka TPR)= cannot be calculated (ㅠ﹏ㅠ)
+    FNR= cannot be calculated (ㅠ﹏ㅠ)
+    FPR=0.454545
+
+../../Samples/Test/laurie/2.mp4, frames:130
+detection:
+    tp=54, tn=∞, fp=12, fn=22
+    recall (aka TPR)=0.710526
+    FNR=0.289474
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=30, tn=54, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+
+../../Samples/Test/laurie/3.mp4, frames:203
+detection:
+    tp=127, tn=∞, fp=82, fn=49
+    recall (aka TPR)=0.721591
+    FNR=0.278409
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=66, tn=119, fp=8, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0.0629921
+
+../../Samples/Test/lincoln/1.mp4, frames:140
+detection:
+    tp=79, tn=∞, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=0, tn=79, fp=0, fn=0
+    recall (aka TPR)= cannot be calculated (ㅠ﹏ㅠ)
+    FNR= cannot be calculated (ㅠ﹏ㅠ)
+    FPR=0
+
+../../Samples/Test/lincoln/2.mp4, frames:271
+detection:
+    tp=20, tn=∞, fp=0, fn=11
+    recall (aka TPR)=0.645161
+    FNR=0.354839
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=0, tn=20, fp=0, fn=0
+    recall (aka TPR)= cannot be calculated (ㅠ﹏ㅠ)
+    FNR= cannot be calculated (ㅠ﹏ㅠ)
+    FPR=0
+
+../../Samples/Test/pegg/1.mp4, frames:142
+detection:
+    tp=22, tn=∞, fp=49, fn=56
+    recall (aka TPR)=0.282051
+    FNR=0.717949
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=11, tn=22, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+
+../../Samples/Test/pegg/2.mp4, frames:283
+detection:
+    tp=29, tn=∞, fp=3, fn=3
+    recall (aka TPR)=0.90625
+    FNR=0.09375
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=0, tn=29, fp=0, fn=0
+    recall (aka TPR)= cannot be calculated (ㅠ﹏ㅠ)
+    FNR= cannot be calculated (ㅠ﹏ㅠ)
+    FPR=0
+
+../../Samples/Test/pegg/3.mp4, frames:302
+detection:
+    tp=413, tn=∞, fp=66, fn=59
+    recall (aka TPR)=0.875
+    FNR=0.125
+    FPR=0
+recognition for known subjects:
+    accuracy=0.953052
+recognition for unknown subjects:
+    tp=175, tn=390, fp=23, fn=2
+    recall (aka TPR)=0.988701
+    FNR=0.0112994
+    FPR=0.0556901
+
+../../Samples/Test/unknown/01.mp4, frames:315
+detection:
+    tp=98, tn=∞, fp=3, fn=4
+    recall (aka TPR)=0.960784
+    FNR=0.0392157
+    FPR=0
+recognition for known subjects:
+    accuracy= cannot be calculated (ㅠ﹏ㅠ)
+recognition for unknown subjects:
+    tp=98, tn=98, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+
+../../Samples/Test/unknown/02.mp4, frames:305
+detection:
+    tp=196, tn=∞, fp=32, fn=2
+    recall (aka TPR)=0.989899
+    FNR=0.010101
+    FPR=0
+recognition for known subjects:
+    accuracy= cannot be calculated (ㅠ﹏ㅠ)
+recognition for unknown subjects:
+    tp=196, tn=196, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+
+../../Samples/Test/unknown/03.mp4, frames:394
+detection:
+    tp=364, tn=∞, fp=149, fn=135
+    recall (aka TPR)=0.729459
+    FNR=0.270541
+    FPR=0
+recognition for known subjects:
+    accuracy= cannot be calculated (ㅠ﹏ㅠ)
+recognition for unknown subjects:
+    tp=364, tn=364, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+
+../../Samples/Test/unknown/04.mp4, frames:145
+detection:
+    tp=31, tn=∞, fp=3, fn=6
+    recall (aka TPR)=0.837838
+    FNR=0.162162
+    FPR=0
+recognition for known subjects:
+    accuracy=1
+recognition for unknown subjects:
+    tp=18, tn=31, fp=0, fn=4
+    recall (aka TPR)=0.818182
+    FNR=0.181818
+    FPR=0
+
+../../Samples/Test/unknown/05.mp4, frames:121
+detection:
+    tp=51, tn=∞, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+recognition for known subjects:
+    accuracy= cannot be calculated (ㅠ﹏ㅠ)
+recognition for unknown subjects:
+    tp=51, tn=51, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+
+../../Samples/Test/unknown/06.mp4, frames:320
+detection:
+    tp=192, tn=∞, fp=27, fn=26
+    recall (aka TPR)=0.880734
+    FNR=0.119266
+    FPR=0
+recognition for known subjects:
+    accuracy= cannot be calculated (ㅠ﹏ㅠ)
+recognition for unknown subjects:
+    tp=192, tn=192, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+
+../../Samples/Test/unknown/07.mp4, frames:204
+detection:
+    tp=106, tn=∞, fp=24, fn=29
+    recall (aka TPR)=0.785185
+    FNR=0.214815
+    FPR=0
+recognition for known subjects:
+    accuracy= cannot be calculated (ㅠ﹏ㅠ)
+recognition for unknown subjects:
+    tp=106, tn=106, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+
+../../Samples/Test/unknown/08.mp4, frames:170
+detection:
+    tp=87, tn=∞, fp=36, fn=16
+    recall (aka TPR)=0.84466
+    FNR=0.15534
+    FPR=0
+recognition for known subjects:
+    accuracy= cannot be calculated (ㅠ﹏ㅠ)
+recognition for unknown subjects:
+    tp=87, tn=87, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+
+../../Samples/Test/unknown/09.mp4, frames:351
+detection:
+    tp=268, tn=∞, fp=80, fn=37
+    recall (aka TPR)=0.878689
+    FNR=0.121311
+    FPR=0
+recognition for known subjects:
+    accuracy= cannot be calculated (ㅠ﹏ㅠ)
+recognition for unknown subjects:
+    tp=268, tn=268, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+
+../../Samples/Test/unknown/10.mp4, frames:252
+detection:
+    tp=15, tn=∞, fp=1, fn=4
+    recall (aka TPR)=0.789474
+    FNR=0.210526
+    FPR=0
+recognition for known subjects:
+    accuracy= cannot be calculated (ㅠ﹏ㅠ)
+recognition for unknown subjects:
+    tp=15, tn=15, fp=0, fn=0
+    recall (aka TPR)=1
+    FNR=0
+    FPR=0
+
+overall detection:
+    recall (aka TPR)=0.827565
+    FNR=0.172435
+    FPR=0
+overall recognition for known subjects:
+    accuracy=0.987261
+overall recognition for unknown subjects:
+    recall (aka TPR)=0.996327
+    FNR=0.00367261
+    FPR=0.0214545
