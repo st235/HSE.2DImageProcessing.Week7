@@ -560,11 +560,24 @@ For recognition there are 2 sets:
 
 ## Quality
 
+overall detection:
+recall (aka TPR)=0.827565
+FNR=0.172435
+FPR=0
+overall recognition for known subjects:
+accuracy=0.987261
+overall recognition for unknown subjects:
+recall (aka TPR)=0.996327
+FNR=0.00367261
+FPR=0.0214545
+
 ### Detection
 
-| Metric   | Score  |
-|----------|--------|
-| Recall   | ~0.434 |
+| Metric | Score   |
+|--------|---------|
+| TPR    | ~0.828  |
+| FNR    | ~0.172  |
+| FPR    | 0       |
 
 ### Recognition
 
@@ -572,13 +585,15 @@ For recognition there are 2 sets:
 
 | Metric   | Score  |
 |----------|--------|
-| Recall   | ~0.434 |
+| Accuracy | ~0.987 |
 
 #### Unknown people
 
 | Metric   | Score  |
 |----------|--------|
-| Recall   | ~0.434 |
+| TPR    | ~0.996 |
+| FNR    | ~0.004 |
+| FPR    | 0.021  |
 
 Full report can be found in (the report file)[./REPORT]
 
