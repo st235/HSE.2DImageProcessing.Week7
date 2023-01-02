@@ -87,7 +87,7 @@ You can find pre-processed data under the [`TrainSet`](./TrainSet) folder.
 This step can be performed automagically 🪄 by using the command below:
 
 ```bash
-./FaceDetector ../../../Samples/Training/atkinson --dataset -o ./preprocessing_results [-d]
+./FaceDetector ../../../Samples/Training/atkinson --dataset -o ../preprocessing_results [-d]
 ```
 
 The command accepts a list of image files and/or folder containing image files as the first parameter immediately followed by `--dataset` flag that specifies the mode. Although this arguments are making a complete command you can also find useful a few extra flags:

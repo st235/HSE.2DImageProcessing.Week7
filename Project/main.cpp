@@ -74,8 +74,8 @@ void GenerateDataset(const std::vector<std::string>& raw_files,
         }
 
         if (faces.empty()) {
-            std::cout << "Skipping: " << file_path
-                      << "no faces detected" << std::endl;
+            std::cout << "Skipping " << file_path
+                      << ": no faces detected" << std::endl;
         }
 
         if (is_debug) {
