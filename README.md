@@ -30,6 +30,12 @@ If for some reason the files are not there you need to copy them into the `bin` 
 
 Hooray 🎉 You're ready to start using the app.
 
+P.S.: to run the program you need to navigate to the `bin` folder.
+
+```bash
+cd bin
+```
+
 ## Data
 
 I will briefly introduce the data before showing how to work with the app through your CLI. 
@@ -81,7 +87,7 @@ You can find pre-processed data under the [`TrainSet`](./TrainSet) folder.
 This step can be performed automagically 🪄 by using the command below:
 
 ```bash
-./bin/FaceDetector ../../Samples/Training/atkinson --dataset -o ./preprocessing_results [-d]
+./FaceDetector ../../../Samples/Training/atkinson --dataset -o ./preprocessing_results [-d]
 ```
 
 The command accepts a list of image files and/or folder containing image files as the first parameter immediately followed by `--dataset` flag that specifies the mode. Although this arguments are making a complete command you can also find useful a few extra flags:
@@ -217,7 +223,7 @@ After we pre-processed our faces and saved them to the disk we can train our rec
 We can use the command below:
 
 ```bash
-./bin/FaceDetector ../../TrainSet --train -om ./output_model.yml -ol ./output_labels.txt
+./FaceDetector ../../../TrainSet --train -om ./output_model.yml -ol ./output_labels.txt
 ```
 
 As you can see this command accepts a folder with images followed by mode `--train` and **2 mandatory flags**: 
@@ -357,7 +363,7 @@ It is time to see how the app works.
 To start the app one may use the command below:
 
 ```bash
-./bin/FaceDetector ../../Samples/Test --process -im ../../Samples/model_dnn_knn.yml -il ../../Samples/mapping_labels.dat [-t optional] [-d optional]
+./FaceDetector ../../../Samples/Test --process -im ../../../Samples/model_dnn_knn.yml -il ../../../Samples/mapping_labels.dat [-t optional] [-d optional]
 ```
 
 As you've seen earlier the command accepts a directory with images and/or images
@@ -378,7 +384,7 @@ After running the command you will see the video output.
 Below is a command example of running the app with a `debug` flag and testing against some config.
 
 ```bash
-./bin/FaceDetector ../../Samples/Test/atkinson/2.mp4 --process -im ../../Samples/model_dnn_knn.yml -il ../../Samples/mapping_labels.dat -t -d
+./FaceDetector ../../../Samples/Test/atkinson/2.mp4 --process -im ../../../Samples/model_dnn_knn.yml -il ../../../Samples/mapping_labels.dat -t -d
 ```
 
 When debugging you will see app detections in **red** and annotations in **blue**. See the example below:
@@ -509,7 +515,7 @@ For example, your video sample is `a/b/c/amazing_video.mp4` the annotations file
 To verify your annotations you may run the command in a specific `--config` mode:
 
 ```bash
-./bin/FaceDetector ../../Samples/Test/pegg/3.mp4 --config
+./FaceDetector ../../../Samples/Test/pegg/3.mp4 --config
 ```
 
 You will see something similar to the image below. If you see similar result 
@@ -583,17 +589,6 @@ For recognition there are 2 sets:
 - __Unknown people.__ I am using a confusion matrix for binary classification.
 
 ## Quality
-
-overall detection:
-recall (aka TPR)=0.827565
-FNR=0.172435
-FPR=0
-overall recognition for known subjects:
-accuracy=0.987261
-overall recognition for unknown subjects:
-recall (aka TPR)=0.996327
-FNR=0.00367261
-FPR=0.0214545
 
 ### Detection
 
