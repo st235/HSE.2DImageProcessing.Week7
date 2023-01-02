@@ -1,6 +1,6 @@
 # Face Detector
 
-Hello! This project is intended to be a final project for 2D Image Processing Course.
+Hello! This project is intended to be the final project for "2D Image Processing" course.
 
 ## Build
 
@@ -9,9 +9,9 @@ Let's start from the basics. You need to build the project in order to try it ou
 A few prerequisites should be met beforehand:
 - C++ 17 compiler installed, check out [this guide](https://en.cppreference.com/w/cpp/compiler_support/17) to verify your compiler;
 - OpenCV installed and configured to work with CMake: if not, please, [check out this guide](https://docs.opencv.org/4.x/d7/d9f/tutorial_linux_install.html);
-- You have stable Internet connection as [CMake needs to download dlib library](https://github.com/st235/HSE.2DImageProcessing.Week7/blob/main/Project/CMakeLists.txt#L25)
+- You have stable Internet connection as [CMake needs to download dlib library](./Project/CMakeLists.txt#L25)
 
-If everything is ready to go I am happy to proceed to building commands. You need to navigate to the [`Project`](https://github.com/st235/HSE.2DImageProcessing.Week7/tree/main/Project) folder and the following commands:
+If everything is ready to go I am happy to proceed to the building stage. You need to navigate to the [`Project`](./Project) folder and run the following chain of commands:
 
 ```bash
 mkdir build
@@ -21,13 +21,18 @@ cmake ..
 make -j7
 ```
 
-Once is done, you should see `bin` directory inside your `build` folder. Please, do verify that the `bin` folder has an executable file and a few additional files: `dlib_face_recognition_resnet_model_v1.dat`, `haarcascade_frontalface_alt.xml`, `haarcascade_frontalface_alt2.xml`, `haarcascade_frontalface_default.xml`, `haarcascade_lefteye_2splits.xml`, `haarcascade_lefteye_2splits.xml`, and `shape_predictor_68_face_landmarks.dat`. If for some reason the files are not there you need to copy them in `bin` directory from [`misc`](https://github.com/st235/HSE.2DImageProcessing.Week7/tree/main/Project/misc).
+Once is done, you should see `bin` directory inside your `build` folder. 
+Please, do verify that the `bin` folder has an executable file and a few additional files: 
+`dlib_face_recognition_resnet_model_v1.dat`, `haarcascade_frontalface_alt.xml`, 
+`haarcascade_frontalface_alt2.xml`, `haarcascade_frontalface_default.xml`, 
+`haarcascade_lefteye_2splits.xml`, `haarcascade_lefteye_2splits.xml`, and `shape_predictor_68_face_landmarks.dat`. 
+If for some reason the files are not there you need to copy them into the `bin` directory from [`misc`](./Project/misc).
 
 Hooray 🎉 You're ready to start using the app.
 
 ## Data
 
-I will breifly introduce the data before showing how to call the app through your CLI. 
+I will briefly introduce the data before showing how to work with the app through your CLI. 
 
 I gathered photos of 10 actors for further classification:
 
@@ -42,17 +47,25 @@ I gathered photos of 10 actors for further classification:
 - [Andrew Lincoln](https://en.wikipedia.org/wiki/Andrew_Lincoln)
 - [Simon Pegg](https://en.wikipedia.org/wiki/Simon_Pegg)
 
-You can find gathered images inside [`Samples/Training`](https://github.com/st235/HSE.2DImageProcessing.Week7/tree/main/Samples/Training). I use these data to train my models.
+You can find data for training inside [`Samples/Training`](./Samples/Training).
 
-To test the quality of the approach I am using annotated video samples. The videos capture the same actores as given below and contain some other people. Moreover, a few videos under the `unknown` folder predominantly contain people from the outside of the training set. You can find data gathered for testing under [`Samples/Test`](https://github.com/st235/HSE.2DImageProcessing.Week7/tree/main/Samples/Test) and follows principles from [Open Set Face Recognition](https://jwdai.github.io/Research/OSFR/OSFR.htm).
+To test the quality I am using annotated video samples. 
+Videos capture the same actors as actors above and contain some other people. 
+Moreover, a few videos under the `unknown` folder predominantly contain people from the outside of the training set. 
+You can find data for testing under [`Samples/Test`](./Samples/Test).
 
-P.S.: All gathered data are used for research purposes only and towards receiving a degree. I believe that this case qualifies as [fair usage](https://www.bl.uk/business-and-ip-centre/articles/fair-dealing-copyright-explained) and obey the UK copyright law. If you have any concerns, please, contact me using my email or opening the issue in the repository.
+Overall, the data follows principles from [Open Set Face Recognition](https://jwdai.github.io/Research/OSFR/OSFR.htm).
+
+P.S.: All the data is used for research purposes only.
+I believe that this case qualifies as [fair usage](https://www.bl.uk/business-and-ip-centre/articles/fair-dealing-copyright-explained) and obey the UK copyright law. 
+If you have any concerns, please, contact me using my email or opening an issue in the repository.
 
 ## Preparing dataset
 
-I made data pre-processing pior training the model.
+I made data pre-processing prior training the model.
 
-Pre-processing can be separated into a few steps:
+Pre-processing can be represented in a few steps:
+
 | Step | Image  | Description  |
 | ------- | --- | --- |
 | 0. Scan | ![Original](./Resources/original_face.png) | Scan the image from the `Samples` folder. |
@@ -63,56 +76,71 @@ Pre-processing can be separated into a few steps:
 | 5. Validate |  | Discard invalid faces: bad image quality, extreme rotation angle, and so on. |
 
 
-You can find pre-processed data under [`TrainSet`](https://github.com/st235/HSE.2DImageProcessing.Week7/tree/main/TrainSet) folder.
+You can find pre-processed data under the [`TrainSet`](./TrainSet) folder.
 
 This step can be performed automagically 🪄 by using the command below:
 
 ```bash
-./bin/FaceDetector ../../Samples/Training/atkinson --dataset -o ./preprocessing_results -d
+./bin/FaceDetector ../../Samples/Training/atkinson --dataset -o ./preprocessing_results [-d]
 ```
 
 The command accepts a list of image files and/or folder containing image files as the first parameter immediately followed by `--dataset` flag that specifies the mode. Although this arguments are making a complete command you can also find useful a few extra flags:
 
-| Argument | Desciption                                                                                                                                                       |
-|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `-d`       | *Debug flag*: if specified then the app displays detected face on the image.                                                                                     |
-| `-o`       | *Output folder*: specifies the final directory for output images. All images will be named in the following order `\*original file name\*_face_\*id of a face\*. |
+| Argument | Optional | Desciption                                                                         |
+|----------|---------|-----------------------------------------------------------------------------------|
+| `-o`     | ✅       | *Output folder*: specifies the final directory for output images. All images will be named in the following order `\*original file name\*_face_\*id of a face\*. |
+| `-d`     | ✅       | *Debug flag*: if specified then the app displays detected face on the image.                    |
 
 **Note: I am using face detection at this step therefore I want to give you a 
-heads-up about face detection and "normalisation" logic under the hood.**
+heads-up about the face detection stage and face "normalisation" logic under the hood.**
 
 ### Face rotation explained
 
 ![Original](./Resources/face_rotation_explained.png)
 
-To rotate the image back to "normal" position we need to find an angle between the x-axis and the line connecting two eyes' centers. A bit of school math and the angle can be calculated as:
+To rotate the image back to the "normal" position
+we need to find an angle between the horizontal-axis and the line connecting two eyes' centers.
+
+The angle can be calculated using school math ideas:
 
 ```math
 angle=arctan(\frac{dx}{dy})
 ```
 
-You can find the corresponding code in [OpenCVFaceDetectionModel](https://github.com/st235/HSE.2DImageProcessing.Week7/blob/main/Project/src/opencv_face_detection_model.cpp#L81).
+where
+
+```math
+dx = |left_eye.x - right_eye.x|
+```
+
+and
+
+```math
+dy = |left_eye.y - right_eye.y|
+```
+
+You can find the corresponding code in [OpenCVFaceDetectionModel](./Project/src/opencv_face_detection_model.cpp#L81).
 
 ### A brief implementation overview
 
 ![Original](./Resources/uml_face_detection.png)
 
-The base class [FaceDetectionModel](https://github.com/st235/HSE.2DImageProcessing.Week7/blob/main/Project/include/face_detection_model.h#L76) abstracts different approaches to face detection:
-- [OpenCVFaceDetectionModel](https://github.com/st235/HSE.2DImageProcessing.Week7/blob/main/Project/include/opencv_face_detection_model.h#L17) uses opencv Haar-like features cascade classifier and accepts face cascades files
-to provide more flexibility for trying different classifiers 
-- [DLibFaceDetection](https://github.com/st235/HSE.2DImageProcessing.Week7/blob/main/Project/include/dlib_face_detection_model.h#L10) uses HOG-based classifier and allows to detect sides of the face in addition to
-frontal face detection. It seems like a more powerful technique but usually comes with
-additional performance overhead
+The base class [FaceDetectionModel](./Project/include/face_detection_model.h#L76) abstracts different approaches to face detection:
+- [OpenCVFaceDetectionModel](./Project/include/opencv_face_detection_model.h#L17) uses Haar-like features cascade classifier. 
+Moreover, the class accepts face cascades files in a constructor to provide more flexibility in trying different classifiers; 
+- [DLibFaceDetection](./Project/include/dlib_face_detection_model.h#L10) uses HOG-based classifier and allows to 
+detect sides of the face in addition to frontal face detection. It seems like a more powerful technique but usually comes with
+additional performance overhead.
 
 ### Different approaches comparison
 
 #### Classifier: `OpenCVFaceDetectionModel` + `haarcascade_frontalface_default.xml`
 
 Pros:
-- Fast and can work in runtime
+- Fast: definitely can work in runtime
 
 Cons:
-- Classifier has a lot of false-positive detections, therefore not accurate.
+- Classifier has a lot of false-positive detections, therefore not accurate
 
 | Not a face detected                                 | Not a face detected                                 |
 |-----------------------------------------------------|-----------------------------------------------------|
@@ -125,7 +153,7 @@ Cons:
 #### Classifier: `OpenCVFaceDetectionModel` + `haarcascade_frontalface_alt.xml`
 
 Pros:
-- Fast and can work in runtime
+- Fast: can work in runtime
 - Detects much less false-positive faces
 
 Cons:
@@ -143,7 +171,7 @@ Cons:
 #### Classifier: `OpenCVFaceDetectionModel` + `haarcascade_frontalface_alt2.xml`
 
 Pros:
-- Fast and can work in runtime
+- Fast: can work in runtime
 - Detects more faces than `frontalface_alt`
 - Detects more false-positive faces than `frontalface_alt` but fewer than `default` classifier
 
@@ -162,12 +190,13 @@ Cons:
 #### Classifier: `DLibFaceDetection`
 
 Pros:
-- Still can work in runtime but works slower than the other classifiers
+- Still can work in runtime but works slower than the other classifiers, so its usage is a bit arguable and depends
+on the task/project
 - Can find faces even if they are partially outside of viewport bound
 
 Cons:
 - Has false-positive detections
-- Finds fewer "small" faces
+- Finds fewer "small" faces: to solve this problem we can pyramid up the image more though it will affect performance
 
 | Face from the side                        | Face detected however the lighting conditions are not perfect |
 |-------------------------------------------|---------------------------------------------------------------|
@@ -179,13 +208,13 @@ Cons:
 
 #### Conclusion
 
-Perhaps in this work I will use `frontalface_alt2` cascade classifier from OpenCV even
-if it works a bit worse than a dlib classifier as it feels a bit performance-wise faster.
+Perhaps in this work I will use the `frontalface_alt2` cascade classifier from OpenCV even
+if it works a bit worse than a dlib classifier as it feels a bit performance-wise better.
 
 ## Training
 
 After we pre-processed our faces and saved them to the disk we can train our recognition model.
-We can do using the command below:
+We can use the command below:
 
 ```bash
 ./bin/FaceDetector ../../TrainSet --train -om ./output_model.yml -ol ./output_labels.txt
@@ -194,18 +223,13 @@ We can do using the command below:
 As you can see this command accepts a folder with images followed by mode `--train` and **2 mandatory flags**: 
 output model file `-om` and output labels file `-ol`.
 
-Please, do keep in mind that **a label** for the face will be extracted 
-from the name of folder where the image lays.
+Please, do keep in mind that **a label** for the face will be extracted from the name of folder where the image lays.
 
-For example, if your image lays within `a/b/c/image.png` then the label for
-this image will be `c`.
+For example, if your image lays within `a/b/c/image.png` then the label for this image will be `c`.
 
 After execution command creates 2 files: `model` and `labels`.
 
-I am using preprocessed data from the previous step located in 
-the [`TrainSet`](https://github.com/st235/HSE.2DImageProcessing.Week7/tree/main/TrainSet)
-folder.
-
+I am using preprocessed data from the previous step located in the [`TrainSet`](./TrainSet) folder.
 The content of this folder looks like the images below:
 
 | Face 1                                      | Face 2                                    | Face 3                                     | Face 4                                  | Face 5                                    |
@@ -216,23 +240,21 @@ The content of this folder looks like the images below:
 
 ![Original](./Resources/uml_face_recognition.png)
 
-Base class [FaceRecognitionModel](https://github.com/st235/HSE.2DImageProcessing.Week7/blob/main/Project/include/face_recognition_model.h)
+Base class [FaceRecognitionModel](./Project/include/face_recognition_model.h)
 represents an abstract recognition model. Every model supports 4 basic
 operations:
 - **write:** to serialise the internal representation of the model into some file
 - **read:** to deserialise model's representation from file 
-- **train:** used to teach your model on some data, however, if your model has
-been deserialised from file it should be fine to do not call `train` if has been
-called before
-- **predict:** predicts the class of the given face
+- **train:** teaches your model on some data; if your model has
+been trained, serialised, and then deserialised from a file 
+it should be fine to skip the `train` step and do some predictions
+- **predict:** predicts the class label for the given face image
 
-Every recognition model represents a recognition algorithm that can be represented in
-2 major steps:
-1. Extract features from the image as a vector or vectors; 
-2. Use any machine learning technique to spot relationship between the extracted
-vector and projected classes.
+An algorithm for face recognition can be represented in 2 steps:
+1. Extract features from the image as a vector or vectors;
+2. Use any machine learning technique to spot relationship between the extracted vector/vectors and the given classes.
 
-In there project were considered a few approaches with different outcomes.
+In there project were considered a few approaches with different scores.
 
 #### BowRecognitionModel
 
@@ -241,6 +263,8 @@ Bag of visual words: pretty classic approach to analyse different classes of obj
 I was using SIFT to extract features from the face and then tried to apply
 K Nearest Neighbours clustering algorithm to extract specific features from the
 given vectors.
+
+At the end SVM or KNN used to match feature vectors.
 
 
 | Extracted features example, Atkinson        | Extracted features example, Cohen           |
@@ -252,34 +276,35 @@ Pros:
 - Not observed
 
 Cons:
-- Prediction quality is quite low: my explanation for this result is 
-because all faces have pretty close visual features and it is really
+- Prediction quality is quite low. My explanation for observed results:  
+all faces have pretty close visual features and it is really
 hard to spot any distinct qualities unless the face under observation
 has some distinct features: scars, tattoo, hair patterns, and so on
 - Bad performance: mapping extracted features to the specific visual words
 is an expensive operation and can be hardly applied in runtime, moreover,
-clustering during the training process on extracted features takes a lot 
-of time during training as well.
+clustering during the training process on extracted features takes a significant amount 
+of time (~10 mins).
 
-For my case every object has been recognised as Emilia Clarke
+For my case every object has been recognised as **Emilia Clarke**
 
 | Atkinson                                               | Atkinson                                               | Cohen                                               |
 |--------------------------------------------------------|--------------------------------------------------------|-----------------------------------------------------|
 | ![Atkinson](./Resources/bow_recognition_quality_1.png) | ![Atkinson](./Resources/bow_recognition_quality_2.png) | ![Face1](./Resources/bow_recognition_quality_3.png) |
 
-I think this is almost useless to calculate the metrics when you have the only
-classification result.
+__I believe this is almost useless to calculate the metrics when you have the only
+classification result.__
 
 #### HogRecognitionModel
 
 Instead of extracting features and combining them into visual words we can
-try to consider extracted features as a face descriptor. 
+try to consider extracted features as a face descriptor and then use KNN to match the vectors.
 
 Frankly speaking, this approach works much better than Bag of Visual Words although
 far away from ideal.
 
 To normalise the HOG vector I am scaling all images to the same size [128x128]
-without preserving aspect ratio to preserve possible image features.
+without preserving aspect ratio. Such transformation should preserve possible image features while
+aspect ratio preserving rescaling followed by center cropping will leave some features behind.
 
 A few examples are given below:
 
@@ -302,6 +327,7 @@ The recognition works in a few steps:
 
 1. Using a random forest to find [68 facial landmarks](https://www.researchgate.net/figure/68-facial-landmarks_fig1_338048224)
 2. Using a dnn model to convert these 68 points to 128D vector
+3. Use KNN to find the class' label
 
 | Extracted features example, Lincoln       | Extracted features example, Cohen         | Extracted features example, Atkinson       | Extracted features example, Pegg           |
 |-------------------------------------------|-------------------------------------------|--------------------------------------------|--------------------------------------------|
@@ -331,12 +357,12 @@ It is time to see how the app works.
 To start the app one may use the command below:
 
 ```bash
-./bin/FaceDetector ../../Samples/Test --process -im ../../Samples/model_dnn_knn.yml -il ../../Samples/mapping_labels.dat -t [-d optional]
+./bin/FaceDetector ../../Samples/Test --process -im ../../Samples/model_dnn_knn.yml -il ../../Samples/mapping_labels.dat [-t optional] [-d optional]
 ```
 
 As you've seen earlier the command accepts a directory with images and/or images
-list separated by space and followed by `--process` mode. The command has 2 mandatory
-and 2 optional arguments.
+list separated by space and followed by `--process` mode. The command has **2 mandatory
+and 2 optional arguments**.
 
 | Argument | Optional | Desciption                                                                         |
 |----------|---------|-----------------------------------------------------------------------------------|
@@ -349,14 +375,13 @@ After running the command you will see the video output.
 
 ![Result](./Resources/processing_result.png)
 
-Here is the example of running the command with a `debug` flag and testing against some config.
+Below is a command example of running the app with a `debug` flag and testing against some config.
 
 ```bash
 ./bin/FaceDetector ../../Samples/Test/atkinson/2.mp4 --process -im ../../Samples/model_dnn_knn.yml -il ../../Samples/mapping_labels.dat -t -d
 ```
 
-When debugging you will see app detections in **red** and annotations in **blue**. See
-the example below:
+When debugging you will see app detections in **red** and annotations in **blue**. See the example below:
 
 | Frame 50                                             | Frame 150                                            |
 |------------------------------------------------------|------------------------------------------------------|
@@ -367,7 +392,7 @@ the example below:
 To save some computational resources and save some processing time the app performs face detection and
 recognition every **10** frames, in between the app tries to keep track of already detected frames.
 
-There are a few image trackers implemented in the project. See the comparison below.
+There are a few image trackers implemented in the project. See the comparison table below.
 Please, do note, that to compute __detection + tracking score__ I was using previously selected models: 
 `DNN` + `frontalface_alt2`.
 
@@ -458,8 +483,7 @@ I will use `KCF` in my final work as it seems as a good tradeoff between quality
 
 ### Make your own annotations
 
-To make your own annotations file your file need to follow the annotations
-structure given below:
+To make your own annotations file your file you need to follow the annotations structure given below:
 
 ```bash
  frame_index_1
@@ -473,22 +497,23 @@ structure given below:
  ...
 ```
 
-You can see an example under `Samples/Test`, for example, [`atkinson/1.txt`](https://github.com/st235/HSE.2DImageProcessing.Week7/blob/main/Samples/Test/atkinson/1.txt).
+You can see an example under `Samples/Test`, like, [`atkinson/1.txt`](./Samples/Test/atkinson/1.txt).
 
-Please, do keep in mind, to make the automagic 🪄 work you need to put this annotations file in the same folder where you
+Please, do keep in mind, to make the automagic 🪄 work you need to put your annotations file in the same folder where the
 video sample is located **and** give it exactly the same name with a different extension - `.txt`.
 
 For example, your video sample is `a/b/c/amazing_video.mp4` the annotations file should be `a/b/c/amazing_video.txt`.
 
 ### Verify your annotations
 
-To verify your annotations you may run the command with in a specific `--config` mode:
+To verify your annotations you may run the command in a specific `--config` mode:
 
 ```bash
 ./bin/FaceDetector ../../Samples/Test/pegg/3.mp4 --config
 ```
 
-You will see something similar to the image below. It means that you created annotations config successfully. Congratulations!
+You will see something similar to the image below. If you see similar result 
+you created annotations config successfully. Congratulations!
 
 ![Result](./Resources/config_mode.png)
 
@@ -503,7 +528,7 @@ True positive rate can be calculated using the following formulae:
 TPR=\frac{TP}{FN+TP}
 ```
 
-However, task requires to show additional metrics, like FNR (false negative rate) and FPR (false positive rate).
+However, the task requires to show additional metrics, like FNR (false negative rate) and FPR (false positive rate).
 I have a few observations about these metrics that looks rather confusing.
 
 #### FNR
@@ -524,7 +549,6 @@ therefore
 FNR=1-TPR
 ```
 
-which actually looks correct using data from app reports.
 However, I will calculate this metric using the original formulae.
 
 #### FPR
@@ -535,12 +559,12 @@ We can get FPR using the formulae below:
 FPR=\frac{FP}{TN+FP}
 ```
 
-However, calculating true negative cases does make any sense.
-True negative means that we did not detect the area as a face and it was a right call.
+Calculating true negative cases does make any sense.
+True negative means that we do not detect the area as a face and this is a right call.
 So, there are a lot of rects (in theory infinitely many) that have not been recognized. 
 Adding this metric to the final report will create unnecessary noise, therefore I am considering `TN` score as `∞`.
 
-Taking into considerations the logic above we can modify `FPR` formulae
+Taking into considerations this logic we can modify `FPR` formulae
 
 ```math
 TN \rightarrow \infty
@@ -595,7 +619,7 @@ FPR=0.0214545
 | FNR    | ~0.004 |
 | FPR    | 0.021  |
 
-Full report can be found in (the report file)[./REPORT]
+Full report can be found in [the report file](./REPORT)
 
 Wow! You've really made this through the document. Thank you for reading!
 
