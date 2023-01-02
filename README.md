@@ -536,14 +536,14 @@ FPR=\frac{FP}{TN+FP}
 
 However, calculating true negative cases does make any sense.
 True negative means that we did not detect the area as a face and it was a right call.
-So, there are a lot of rects that have not been recognized and adding this metric to
-the final report will create avoidable noise, therefore I am considering `TN` score as `0`.
+So, there are a lot of rects (in theory infinitely many) that have not been recognized. 
+Adding this metric to the final report will create unnecessary noise, therefore I am considering `TN` score as `∞`.
 
 Taking into considerations the logic above we can modify `FPR` formulae
 
 ```math
-TN=0\
-FPR=\frac{FP}{TN+FP}=\frac{FP}{0+FP}=1
+TN \rightarrow \infty\\
+FPR = \frac{FP}{TN+FP} = lim_{x \rightarrow \infty}\frac{FP}{x+FP} = 1
 ```
 
 So, `FPR` will be always `1` and it does not seem reasonable to keep track of the metric.
