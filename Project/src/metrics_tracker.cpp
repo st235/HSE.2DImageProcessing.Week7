@@ -1,12 +1,22 @@
 #include "metrics_tracker.h"
 
+#include <limits>
 #include <unordered_map>
+#include <iostream>
 
 #include "strings.h"
 
 namespace {
 
 const static std::string UNKNOWN_LABEL = "unknown";
+
+int32_t AddWithInf(int32_t a, int32_t b, int32_t inf) {
+    if (a == inf || b == inf) {
+        return inf;
+    }
+
+    return a + b;
+}
 
 }
 
@@ -189,6 +199,8 @@ MultiClassificationMatrix::~MultiClassificationMatrix() {
     delete[] _classification_matrix;
 }
 
+const int32_t BinaryClassificationMatrix::INF = -1;
+
 BinaryClassificationMatrix::BinaryClassificationMatrix():
     tp(0),
     tn(0),
@@ -228,10 +240,10 @@ BinaryClassificationMatrix& BinaryClassificationMatrix::operator=(const BinaryCl
 }
 
 BinaryClassificationMatrix BinaryClassificationMatrix::merge(const BinaryClassificationMatrix& that) {
-    return BinaryClassificationMatrix(tp + that.tp,
-                           tn + that.tn,
-                           fp + that.fp,
-                           fn + that.fn);
+    return BinaryClassificationMatrix(AddWithInf(tp, that.tp, INF),
+                                      AddWithInf(tn, that.tn, INF),
+                                      AddWithInf(fp, that.fp, INF),
+                                      AddWithInf(fn, that.fn, INF));
 }
 
 double BinaryClassificationMatrix::tpr() const {
@@ -239,22 +251,52 @@ double BinaryClassificationMatrix::tpr() const {
 }
 
 double BinaryClassificationMatrix::fnr() const {
+    if (fn == INF) {
+        return std::numeric_limits<double>::infinity();
+    }
+    if (tp == INF || fn == INF) {
+        return 0;
+    }
     return static_cast<double>(fn) / (static_cast<double>(tp) + static_cast<double>(fn));
 }
 
 double BinaryClassificationMatrix::tnr() const {
+    if (tn == INF) {
+        return std::numeric_limits<double>::infinity();
+    }
+    if (tn == INF || fp == INF) {
+        return 0;
+    }
     return static_cast<double>(tn) / (static_cast<double>(tn) + static_cast<double>(fp));
 }
 
 double BinaryClassificationMatrix::fpr() const {
+    if (fp == INF) {
+        return std::numeric_limits<double>::infinity();
+    }
+    if (fp == INF || tn == INF) {
+        return 0.0;
+    }
     return static_cast<double>(fp) / (static_cast<double>(fp) + static_cast<double>(tn));
 }
 
 double BinaryClassificationMatrix::precision() const {
+    if (tp == INF) {
+        return std::numeric_limits<double>::infinity();
+    }
+    if (tp == INF || fp == INF) {
+        return 0;
+    }
     return static_cast<double>(tp) / (static_cast<double>(tp) + static_cast<double>(fp));
 }
 
 double BinaryClassificationMatrix::recall() const {
+    if (tp == INF) {
+        return std::numeric_limits<double>::infinity();
+    }
+    if (tp == INF || fn == INF) {
+        return 0;
+    }
     return static_cast<double>(tp) / (static_cast<double>(tp) + static_cast<double>(fn));
 }
 
@@ -283,10 +325,10 @@ BinaryClassificationMatrix BinaryClassificationMatrix::operator+(const BinaryCla
 }
 
 BinaryClassificationMatrix& BinaryClassificationMatrix::operator+=(const BinaryClassificationMatrix& that) {
-    this->tp += that.tp;
-    this->tn += that.tn;
-    this->fp += that.fp;
-    this->fn += that.fn;
+    this->tp = AddWithInf(tp, that.tp, INF);
+    this->tn = AddWithInf(tn, that.tn, INF);
+    this->fp = AddWithInf(fp, that.fp, INF);
+    this->fn = AddWithInf(fn, that.fn, INF);
     return *this;
 }
 
@@ -344,7 +386,7 @@ void MetricsTracker::trackDetection(const FrameInfo& frame_info,
     _detections_per_frame_lookup.insert({ frame_info.id(),
                   BinaryClassificationMatrix(
                           matched,
-                          0 /* tn, not applicable for the project */,
+                          BinaryClassificationMatrix::INF /* tn, there are infinite number of areas that were not faces */,
                           detected_face_origins.size() - matched /* fp */,
                           annotated_faces_origins.size() - matched /* fn */) });
 }

@@ -13,6 +13,8 @@ namespace detection {
 
 struct BinaryClassificationMatrix {
 public:
+    static const int32_t INF;
+
     int32_t tp;
     int32_t tn;
     int32_t fp;

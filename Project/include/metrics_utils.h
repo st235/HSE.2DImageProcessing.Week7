@@ -1,10 +1,38 @@
 #ifndef METRICS_UTILS_H
 #define METRICS_UTILS_H
 
+#include <cmath>
+#include <cstdint>
 #include <iostream>
 #include <string>
 
 #include "metrics_tracker.h"
+#include "strings.h"
+
+namespace {
+
+std::string ValueToString(int32_t value) {
+    if (value == detection::BinaryClassificationMatrix::INF) {
+        return "\u221E";
+    }
+    return std::AsString(value);
+}
+
+std::string FormatValue(const std::string& indent,
+                        const std::string& title,
+                        double value) {
+    if (std::isnan(value)) {
+        return indent + title + " cannot be calculated (ㅠ﹏ㅠ)";
+    }
+
+    if (std::isinf(value)) {
+        return indent + title + "\u221E";
+    }
+
+    return indent + title + std::AsString(value);
+}
+
+} // namespace
 
 namespace detection {
 
@@ -37,45 +65,38 @@ static void PrintBinaryMatrix(const std::string& title,
 
     if ((flags & PB_CONFUSION_SCORES) != 0) {
         std::cout << indent
-            << "tp=" << matrix.tp
-            << ", tn=" << matrix.tn
-            << ", fp=" << matrix.fp
-            << ", fn=" << matrix.fn << std::endl;
+            << "tp=" << ValueToString(matrix.tp)
+            << ", tn=" << ValueToString(matrix.tn)
+            << ", fp=" << ValueToString(matrix.fp)
+            << ", fn=" << ValueToString(matrix.fn) << std::endl;
     }
 
     if ((flags & PB_PRECISION) != 0) {
-        std::cout << indent
-                  << "precision=" << matrix.precision() << std::endl;
+        std::cout << FormatValue(indent, "precision=", matrix.precision()) << std::endl;
     }
 
     if ((flags & PB_RECALL) != 0 || (flags & PB_TPR) != 0) {
-        std::cout << indent
-                  << "recall(aka TPR)=" << matrix.recall() << std::endl;
+        std::cout << FormatValue(indent, "recall (aka TPR)=", matrix.recall())<< std::endl;
     }
 
     if ((flags & PB_ACCURACY) != 0) {
-        std::cout << indent
-                  << "accuracy=" << matrix.accuracy() << std::endl;
+        std::cout << FormatValue(indent, "accuracy=", matrix.accuracy()) << std::endl;
     }
 
     if ((flags & PB_F1) != 0) {
-        std::cout << indent
-                  << "f1=" << matrix.f1() << std::endl;
+        std::cout << FormatValue(indent, "f1=", matrix.f1()) << std::endl;
     }
 
     if ((flags & PB_FNR) != 0) {
-        std::cout << indent
-                  << "FNR=" << matrix.fnr() << std::endl;
+        std::cout << FormatValue(indent, "FNR=", matrix.fnr()) << std::endl;
     }
 
     if ((flags & PB_TNR) != 0) {
-        std::cout << indent
-                  << "TNR=" << matrix.tnr() << std::endl;
+        std::cout << FormatValue(indent, "TNR=", matrix.tnr()) << std::endl;
     }
 
     if ((flags & PB_FPR) != 0) {
-        std::cout << indent
-                  << "FPR=" << matrix.fpr() << std::endl;
+        std::cout << FormatValue(indent, "FPR=", matrix.fpr()) << std::endl;
     }
 }
 
@@ -98,8 +119,7 @@ static void PrintMulticlassMatrix(const std::string& title,
     }
 
     if ((flags & MB_ACCURACY) != 0) {
-        std::cout << indent
-                  << "accuracy=" << matrix.accuracy() << std::endl;
+        std::cout << FormatValue(indent, "accuracy=", matrix.accuracy()) << std::endl;
     }
 }
 
