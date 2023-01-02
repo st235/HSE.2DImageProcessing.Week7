@@ -496,6 +496,59 @@ You will see something similar to the image below. It means that you created ann
 
 ### Detection quality
 
+To analyse quality I am relying mostly on recall (aka true positive rate).
+True positive rate can be calculated using the following formulae:
+
+```math
+TPR=\frac{TP}{FN+TP}
+```
+
+However, task requires to show additional metrics, like FNR (false negative rate) and FPR (false positive rate).
+I have a few observations about these metrics that looks rather confusing.
+
+#### FNR
+
+```math
+FNR=\frac{FN}{FN+TP}
+```
+
+If we add FNR to TPR we will get
+
+```math
+TPR+FNR=\frac{TP}{FN+TP}+\frac{FN}{FN+TP}=\frac{TP+FN}{FN+TP}=1
+```
+
+therefore
+
+```math
+FNR=1-TPR
+```
+
+which actually looks correct using data from app reports.
+
+#### FPR
+
+We can get FPR using the formulae below:
+
+```math
+FPR=\frac{FP}{TN+FP}
+```
+
+However, calculating true negative cases does make any sense.
+True negative means that we did not detect the area as a face and it was a right call.
+So, there are a lot of rects that have not been recognized and adding this metric to
+the final report will create avoidable noise, therefore I am considering `TN` score as `0`.
+
+Taking into considerations the logic above we can modify `FPR` formulae
+
+```math
+TN=0\
+FPR=\frac{FP}{TN+FP}=\frac{FP}{0+FP}=1
+```
+
+So, `FPR` will be always `1` and it does not seem reasonable to keep track of the metric.
+
+
 ### Recognition quality
 
 ## Quality
