@@ -321,7 +321,9 @@ This model works much better than the others.
 |---------------------------------------------------------|-------------------------------------------------------|
 | ![Result](./Resources/dnn_recognition_quality_5.jpeg)   | ![Result](./Resources/dnn_recognition_quality_6.jpeg) |
 
-I will bear with this approach as the approach is the most accurate.
+#### Conclusion
+
+I will bear with the `DNN` approach as the most accurate one.
 
 ## Processing videos
 
@@ -365,11 +367,92 @@ the example below:
 To save some computational resources and save some processing time the app performs face detection and
 recognition every **10** frames, in between the app tries to keep track of already detected frames.
 
-There are a few image trackers implemented in the project:
-- KCF: fast and do a few mistakes
-- MIL: slow but accurate, slower than `KCF`
-- CSRT: fast but makes a lot of errors
-- GOTURN: not observed any differences from `KCF`
+There are a few image trackers implemented in the project. See the comparison below.
+Please, do note, that to compute __detection + tracking score__ I was using previously selected models: 
+`DNN` + `frontalface_alt2`.
+
+### KCF
+
+Pros:
+- Fast: can work in runtime without any visible artifacts
+- Mostly accurate: track faces in the wast majority of cases
+
+Cons:
+- Loose objects that have been previously detected
+- Tracks objects that left the frame
+
+| Scene 1                                         | Scene 2                                         |
+|-------------------------------------------------|-------------------------------------------------|
+| ![Result](./Resources/tracking_kcf_issue_1.png) | ![Result](./Resources/tracking_kcf_issue_2.png) |
+
+| Metric   | Score  |
+|----------|--------|
+| Recall   | ~0.829 |
+
+### MIL
+
+Pros:
+- Seems like detects faces more accurate than `KCF`
+
+Cons:
+- Slow: still may be tolerable for runtime but works slower than `KCF`
+- Tracks an object even if the object is not in the frame
+- Still not perfect: sometimes as `KCF` just loose previously detected faces
+
+| Scene 1                                         | Scene 2                                         |
+|-------------------------------------------------|-------------------------------------------------|
+| ![Result](./Resources/tracking_mil_issue_1.png) | ![Result](./Resources/tracking_mil_issue_2.png) |
+
+| Metric   | Score  |
+|----------|--------|
+| Recall   | ~0.830 |
+
+### CSRT
+
+Pros:
+- Seems like detects faces more accurate than `KCF` and even `MIL`
+- Keeps tracking longer even when face is turned almost sideways
+
+Cons:
+- Slow: still may be tolerable for runtime but works slower than `KCF` and `MIL`
+- May track an object even if the object left the frame
+
+| Scene 1                                         | Scene 2                                          |
+|-------------------------------------------------|--------------------------------------------------|
+| ![Result](./Resources/tracking_csrt_issue_1.png) | ![Result](./Resources/tracking_csrt_issue_2.png) |
+
+| Metric   | Score  |
+|----------|--------|
+| Recall   | ~0.840 |
+
+### GOTURN
+
+__Please, note, you need to download from the Internet and 
+put into the same folder where the executable file is located 
+2 special files: `goturn.caffemodel` and `goturn.prototxt`.
+The tracker won't work without these files.__
+
+Pros:
+- Looks like tracking is mostly accurate
+
+Cons:
+- Slow: a total disaster, not feasible to use in runtime
+- Has major tracking issues when there are a few objects close to each other resulting
+in visual artifacts or enormous detections bounds
+- Sometimes the bounds are inaccurate
+
+| Enormous bound                                     | Close objects collapse                             | Inacurate bounds                                   |
+|----------------------------------------------------|----------------------------------------------------|----------------------------------------------------|
+| ![Result](./Resources/tracking_goturn_issue_1.png) | ![Result](./Resources/tracking_goturn_issue_2.png) | ![Result](./Resources/tracking_goturn_issue_3.png) |
+
+| Metric   | Score  |
+|----------|--------|
+| Recall   | ~0.434 |
+
+
+### Conclusion
+
+I will use `KCF` in my final work as it seems as a good tradeoff between quality and performance.
 
 ## Annotations
 
@@ -411,5 +494,8 @@ You will see something similar to the image below. It means that you created ann
 
 ## Metrics calculation
 
+### Detection quality
+
+### Recognition quality
 
 ## Quality
