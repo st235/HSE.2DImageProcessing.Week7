@@ -152,9 +152,9 @@ Cons:
 |-----------------------------------------------------|-----------------------------------------------------|
 | ![Original](./Resources/opencv_default_issue_1.png) | ![Original](./Resources/opencv_default_issue_2.png) |
 
-| Metric | Score |
-|--------|-------|
-| Recall | 0.755 |
+| Metric | Score  |
+|--------|--------|
+| Recall | ~0.846 |
 
 #### Classifier: `OpenCVFaceDetectionModel` + `haarcascade_frontalface_alt.xml`
 
@@ -170,9 +170,9 @@ Cons:
 |-------------------------------------------------|-------------------------------------------------|
 | ![Original](./Resources/opencv_alt_issue_1.png) | ![Original](./Resources/opencv_alt_issue_2.png) |
 
-| Metric   | Score |
-|----------|-------|
-| Recall   | 0.788 |
+| Metric   | Score  |
+|----------|--------|
+| Recall   | ~0.828 |
 
 #### Classifier: `OpenCVFaceDetectionModel` + `haarcascade_frontalface_alt2.xml`
 
@@ -189,11 +189,11 @@ Cons:
 |--------------------------------------------------|--------------------------------------------------|
 | ![Original](./Resources/opencv_alt2_issue_1.png) | ![Original](./Resources/opencv_alt2_issue_2.png) |
 
-| Metric   | Score |
-|----------|-------|
-| Recall   | 0.830 |
+| Metric   | Score  |
+|----------|--------|
+| Recall   | ~0.884 |
 
-#### Classifier: `DLibFaceDetection`
+#### Classifier: `DLibFaceDetectionModel`
 
 Pros:
 - Still can work in runtime but works slower than the other classifiers, so its usage is a bit arguable and depends
@@ -208,9 +208,9 @@ Cons:
 |-------------------------------------------|---------------------------------------------------------------|
 | ![Original](./Resources/dlib_issue_1.png) | ![Original](./Resources/dlib_issue_2.png)                     |
 
-| Metric   | Score |
-|----------|-------|
-| Recall   | 0.854 |
+| Metric   | Score  |
+|----------|--------|
+| Recall   | ~0.897 |
 
 #### Conclusion
 
