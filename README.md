@@ -418,7 +418,7 @@ Cons:
 
 | Metric   | Score  |
 |----------|--------|
-| Recall   | ~0.828 |
+| Recall   | ~0.884 |
 
 ### MIL
 
@@ -426,7 +426,7 @@ Pros:
 - Seems like detects faces more accurate than `KCF`
 
 Cons:
-- Slow: still may be tolerable for runtime but works slower than `KCF`
+- Slow: may be tolerated for runtime but works slower than `KCF`
 - Tracks an object even if the object is not in the frame
 - Still not perfect: sometimes as `KCF` just loose previously detected faces
 
@@ -436,7 +436,7 @@ Cons:
 
 | Metric   | Score  |
 |----------|--------|
-| Recall   | ~0.830 |
+| Recall   | ~0.887 |
 
 ### CSRT
 
@@ -445,7 +445,7 @@ Pros:
 - Keeps tracking longer even when face is turned almost sideways
 
 Cons:
-- Slow: still may be tolerable for runtime but works slower than `KCF` and `MIL`
+- Slow: still may be tolerated for runtime usages but works slower than `KCF` and `MIL`
 - May track an object even if the object left the frame
 
 | Scene 1                                         | Scene 2                                          |
@@ -454,7 +454,7 @@ Cons:
 
 | Metric   | Score  |
 |----------|--------|
-| Recall   | ~0.840 |
+| Recall   | ~0.893 |
 
 ### GOTURN
 
@@ -478,12 +478,12 @@ in visual artifacts or enormous detections bounds
 
 | Metric   | Score  |
 |----------|--------|
-| Recall   | ~0.434 |
+| Recall   | ~0.484 |
 
 
 ### Conclusion
 
-I will use `KCF` in my final work as it seems as a good tradeoff between quality and performance.
+I will use `KCF` in my final work as it seems as a good tradeoff between quality and performance. 
 
 ## Annotations
 
@@ -592,11 +592,11 @@ For recognition there are 2 sets:
 
 ### Detection
 
-| Metric | Score   |
-|--------|---------|
-| TPR    | ~0.828  |
-| FNR    | ~0.172  |
-| FPR    | 0       |
+| Metric | Score  |
+|--------|--------|
+| TPR    | ~0.884 |
+| FNR    | ~0.116 |
+| FPR    | 0      |
 
 ### Recognition
 
