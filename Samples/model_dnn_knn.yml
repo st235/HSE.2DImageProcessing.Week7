@@ -1,5 +1,7 @@
 %YAML:1.0
 ---
+_unknown_max_distance: 6.9999999999999996e-01
+_considered_neighbours: 100
 _dnn_model_file: "dlib_face_recognition_resnet_model_v1.dat"
 _landmarks_model_file: "shape_predictor_68_face_landmarks.dat"
 _knearest:
