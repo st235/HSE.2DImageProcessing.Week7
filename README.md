@@ -610,9 +610,9 @@ For recognition there are 2 sets:
 
 | Metric   | Score  |
 |----------|--------|
-| TPR    | ~0.996 |
-| FNR    | ~0.004 |
-| FPR    | 0.021  |
+| TPR      | ~0.996 |
+| FNR      | ~0.003 |
+| FPR      | 0.032  |
 
 Full report can be found in [the report file](./REPORT)
 
