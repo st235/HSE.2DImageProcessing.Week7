@@ -39,8 +39,8 @@ public:
   virtual ~FaceTrackingModel() = default;
 
 private:
-    FaceTrackingModel::Model _model;
-    std::vector<cv::Ptr<cv::Tracker>> _trackers;
+  FaceTrackingModel::Model _model;
+  std::vector<cv::Ptr<cv::Tracker>> _trackers;
 };
 
 } // namespace detection

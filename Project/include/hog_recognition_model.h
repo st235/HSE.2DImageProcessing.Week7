@@ -7,23 +7,23 @@ namespace detection {
 
 class HogRecognitionModel: public FaceRecognitionModel {
 private:
-    cv::Ptr<cv::ml::StatModel> _model;
+  cv::Ptr<cv::ml::StatModel> _model;
 
-    cv::Mat extractFeatures(cv::Mat image) const;
+  cv::Mat extractFeatures(cv::Mat image) const;
 
 public:
-    explicit HogRecognitionModel(cv::Ptr<cv::ml::StatModel> model = cv::ml::KNearest::create());
-    HogRecognitionModel(const HogRecognitionModel& that);
-    HogRecognitionModel& operator=(const HogRecognitionModel& that);
+  explicit HogRecognitionModel(cv::Ptr<cv::ml::StatModel> model = cv::ml::KNearest::create());
+  HogRecognitionModel(const HogRecognitionModel& that);
+  HogRecognitionModel& operator=(const HogRecognitionModel& that);
 
-    void write(const std::string& file) override;
-    void read(const std::string& file) override;
+  void write(const std::string& file) override;
+  void read(const std::string& file) override;
 
-    void train(std::vector<cv::Mat>& images,
-               std::vector<int>& images_labels) override;
-    int predict(cv::Mat& image) const override;
+  void train(std::vector<cv::Mat>& images,
+             std::vector<int>& images_labels) override;
+  int predict(cv::Mat& image) const override;
 
-    ~HogRecognitionModel() = default;
+  ~HogRecognitionModel() = default;
 };
 
 } // namespace detection

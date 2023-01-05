@@ -13,38 +13,38 @@ namespace detection {
 
 struct BinaryClassificationMatrix {
 public:
-    static const int32_t INF;
+  static const int32_t INF;
 
-    int32_t tp;
-    int32_t tn;
-    int32_t fp;
-    int32_t fn;
+  int32_t tp;
+  int32_t tn;
+  int32_t fp;
+  int32_t fn;
 
-    BinaryClassificationMatrix();
-    BinaryClassificationMatrix(int32_t tp,
-                               int32_t tn,
-                               int32_t fp,
-                               int32_t fn);
-    BinaryClassificationMatrix(const BinaryClassificationMatrix& that);
-    BinaryClassificationMatrix& operator=(const BinaryClassificationMatrix& that);
+  BinaryClassificationMatrix();
+  BinaryClassificationMatrix(int32_t tp,
+                             int32_t tn,
+                             int32_t fp,
+                             int32_t fn);
+  BinaryClassificationMatrix(const BinaryClassificationMatrix& that);
+  BinaryClassificationMatrix& operator=(const BinaryClassificationMatrix& that);
 
-    BinaryClassificationMatrix merge(const BinaryClassificationMatrix& that);
+  BinaryClassificationMatrix merge(const BinaryClassificationMatrix& that);
 
-    double tpr() const;
-    double fnr() const;
-    double tnr() const;
-    double fpr() const;
-    double precision() const;
-    double recall() const;
-    double f1() const;
-    double accuracy() const;
+  double tpr() const;
+  double fnr() const;
+  double tnr() const;
+  double fpr() const;
+  double precision() const;
+  double recall() const;
+  double f1() const;
+  double accuracy() const;
 
-    bool empty() const;
+  bool empty() const;
 
-    BinaryClassificationMatrix operator+(const BinaryClassificationMatrix& that);
-    BinaryClassificationMatrix& operator+=(const BinaryClassificationMatrix& that);
+  BinaryClassificationMatrix operator+(const BinaryClassificationMatrix& that);
+  BinaryClassificationMatrix& operator+=(const BinaryClassificationMatrix& that);
 
-    ~BinaryClassificationMatrix() = default;
+  ~BinaryClassificationMatrix() = default;
 };
 
 struct MultiClassificationMatrix {
@@ -76,40 +76,40 @@ public:
 
 class MetricsTracker {
 private:
-    std::vector<std::string> _labels;
-    std::unordered_map<std::string, uint32_t> _labels_to_ids_lookup;
-    std::unordered_map<uint32_t, BinaryClassificationMatrix> _detections_per_frame_lookup;
-    std::unordered_map<uint32_t, MultiClassificationMatrix> _recognitions_per_frame_lookup;
+  std::vector<std::string> _labels;
+  std::unordered_map<std::string, uint32_t> _labels_to_ids_lookup;
+  std::unordered_map<uint32_t, BinaryClassificationMatrix> _detections_per_frame_lookup;
+  std::unordered_map<uint32_t, MultiClassificationMatrix> _recognitions_per_frame_lookup;
 
-    /**
-     * Brute forces detected rectangles match
-     * based on intersection over union.
-     * Works for O(n^2) where n is a size of matched rectangles.
-     * Should be fine to match
-     */
-    void trackDetection(const FrameInfo& frame_info,
-                        const std::vector<Rect>& detected_face_origins);
+  /**
+   * Brute forces detected rectangles match
+   * based on intersection over union.
+   * Works for O(n^2) where n is a size of matched rectangles.
+   * Should be fine to match
+   */
+  void trackDetection(const FrameInfo& frame_info,
+                      const std::vector<Rect>& detected_face_origins);
 
-    void trackRecognition(const FrameInfo& frame_info,
-                          const std::vector<std::string>& labels,
-                          const std::vector<Rect>& detected);
+  void trackRecognition(const FrameInfo& frame_info,
+                        const std::vector<std::string>& labels,
+                        const std::vector<Rect>& detected);
 
 public:
-    explicit MetricsTracker(std::vector<std::string> labels);
-    MetricsTracker(const MetricsTracker& that);
-    MetricsTracker& operator=(const MetricsTracker& that);
+  explicit MetricsTracker(std::vector<std::string> labels);
+  MetricsTracker(const MetricsTracker& that);
+  MetricsTracker& operator=(const MetricsTracker& that);
 
-    void keepTrackOf(const FrameInfo& frame_info,
-                     const std::vector<std::string>& detected_labels,
-                     const std::vector<Rect>& detected_face_origins);
+  void keepTrackOf(const FrameInfo& frame_info,
+                   const std::vector<std::string>& detected_labels,
+                   const std::vector<Rect>& detected_face_origins);
 
-    BinaryClassificationMatrix overallDetectionMetrics() const;
+  BinaryClassificationMatrix overallDetectionMetrics() const;
 
-    MultiClassificationMatrix overallKnownRecognitionMetrics() const;
+  MultiClassificationMatrix overallKnownRecognitionMetrics() const;
 
-    BinaryClassificationMatrix overallUnknownRecognitionMetrics() const;
+  BinaryClassificationMatrix overallUnknownRecognitionMetrics() const;
 
-    ~MetricsTracker() = default;
+  ~MetricsTracker() = default;
 };
 
 } // namespace detection
