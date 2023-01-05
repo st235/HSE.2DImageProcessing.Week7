@@ -39,8 +39,12 @@ std::vector<double> DnnRecognitionModel::extractFeatures(const cv::Mat& mat) con
     return vector;
 }
 
-DnnRecognitionModel::DnnRecognitionModel(const std::string& landmarks_model_file,
+DnnRecognitionModel::DnnRecognitionModel(double unknown_max_distance,
+                                         uint32_t considered_neighbours,
+                                         const std::string& landmarks_model_file,
                                          const std::string& dnn_model_file):
+    _unknown_max_distance(unknown_max_distance),
+    _considered_neighbours(considered_neighbours),
     _dnn_model_file(dnn_model_file),
     _landmarks_model_file(landmarks_model_file),
     _shape_predictor(),
@@ -51,17 +55,21 @@ DnnRecognitionModel::DnnRecognitionModel(const std::string& landmarks_model_file
 }
 
 DnnRecognitionModel::DnnRecognitionModel(const DnnRecognitionModel& that):
-        _dnn_model_file(that._dnn_model_file),
-        _landmarks_model_file(that._landmarks_model_file),
-        _shape_predictor(that._shape_predictor),
-        _face_recognition_dnn_model(that._face_recognition_dnn_model),
-        _knearest(that._knearest) {
-    _knearest->setDefaultK(100);
+    _unknown_max_distance(that._unknown_max_distance),
+    _considered_neighbours(that._considered_neighbours),
+    _dnn_model_file(that._dnn_model_file),
+    _landmarks_model_file(that._landmarks_model_file),
+    _shape_predictor(that._shape_predictor),
+    _face_recognition_dnn_model(that._face_recognition_dnn_model),
+    _knearest(that._knearest) {
+    _knearest->setDefaultK(_considered_neighbours);
     _knearest->setIsClassifier(true);
 }
 
 DnnRecognitionModel& DnnRecognitionModel::operator=(const DnnRecognitionModel& that) {
     if (this != &that) {
+        this->_unknown_max_distance = that._unknown_max_distance;
+        this->_considered_neighbours = that._considered_neighbours;
         this->_dnn_model_file = that._dnn_model_file;
         this->_landmarks_model_file = that._landmarks_model_file;
         this->_shape_predictor = that._shape_predictor;
@@ -75,6 +83,8 @@ DnnRecognitionModel& DnnRecognitionModel::operator=(const DnnRecognitionModel& t
 void DnnRecognitionModel::write(const std::string& file) {
     cv::Ptr<cv::FileStorage> file_storage = cv::makePtr<cv::FileStorage>(file, cv::FileStorage::WRITE);
 
+    file_storage->write("_unknown_max_distance", _unknown_max_distance);
+    file_storage->write("_considered_neighbours", static_cast<int>(_considered_neighbours));
     file_storage->write("_dnn_model_file", _dnn_model_file);
     file_storage->write("_landmarks_model_file", _landmarks_model_file);
 
@@ -83,6 +93,12 @@ void DnnRecognitionModel::write(const std::string& file) {
 
 void DnnRecognitionModel::read(const std::string& file) {
     cv::FileStorage file_storage(file, cv::FileStorage::READ);
+
+    file_storage["_unknown_max_distance"] >> _unknown_max_distance;
+
+    int considered_neighbours;
+    file_storage["_considered_neighbours"] >> considered_neighbours;
+    _considered_neighbours = static_cast<uint32_t>(considered_neighbours);
 
     file_storage["_dnn_model_file"] >> _dnn_model_file;
     file_storage["_landmarks_model_file"] >> _landmarks_model_file;
@@ -163,7 +179,7 @@ int DnnRecognitionModel::predict(cv::Mat& image) const {
     // prediction
     double prediction = 1 - distance;
 
-    if (prediction < 0.7) {
+    if (prediction < _unknown_max_distance) {
         return FaceRecognitionModel::LABEL_UNKNOWN;
     }
 
