@@ -600,6 +600,13 @@ For recognition there are 2 sets:
 
 ### Recognition
 
+### Hyper parameters
+
+| Parameter             | Value |
+|-----------------------|-------|
+| unknown distance      | 0.7   |
+| considered neighbours | 100   |
+
 #### Closed set of people (people we know)
 
 | Metric   | Score  |
