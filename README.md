@@ -590,9 +590,11 @@ For recognition there are 2 sets:
 
 ## Quality
 
+The given configuration is a good tradeoff between quality and performance
+
 ### Detection
 
-#### Hyper parameters
+#### Hyperparameters
 
 | Parameter           | Value |
 |---------------------|-------|
@@ -611,7 +613,7 @@ For recognition there are 2 sets:
 
 ### Recognition
 
-### Hyper parameters
+### Hyperparameters
 
 | Parameter             | Value |
 |-----------------------|-------|
@@ -630,9 +632,27 @@ For recognition there are 2 sets:
 |----------|--------|
 | TPR      | ~0.996 |
 | FNR      | ~0.003 |
-| FPR      | 0.032  |
+| FPR      | ~0.032 |
 
-Full report can be found in [the report file](./REPORT)
+P.S.: Full program output can be found in [the report file](./REPORT)
+
+## Alternative hyperparameters considerations
+
+| Metric                                  | Configuration 1 | Configuration 2 | Configuration 3 | Configuration 4 | Configuration 5 | Configuration 6 |
+|-----------------------------------------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|
+| Hyperparameters: face scale factor      | 1.05            | 1.05            | 1.01            | 1.1             | 1.1             | 1.1             |
+| Hyperparameters: face min neighbours    | 6               | 8               | 6               | 6               | 6               | 6               |
+| Hyperparameters:  eyes scale factor     | 1.1             | 1.1             | 1.05            | 1.1             | 1.1             | 1.1             |
+| Hyperparameters:  eyes min neighbours   | 6               | 6               | 6               | 6               | 6               | 6               |
+| Hyperparameters:  unknown distance      | 0.7             | 0.7             | 0.7             | 0.65            | 0.55            | 0.7             |
+| Hyperparameters:  considered neighbours | 100             | 100             | 100             | 50              | 10              | 250             |
+| Detection: TPR                          | ~0.892          | ~0.889          | ~0.902          | ~0.884          | ~0.884          | ~0.884          |
+| Detection: FNR                          | ~0.108          | ~0.111          | ~0.975          | ~0.116          | ~0.116          | ~0.116          |
+| Detection: FPR                          | 0               | 0               | 0               | 0               | 0               | 0               |
+| Recognition, Known: Accuracy            | ~0.986          | ~0.988          | ~0.996          | ~0.938          | ~0.926          | ~0.987          |
+| Recognition, Unknown: TPR               | ~0.998          | ~0.998          | ~0.997          | ~0.947          | ~0.360          | ~0.997          |
+| Recognition, Unknown: FNR               | ~0.002          | ~0.002          | ~0.002          | ~0.053          | ~0.640          | ~0.003          |
+| Recognition, Unknown: FPR               | ~0.030          | ~0.030          | ~0.030          | ~0.004          | ~0              | ~0.033          |
 
 Wow! You've really made this through the document. Thank you for reading!
 
