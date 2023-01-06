@@ -2,9 +2,17 @@
 
 namespace detection {
 
-OpenCVFaceDetectionModel::OpenCVFaceDetectionModel(const std::string& face_cascade_file_path,
+OpenCVFaceDetectionModel::OpenCVFaceDetectionModel(double face_scale_factor,
+                                                   uint32_t face_min_neighbours,
+                                                   double eyes_scale_factor,
+                                                   uint32_t eyes_min_neighbours,
+                                                   const std::string& face_cascade_file_path,
                                                    const std::string& right_eye_cascade_file_path,
                                                    const std::string& left_eye_cascade_file_path):
+    _face_scale_factor(face_scale_factor),
+    _face_min_neighbours(face_min_neighbours),
+    _eyes_scale_factor(eyes_scale_factor),
+    _eyes_min_neighbours(eyes_min_neighbours),
     _face_cascade(),
     _right_eye_cascade(),
     _left_eye_cascade(left_eye_cascade_file_path) {
@@ -14,6 +22,10 @@ OpenCVFaceDetectionModel::OpenCVFaceDetectionModel(const std::string& face_casca
 }
 
 OpenCVFaceDetectionModel::OpenCVFaceDetectionModel(const OpenCVFaceDetectionModel& that):
+    _face_scale_factor(that._face_scale_factor),
+    _face_min_neighbours(that._face_min_neighbours),
+    _eyes_scale_factor(that._eyes_scale_factor),
+    _eyes_min_neighbours(that._eyes_min_neighbours),
     _face_cascade(that._face_cascade),
     _right_eye_cascade(that._right_eye_cascade),
     _left_eye_cascade(that._left_eye_cascade) {
@@ -22,6 +34,10 @@ OpenCVFaceDetectionModel::OpenCVFaceDetectionModel(const OpenCVFaceDetectionMode
 
 OpenCVFaceDetectionModel& OpenCVFaceDetectionModel::operator=(const OpenCVFaceDetectionModel& that) {
     if (this != &that) {
+        this->_face_scale_factor = that._face_scale_factor;
+        this->_face_min_neighbours = that._face_min_neighbours;
+        this->_eyes_scale_factor = that._eyes_scale_factor;
+        this->_eyes_min_neighbours = that._eyes_min_neighbours;
         this->_face_cascade = that._face_cascade;
         this->_right_eye_cascade = that._right_eye_cascade;
         this->_left_eye_cascade = that._left_eye_cascade;
@@ -37,7 +53,7 @@ std::vector<Face> OpenCVFaceDetectionModel::extractFaces(const Rect& viewport, c
     cv::cvtColor(image, greyscale_image, cv::COLOR_BGR2GRAY);
 
     std::vector<cv::Rect> faces;
-    _face_cascade.detectMultiScale(greyscale_image, faces, 1.1, 6);
+    _face_cascade.detectMultiScale(greyscale_image, faces, _face_scale_factor, _face_min_neighbours);
 
     for(size_t i = 0; i < faces.size(); i++) {
         cv::Rect face = faces[i];
@@ -51,8 +67,8 @@ std::vector<Face> OpenCVFaceDetectionModel::extractFaces(const Rect& viewport, c
         std::vector<cv::Rect> left_eyes;
         std::vector<cv::Rect> right_eyes;
 
-        _left_eye_cascade.detectMultiScale(face_area, left_eyes, 1.1, 6);
-        _right_eye_cascade.detectMultiScale(face_area, right_eyes, 1.1, 6);
+        _left_eye_cascade.detectMultiScale(face_area, left_eyes, _eyes_scale_factor, _eyes_min_neighbours);
+        _right_eye_cascade.detectMultiScale(face_area, right_eyes, _eyes_scale_factor, _eyes_min_neighbours);
 
         cv::Rect left_eye;
         cv::Rect right_eye;

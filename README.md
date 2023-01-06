@@ -592,6 +592,17 @@ For recognition there are 2 sets:
 
 ### Detection
 
+#### Hyper parameters
+
+| Parameter           | Value |
+|---------------------|-------|
+| face scale factor   | 1.1   |
+| face min neighbours | 6     |
+| eyes scale factor   | 1.1   |
+| eyes min neighbours | 6     |
+
+#### Scores
+
 | Metric | Score  |
 |--------|--------|
 | TPR    | ~0.884 |

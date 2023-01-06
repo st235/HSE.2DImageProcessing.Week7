@@ -49,8 +49,8 @@ using face_recognition_dnn_model = dlib::loss_metric<dlib::fc_no_bias<128,dlib::
 
 const double DEFAULT_UNKNOWN_MAX_DISTANCE = 0.7;
 const uint32_t DEFAULT_CONSIDERED_NEIGHBOURS = 100;
-const std::string LANDMARK_MODEL_FILE_PATH = "shape_predictor_68_face_landmarks.dat";
-const std::string DNN_MODEL_FILE_PATH = "dlib_face_recognition_resnet_model_v1.dat";
+const std::string DEFAULT_LANDMARK_MODEL_FILE_PATH = "shape_predictor_68_face_landmarks.dat";
+const std::string DEFAULT_DNN_MODEL_FILE_PATH = "dlib_face_recognition_resnet_model_v1.dat";
 
 } // namespace
 
@@ -79,8 +79,8 @@ private:
 public:
   DnnRecognitionModel(double unknown_max_distance = DEFAULT_UNKNOWN_MAX_DISTANCE,
                       uint32_t considered_neighbours = DEFAULT_CONSIDERED_NEIGHBOURS,
-                      const std::string& landmarks_model_file = LANDMARK_MODEL_FILE_PATH,
-                      const std::string& dnn_model_file = DNN_MODEL_FILE_PATH);
+                      const std::string& landmarks_model_file = DEFAULT_LANDMARK_MODEL_FILE_PATH,
+                      const std::string& dnn_model_file = DEFAULT_DNN_MODEL_FILE_PATH);
   DnnRecognitionModel(const DnnRecognitionModel& that);
   DnnRecognitionModel& operator=(const DnnRecognitionModel& that);
 
