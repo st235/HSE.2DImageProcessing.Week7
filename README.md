@@ -647,7 +647,7 @@ P.S.: Full program output can be found in [the report file](./REPORT)
 | Hyperparameters:  unknown distance      | 0.7             | 0.7             | 0.7             | 0.65            | 0.55            | 0.7             |
 | Hyperparameters:  considered neighbours | 100             | 100             | 100             | 50              | 10              | 250             |
 | Detection: TPR                          | ~0.892          | ~0.889          | ~0.902          | ~0.884          | ~0.884          | ~0.884          |
-| Detection: FNR                          | ~0.108          | ~0.111          | ~0.975          | ~0.116          | ~0.116          | ~0.116          |
+| Detection: FNR                          | ~0.108          | ~0.111          | ~0.098          | ~0.116          | ~0.116          | ~0.116          |
 | Detection: FPR                          | 0               | 0               | 0               | 0               | 0               | 0               |
 | Recognition, Known: Accuracy            | ~0.986          | ~0.988          | ~0.996          | ~0.938          | ~0.926          | ~0.987          |
 | Recognition, Unknown: TPR               | ~0.998          | ~0.998          | ~0.997          | ~0.947          | ~0.360          | ~0.997          |
