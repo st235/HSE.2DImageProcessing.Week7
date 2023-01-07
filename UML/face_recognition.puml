@@ -30,7 +30,9 @@ class BowRecognitionModel {
 }
 
 class HogRecognitionModel {
-- cv::Ptr<cv::ml::StatModel> _model;
+- uint32_t _max_neighbours;
+- double _max_neighbours_distance;
+- cv::Ptr<cv::ml::KNearest> _knearest;
 - cv::Mat extractFeatures(cv::Mat image) const;
 
 + void write(const std::string& file) override;
@@ -41,6 +43,8 @@ class HogRecognitionModel {
 }
 
 class DnnRecognitionModel {
+- double _unknown_max_distance;
+- uint32_t _considered_neighbours;
 - std::string _dnn_model_file;
 - std::string _landmarks_model_file;
 - dlib::shape_predictor _shape_predictor;

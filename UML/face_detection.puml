@@ -6,6 +6,10 @@ abstract class FaceDetectionModel {
 }
 
 class OpenCVFaceDetectionModel {
+- double _face_scale_factor;
+- uint32_t _face_min_neighbours;
+- double _eyes_scale_factor;
+- uint32_t _eyes_min_neighbours;
 - cv::CascadeClassifier _face_cascade;
 - cv::CascadeClassifier _right_eye_cascade;
 - cv::CascadeClassifier _left_eye_cascade;
