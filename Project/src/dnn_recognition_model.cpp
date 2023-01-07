@@ -52,6 +52,8 @@ DnnRecognitionModel::DnnRecognitionModel(double unknown_max_distance,
     _knearest(cv::ml::KNearest::create()) {
     dlib::deserialize(landmarks_model_file) >> _shape_predictor;
     dlib::deserialize(dnn_model_file) >> _face_recognition_dnn_model;
+    _knearest->setDefaultK(_considered_neighbours);
+    _knearest->setIsClassifier(true);
 }
 
 DnnRecognitionModel::DnnRecognitionModel(const DnnRecognitionModel& that):
@@ -62,8 +64,7 @@ DnnRecognitionModel::DnnRecognitionModel(const DnnRecognitionModel& that):
     _shape_predictor(that._shape_predictor),
     _face_recognition_dnn_model(that._face_recognition_dnn_model),
     _knearest(that._knearest) {
-    _knearest->setDefaultK(_considered_neighbours);
-    _knearest->setIsClassifier(true);
+    // empty on purpose
 }
 
 DnnRecognitionModel& DnnRecognitionModel::operator=(const DnnRecognitionModel& that) {

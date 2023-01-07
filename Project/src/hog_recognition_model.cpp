@@ -20,18 +20,27 @@ cv::Mat HogRecognitionModel::extractFeatures(cv::Mat image) const {
     return out_descriptors;
 }
 
-HogRecognitionModel::HogRecognitionModel(cv::Ptr<cv::ml::StatModel> model):
-        _model(model) {
-    // empty on purpose
+HogRecognitionModel::HogRecognitionModel(uint32_t max_neighbours,
+                                         double max_neighbours_distance):
+    _max_neighbours(max_neighbours),
+    _max_neighbours_distance(max_neighbours_distance),
+    _knearest(cv::ml::KNearest::create()) {
+    _knearest->setDefaultK(_max_neighbours);
+    _knearest->setIsClassifier(true);
 }
 
-HogRecognitionModel::HogRecognitionModel(const HogRecognitionModel& that) {
-    this->_model = that._model;
+HogRecognitionModel::HogRecognitionModel(const HogRecognitionModel& that):
+    _max_neighbours(that._max_neighbours),
+    _max_neighbours_distance(that._max_neighbours_distance),
+    _knearest(that._knearest) {
+    // empty on purpose
 }
 
 HogRecognitionModel& HogRecognitionModel::operator=(const HogRecognitionModel& that) {
     if (this != &that) {
-        this->_model = that._model;
+        this->_max_neighbours = that._max_neighbours;
+        this->_max_neighbours_distance = that._max_neighbours_distance;
+        this->_knearest = that._knearest;
     }
 
     return *this;
@@ -39,12 +48,23 @@ HogRecognitionModel& HogRecognitionModel::operator=(const HogRecognitionModel& t
 
 void HogRecognitionModel::write(const std::string& file) {
     cv::Ptr<cv::FileStorage> file_storage = cv::makePtr<cv::FileStorage>(file, cv::FileStorage::WRITE);
-    _model->write(file_storage, "_model");
+
+    file_storage->write("_max_neighbours", static_cast<int>(_max_neighbours));
+    file_storage->write("_max_neighbours_distance", _max_neighbours_distance);
+
+    _knearest->write(file_storage, "_knearest");
 }
 
 void HogRecognitionModel::read(const std::string& file) {
     cv::FileStorage file_storage(file, cv::FileStorage::READ);
-    _model->read(file_storage["_model"]);
+
+    int max_neighbours;
+    file_storage["_max_neighbours"] >> max_neighbours;
+    _max_neighbours = static_cast<uint32_t>(max_neighbours);
+
+    file_storage["_max_neighbours_distance"] >> _max_neighbours_distance;
+
+    _knearest->read(file_storage["_knearest"]);
 }
 
 void HogRecognitionModel::train(std::vector<cv::Mat>& images,
@@ -68,12 +88,29 @@ void HogRecognitionModel::train(std::vector<cv::Mat>& images,
     cv::Ptr<cv::ml::TrainData> train_data =
             cv::ml::TrainData::create(train_images_descriptors, cv::ml::ROW_SAMPLE, train_images_labels);
 
-    _model->train(train_data);
+    _knearest->train(train_data);
 }
 
 int HogRecognitionModel::predict(cv::Mat& image) const {
-    cv::Mat descriptors = extractFeatures(image);
-    return static_cast<int>(_model->predict(descriptors));
+    cv::Mat train_data = extractFeatures(image);
+
+    cv::Mat out_results,
+            out_neighbors,
+            out_distances;
+    float classification_result = _knearest->findNearest(train_data, _knearest->getDefaultK(), out_results, out_neighbors, out_distances);
+
+    double distance = 0;
+    for (size_t i = 0; i < out_distances.cols; i++) {
+        distance += out_distances.at<float>(0, i);
+    }
+    // distance is on scale from [0, 1]
+    distance /= out_distances.cols;
+
+    if (distance > _max_neighbours_distance) {
+        return FaceRecognitionModel::LABEL_UNKNOWN;
+    }
+
+    return static_cast<int>(classification_result);
 }
 
 } // namespace detection

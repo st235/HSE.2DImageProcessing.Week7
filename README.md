@@ -212,10 +212,156 @@ Cons:
 |----------|--------|
 | Recall   | ~0.897 |
 
+#### Scores
+
+Detection is performed for **every frame** to estimate the quality.
+Moreover, eyes detection does not commit to face recognition quality therefore these
+parameters are excluded from the table.
+
+| Metric                                  | `OpenCVFaceDetectionModel`            | `OpenCVFaceDetectionModel`            | `OpenCVFaceDetectionModel`            |
+|-----------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|
+| Hyperparameters: detector               | `haarcascade_frontalface_default.xml` | `haarcascade_frontalface_default.xml` | `haarcascade_frontalface_default.xml` |
+| Hyperparameters: face scale factor      | 1.1                                   | 1.05                                  | 1.05                                  |
+| Hyperparameters: face min neighbours    | 6                                     | 6                                     | 8                                     |
+| Detection: TPR                          | ~0.846                                | ~0.886                                | ~0.876                                |
+| Detection: FNR                          | ~0.154                                | ~0.114                                | ~0.124                                |
+| Detection: FPR                          | 0                                     | 0                                     | 0                                     |
+
+
+| Metric                                  | `OpenCVFaceDetectionModel`        | `OpenCVFaceDetectionModel`        | `OpenCVFaceDetectionModel`        |
+|-----------------------------------------|-----------------------------------|-----------------------------------|-----------------------------------|
+| Hyperparameters: detector               | `haarcascade_frontalface_alt.xml` | `haarcascade_frontalface_alt.xml` | `haarcascade_frontalface_alt.xml` |
+| Hyperparameters: face scale factor      | 1.1                               | 1.05                              | 1.1                               |
+| Hyperparameters: face min neighbours    | 6                                 | 6                                 | 8                                 |
+| Detection: TPR                          | ~0.828                            | ~0.877                            | ~0.798                            |
+| Detection: FNR                          | ~0.172                            | ~0.123                            | ~0.202                            |
+| Detection: FPR                          | 0                                 | 0                                 | 0                                 |
+
+| Metric                                  | `OpenCVFaceDetectionModel`         | `OpenCVFaceDetectionModel`         | `OpenCVFaceDetectionModel`         |
+|-----------------------------------------|------------------------------------|------------------------------------|------------------------------------|
+| Hyperparameters: detector               | `haarcascade_frontalface_alt2.xml` | `haarcascade_frontalface_alt2.xml` | `haarcascade_frontalface_alt2.xml` |
+| Hyperparameters: face scale factor      | 1.1                                | 1.05                               | 1.2                                |
+| Hyperparameters: face min neighbours    | 6                                  | 6                                  | 8                                  |
+| Detection: TPR                          | ~0.884                             | ~0.893                             | ~0.732                             |
+| Detection: FNR                          | ~0.116                             | ~0.107                             | ~0.268                             |
+| Detection: FPR                          | 0                                  | 0                                  | 0                                  |
+
+| Metric                                  | `DLibFaceDetectionModel ` |
+|-----------------------------------------|---------------------------|
+| Detection: TPR                          | ~0.897                    |
+| Detection: FNR                          | ~0.103                    |
+| Detection: FPR                          | 0                         |
+
+
 #### Conclusion
 
 Perhaps in this work I will use the `frontalface_alt2` cascade classifier from OpenCV even
 if it works a bit worse than a dlib classifier as it feels a bit performance-wise better.
+
+
+## Performance considerations
+
+To save some computational resources and save some processing time the app performs face detection and
+recognition every **10** frames, in between the app tries to keep track of already detected frames.
+
+There are a few image trackers implemented in the project. See the comparison table below.
+Please, do note, that to compute __detection + tracking score__ I was using previously selected models:
+`OpenCVFaceDetectionModel` + `frontalface_alt2`. Morever, values of hyperparameters are listed for
+the face detector.
+
+### KCF
+
+Pros:
+- Fast: can work in runtime without any visible artifacts
+- Mostly accurate: track faces in the wast majority of cases
+
+Cons:
+- Loose objects that have been previously detected
+- Tracks objects that left the frame
+
+| Scene 1                                         | Scene 2                                         |
+|-------------------------------------------------|-------------------------------------------------|
+| ![Result](./Resources/tracking_kcf_issue_1.png) | ![Result](./Resources/tracking_kcf_issue_2.png) |
+
+| Metric                                   | Score                   |
+|------------------------------------------|-------------------------|
+| Hyperparameters: face scale factor       | 1.1                     |
+| Hyperparameters: face min neighbours     | 6                       |
+| TPR                                      | ~0.884                  |
+| FNR                                      | ~0.116                  |
+
+### MIL
+
+Pros:
+- Seems like detects faces more accurate than `KCF`
+
+Cons:
+- Slow: may be tolerated for runtime but works slower than `KCF`
+- Tracks an object even if the object is not in the frame
+- Still not perfect: sometimes as `KCF` just loose previously detected faces
+
+| Scene 1                                         | Scene 2                                         |
+|-------------------------------------------------|-------------------------------------------------|
+| ![Result](./Resources/tracking_mil_issue_1.png) | ![Result](./Resources/tracking_mil_issue_2.png) |
+
+| Metric                                  | Score       |
+|-----------------------------------------|-------------|
+| Hyperparameters: face scale factor      | 1.1         |
+| Hyperparameters: face min neighbours    | 6           |
+| TPR                                     | ~0.887      |
+| FNR                                     | ~0.113      |
+
+### CSRT
+
+Pros:
+- Seems like detects faces more accurate than `KCF` and even `MIL`
+- Keeps tracking longer even when face is turned almost sideways
+
+Cons:
+- Slow: still may be tolerated for runtime usages but works slower than `KCF` and `MIL`
+- May track an object even if the object left the frame
+
+| Scene 1                                         | Scene 2                                          |
+|-------------------------------------------------|--------------------------------------------------|
+| ![Result](./Resources/tracking_csrt_issue_1.png) | ![Result](./Resources/tracking_csrt_issue_2.png) |
+
+| Metric                                  | Score               |
+|-----------------------------------------|---------------------|
+| Hyperparameters: face scale factor      | 1.1                 |
+| Hyperparameters: face min neighbours    | 6                   |
+| TPR                                     | ~0.893              |
+| FNR                                     | ~0.107              |
+
+### GOTURN
+
+__Please, note, you need to download from the Internet and
+put into the same folder where the executable file is located
+2 special files: `goturn.caffemodel` and `goturn.prototxt`.
+The tracker won't work without these files.__
+
+Pros:
+- Looks like tracking is mostly accurate
+
+Cons:
+- Slow: a total disaster, not feasible to use in runtime
+- Has major tracking issues when there are a few objects close to each other resulting
+  in visual artifacts or enormous detections bounds
+- Sometimes the bounds are inaccurate
+
+| Enormous bound                                     | Close objects collapse                             | Inacurate bounds                                   |
+|----------------------------------------------------|----------------------------------------------------|----------------------------------------------------|
+| ![Result](./Resources/tracking_goturn_issue_1.png) | ![Result](./Resources/tracking_goturn_issue_2.png) | ![Result](./Resources/tracking_goturn_issue_3.png) |
+
+| Metric                                    | Score           |
+|-------------------------------------------|-----------------|
+| Hyperparameters: face scale factor        | 1.1             |
+| Hyperparameters: face min neighbours      | 6               |
+| TPR                                       | ~0.484          |
+| FNR                                       | ~0.516          |
+
+### Conclusion
+
+I will use `KCF` in my final work as it seems as a good tradeoff between quality and performance.
 
 ## Training
 
@@ -353,9 +499,33 @@ This model works much better than the others.
 |---------------------------------------------------------|-------------------------------------------------------|
 | ![Result](./Resources/dnn_recognition_quality_5.jpeg)   | ![Result](./Resources/dnn_recognition_quality_6.jpeg) |
 
+#### Scores table
+
+__Note: to get new results you need to re-train your model with new parameters.__ 
+
+| Metric                                      | `HogRecognitionModel` | `HogRecognitionModel` | `HogRecognitionModel` | `HogRecognitionModel` |
+|---------------------------------------------|-----------------------|-----------------------|-----------------------|-----------------------|
+| Hyperparameters:  max neighbours distance   | 200                   | 250                   | 235                   | 235                   |
+| Hyperparameters:  max neighbours            | 50                    | 50                    | 50                    | 70                    |
+| Recognition, Known: Accuracy                | N/A (no matches)      | ~0.497                | ~0.494                | ~0.413                |
+| Recognition, Unknown: TPR                   | 1                     | ~0.073                | ~0.116                | ~0.135                |
+| Recognition, Unknown: FNR                   | 0                     | ~0.927                | ~0.884                | ~0.865                |
+| Recognition, Unknown: FPR                   | ~0.303                | ~0.010                | ~0.015                | ~0.218                |
+
+
+| Metric                                  | `DnnRecognitionModel` | `DnnRecognitionModel` | `DnnRecognitionModel` | `DnnRecognitionModel` |
+|-----------------------------------------|-----------------------|-----------------------|-----------------------|-----------------------|
+| Hyperparameters:  unknown distance      | 0.7                   | 0.65                  | 0.55                  | 0.7                   |
+| Hyperparameters:  considered neighbours | 100                   | 50                    | 10                    | 250                   |
+| Recognition, Known: Accuracy            | ~0.987                | ~0.938                | ~0.926                | ~0.987                |
+| Recognition, Unknown: TPR               | ~0.997                | ~0.947                | ~0.360                | ~0.997                |
+| Recognition, Unknown: FNR               | ~0.003                | ~0.053                | ~0.640                | ~0.003                |
+| Recognition, Unknown: FPR               | ~0.033                | ~0.004                | ~0                    | ~0.033                |
+
 #### Conclusion
 
-I will bear with the `DNN` approach as the most accurate one.
+I will bear with the `DNN` approach as the most accurate one and hyperparameters from the first column 
+as it seems quite accurate and shows good performance results.
 
 ## Processing videos
 
@@ -370,12 +540,12 @@ As you've seen earlier the command accepts a directory with images and/or images
 list separated by space and followed by `--process` mode. The command has **2 mandatory
 and 2 optional arguments**.
 
-| Argument | Optional | Desciption                                                                         |
-|----------|---------|-----------------------------------------------------------------------------------|
-| `-im`      | ❌       | *Input model*:  your trained model from the previous step.                         |
-| `-il`      | ❌       | *Input labels*: your labels from the previous step.                                |
-| `-t`       | ✅       | *Test against annotations*: test your videos against annotations and see the score. |
-| `-d`       | ✅       | *Debug*: slows down the video when matching against some frame.                    |
+| Argument  | Optional     | Description                                                                         |
+|-----------|--------------|-------------------------------------------------------------------------------------|
+| `-im`     | ❌            | *Input model*:  your trained model from the previous step.                          |
+| `-il`     | ❌            | *Input labels*: your labels from the previous step.                                 |
+| `-t`      | ✅            | *Test against annotations*: test your videos against annotations and see the score. |
+| `-d`      | ✅            | *Debug*: slows down the video when matching against some frame.                     |
 
 After running the command you will see the video output.
 
@@ -391,99 +561,7 @@ When debugging you will see app detections in **red** and annotations in **blue*
 
 | Frame 50                                             | Frame 150                                            |
 |------------------------------------------------------|------------------------------------------------------|
-| ![Result](./Resources/processing_result_debug_1.png) | ![Result](./Resources/processing_result_debug_2.png) |
-
-## Performance considerations
-
-To save some computational resources and save some processing time the app performs face detection and
-recognition every **10** frames, in between the app tries to keep track of already detected frames.
-
-There are a few image trackers implemented in the project. See the comparison table below.
-Please, do note, that to compute __detection + tracking score__ I was using previously selected models: 
-`DNN` + `frontalface_alt2`.
-
-### KCF
-
-Pros:
-- Fast: can work in runtime without any visible artifacts
-- Mostly accurate: track faces in the wast majority of cases
-
-Cons:
-- Loose objects that have been previously detected
-- Tracks objects that left the frame
-
-| Scene 1                                         | Scene 2                                         |
-|-------------------------------------------------|-------------------------------------------------|
-| ![Result](./Resources/tracking_kcf_issue_1.png) | ![Result](./Resources/tracking_kcf_issue_2.png) |
-
-| Metric   | Score  |
-|----------|--------|
-| Recall   | ~0.884 |
-
-### MIL
-
-Pros:
-- Seems like detects faces more accurate than `KCF`
-
-Cons:
-- Slow: may be tolerated for runtime but works slower than `KCF`
-- Tracks an object even if the object is not in the frame
-- Still not perfect: sometimes as `KCF` just loose previously detected faces
-
-| Scene 1                                         | Scene 2                                         |
-|-------------------------------------------------|-------------------------------------------------|
-| ![Result](./Resources/tracking_mil_issue_1.png) | ![Result](./Resources/tracking_mil_issue_2.png) |
-
-| Metric   | Score  |
-|----------|--------|
-| Recall   | ~0.887 |
-
-### CSRT
-
-Pros:
-- Seems like detects faces more accurate than `KCF` and even `MIL`
-- Keeps tracking longer even when face is turned almost sideways
-
-Cons:
-- Slow: still may be tolerated for runtime usages but works slower than `KCF` and `MIL`
-- May track an object even if the object left the frame
-
-| Scene 1                                         | Scene 2                                          |
-|-------------------------------------------------|--------------------------------------------------|
-| ![Result](./Resources/tracking_csrt_issue_1.png) | ![Result](./Resources/tracking_csrt_issue_2.png) |
-
-| Metric   | Score  |
-|----------|--------|
-| Recall   | ~0.893 |
-
-### GOTURN
-
-__Please, note, you need to download from the Internet and 
-put into the same folder where the executable file is located 
-2 special files: `goturn.caffemodel` and `goturn.prototxt`.
-The tracker won't work without these files.__
-
-Pros:
-- Looks like tracking is mostly accurate
-
-Cons:
-- Slow: a total disaster, not feasible to use in runtime
-- Has major tracking issues when there are a few objects close to each other resulting
-in visual artifacts or enormous detections bounds
-- Sometimes the bounds are inaccurate
-
-| Enormous bound                                     | Close objects collapse                             | Inacurate bounds                                   |
-|----------------------------------------------------|----------------------------------------------------|----------------------------------------------------|
-| ![Result](./Resources/tracking_goturn_issue_1.png) | ![Result](./Resources/tracking_goturn_issue_2.png) | ![Result](./Resources/tracking_goturn_issue_3.png) |
-
-| Metric   | Score  |
-|----------|--------|
-| Recall   | ~0.484 |
-
-
-### Conclusion
-
-I will use `KCF` in my final work as it seems as a good tradeoff between quality and performance. 
+| ![Result](./Resources/processing_result_debug_1.png) | ![Result](./Resources/processing_result_debug_2.png) | 
 
 ## Annotations
 
@@ -588,7 +666,7 @@ For recognition there are 2 sets:
 - __People we know.__ I am using multiclass confusion matrix.
 - __Unknown people.__ I am using a confusion matrix for binary classification.
 
-## Quality
+## Final hyperparameters + quality scores
 
 The given configuration is a good tradeoff between quality and performance
 
@@ -635,24 +713,6 @@ The given configuration is a good tradeoff between quality and performance
 | FPR      | ~0.032 |
 
 P.S.: Full program output can be found in [the report file](./REPORT)
-
-## Alternative hyperparameters considerations
-
-| Metric                                  | Configuration 1 | Configuration 2 | Configuration 3 | Configuration 4 | Configuration 5 | Configuration 6 |
-|-----------------------------------------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|
-| Hyperparameters: face scale factor      | 1.05            | 1.05            | 1.01            | 1.1             | 1.1             | 1.1             |
-| Hyperparameters: face min neighbours    | 6               | 8               | 6               | 6               | 6               | 6               |
-| Hyperparameters:  eyes scale factor     | 1.1             | 1.1             | 1.05            | 1.1             | 1.1             | 1.1             |
-| Hyperparameters:  eyes min neighbours   | 6               | 6               | 6               | 6               | 6               | 6               |
-| Hyperparameters:  unknown distance      | 0.7             | 0.7             | 0.7             | 0.65            | 0.55            | 0.7             |
-| Hyperparameters:  considered neighbours | 100             | 100             | 100             | 50              | 10              | 250             |
-| Detection: TPR                          | ~0.892          | ~0.889          | ~0.902          | ~0.884          | ~0.884          | ~0.884          |
-| Detection: FNR                          | ~0.108          | ~0.111          | ~0.098          | ~0.116          | ~0.116          | ~0.116          |
-| Detection: FPR                          | 0               | 0               | 0               | 0               | 0               | 0               |
-| Recognition, Known: Accuracy            | ~0.986          | ~0.988          | ~0.996          | ~0.938          | ~0.926          | ~0.987          |
-| Recognition, Unknown: TPR               | ~0.998          | ~0.998          | ~0.997          | ~0.947          | ~0.360          | ~0.997          |
-| Recognition, Unknown: FNR               | ~0.002          | ~0.002          | ~0.002          | ~0.053          | ~0.640          | ~0.003          |
-| Recognition, Unknown: FPR               | ~0.030          | ~0.030          | ~0.030          | ~0.004          | ~0              | ~0.033          |
 
 Wow! You've really made this through the document. Thank you for reading!
 

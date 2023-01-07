@@ -3,16 +3,26 @@
 
 #include "face_recognition_model.h"
 
+namespace {
+
+const uint32_t DEFAULT_MAX_NEIGHBOURS = 50;
+const double MAX_NEIGHBOURS_DISTANCE = 250;
+
+} // namespace
+
 namespace detection {
 
 class HogRecognitionModel: public FaceRecognitionModel {
 private:
-  cv::Ptr<cv::ml::StatModel> _model;
+  uint32_t _max_neighbours;
+  double _max_neighbours_distance;
+  cv::Ptr<cv::ml::KNearest> _knearest;
 
   cv::Mat extractFeatures(cv::Mat image) const;
 
 public:
-  explicit HogRecognitionModel(cv::Ptr<cv::ml::StatModel> model = cv::ml::KNearest::create());
+  explicit HogRecognitionModel(uint32_t max_neighbours = DEFAULT_MAX_NEIGHBOURS,
+                               double max_neighbours_distance = MAX_NEIGHBOURS_DISTANCE);
   HogRecognitionModel(const HogRecognitionModel& that);
   HogRecognitionModel& operator=(const HogRecognitionModel& that);
 
