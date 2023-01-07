@@ -218,33 +218,52 @@ Detection is performed for **every frame** to estimate the quality.
 Moreover, eyes detection does not commit to face recognition quality therefore these
 parameters are excluded from the table.
 
-| Metric                                  | `OpenCVFaceDetectionModel`            | `OpenCVFaceDetectionModel`            | `OpenCVFaceDetectionModel`            |
-|-----------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|
-| Hyperparameters: detector               | `haarcascade_frontalface_default.xml` | `haarcascade_frontalface_default.xml` | `haarcascade_frontalface_default.xml` |
-| Hyperparameters: face scale factor      | 1.1                                   | 1.05                                  | 1.05                                  |
-| Hyperparameters: face min neighbours    | 6                                     | 6                                     | 8                                     |
-| Detection: TPR                          | ~0.846                                | ~0.886                                | ~0.876                                |
-| Detection: FNR                          | ~0.154                                | ~0.114                                | ~0.124                                |
-| Detection: FPR                          | 0                                     | 0                                     | 0                                     |
+| Metric                                  | `OpenCVFaceDetectionModel`            | `OpenCVFaceDetectionModel`            |
+|-----------------------------------------|---------------------------------------|---------------------------------------|
+| Hyperparameters: detector               | `haarcascade_frontalface_default.xml` | `haarcascade_frontalface_default.xml` |
+| Hyperparameters: face scale factor      | 1.1                                   | 1.05                                  |
+| Hyperparameters: face min neighbours    | 6                                     | 6                                     |
+| Detection: TPR                          | ~0.846                                | ~0.886                                |
+| Detection: FNR                          | ~0.154                                | ~0.114                                |
+| Detection: FPR                          | 0                                     | 0                                     |
+
+| Metric                                  | `OpenCVFaceDetectionModel`            | `OpenCVFaceDetectionModel`        |
+|-----------------------------------------|---------------------------------------|-----------------------------------|
+| Hyperparameters: detector               | `haarcascade_frontalface_default.xml` | `haarcascade_frontalface_alt.xml` |
+| Hyperparameters: face scale factor      | 1.05                                  | 1.1                               |
+| Hyperparameters: face min neighbours    | 8                                     | 6                                 |
+| Detection: TPR                          | ~0.876                                | ~0.828                            |
+| Detection: FNR                          | ~0.124                                | ~0.172                            |
+| Detection: FPR                          | 0                                     | 0                                 |
+
+| Metric                                  | `OpenCVFaceDetectionModel`        | `OpenCVFaceDetectionModel`        |
+|-----------------------------------------|-----------------------------------|-----------------------------------|
+| Hyperparameters: detector               | `haarcascade_frontalface_alt.xml` | `haarcascade_frontalface_alt.xml` |
+| Hyperparameters: face scale factor      | 1.05                              | 1.1                               |
+| Hyperparameters: face min neighbours    | 6                                 | 8                                 |
+| Detection: TPR                          | ~0.877                            | ~0.798                            |
+| Detection: FNR                          | ~0.123                            | ~0.202                            |
+| Detection: FPR                          | 0                                 | 0                                 |
+
+| Metric                                  | `OpenCVFaceDetectionModel`         | `OpenCVFaceDetectionModel`         |
+|-----------------------------------------|------------------------------------|------------------------------------|
+| Hyperparameters: detector               | `haarcascade_frontalface_alt2.xml` | `haarcascade_frontalface_alt2.xml` |
+| Hyperparameters: face scale factor      | 1.1                                | 1.05                               |
+| Hyperparameters: face min neighbours    | 6                                  | 6                                  |
+| Detection: TPR                          | ~0.884                             | ~0.893                             |
+| Detection: FNR                          | ~0.116                             | ~0.107                             |
+| Detection: FPR                          | 0                                  | 0                                  |
 
 
-| Metric                                  | `OpenCVFaceDetectionModel`        | `OpenCVFaceDetectionModel`        | `OpenCVFaceDetectionModel`        |
-|-----------------------------------------|-----------------------------------|-----------------------------------|-----------------------------------|
-| Hyperparameters: detector               | `haarcascade_frontalface_alt.xml` | `haarcascade_frontalface_alt.xml` | `haarcascade_frontalface_alt.xml` |
-| Hyperparameters: face scale factor      | 1.1                               | 1.05                              | 1.1                               |
-| Hyperparameters: face min neighbours    | 6                                 | 6                                 | 8                                 |
-| Detection: TPR                          | ~0.828                            | ~0.877                            | ~0.798                            |
-| Detection: FNR                          | ~0.172                            | ~0.123                            | ~0.202                            |
-| Detection: FPR                          | 0                                 | 0                                 | 0                                 |
+| Metric                                  | `OpenCVFaceDetectionModel`         |
+|-----------------------------------------|------------------------------------|
+| Hyperparameters: detector               | `haarcascade_frontalface_alt2.xml` |
+| Hyperparameters: face scale factor      | 1.2                                |
+| Hyperparameters: face min neighbours    | 8                                  |
+| Detection: TPR                          | ~0.732                             |
+| Detection: FNR                          | ~0.268                             |
+| Detection: FPR                          | 0                                  |
 
-| Metric                                  | `OpenCVFaceDetectionModel`         | `OpenCVFaceDetectionModel`         | `OpenCVFaceDetectionModel`         |
-|-----------------------------------------|------------------------------------|------------------------------------|------------------------------------|
-| Hyperparameters: detector               | `haarcascade_frontalface_alt2.xml` | `haarcascade_frontalface_alt2.xml` | `haarcascade_frontalface_alt2.xml` |
-| Hyperparameters: face scale factor      | 1.1                                | 1.05                               | 1.2                                |
-| Hyperparameters: face min neighbours    | 6                                  | 6                                  | 8                                  |
-| Detection: TPR                          | ~0.884                             | ~0.893                             | ~0.732                             |
-| Detection: FNR                          | ~0.116                             | ~0.107                             | ~0.268                             |
-| Detection: FPR                          | 0                                  | 0                                  | 0                                  |
 
 | Metric                                  | `DLibFaceDetectionModel ` |
 |-----------------------------------------|---------------------------|
@@ -503,24 +522,41 @@ This model works much better than the others.
 
 __Note: to get new results you need to re-train your model with new parameters.__ 
 
-| Metric                                      | `HogRecognitionModel` | `HogRecognitionModel` | `HogRecognitionModel` | `HogRecognitionModel` |
-|---------------------------------------------|-----------------------|-----------------------|-----------------------|-----------------------|
-| Hyperparameters:  max neighbours distance   | 200                   | 250                   | 235                   | 235                   |
-| Hyperparameters:  max neighbours            | 50                    | 50                    | 50                    | 70                    |
-| Recognition, Known: Accuracy                | N/A (no matches)      | ~0.497                | ~0.494                | ~0.413                |
-| Recognition, Unknown: TPR                   | 1                     | ~0.073                | ~0.116                | ~0.135                |
-| Recognition, Unknown: FNR                   | 0                     | ~0.927                | ~0.884                | ~0.865                |
-| Recognition, Unknown: FPR                   | ~0.303                | ~0.010                | ~0.015                | ~0.218                |
+| Metric                                      | `HogRecognitionModel` | `HogRecognitionModel` |
+|---------------------------------------------|-----------------------|-----------------------|
+| Hyperparameters:  max neighbours distance   | 200                   | 250                   |
+| Hyperparameters:  max neighbours            | 50                    | 50                    |
+| Recognition, Known: Accuracy                | N/A (no matches)      | ~0.497                |
+| Recognition, Unknown: TPR                   | 1                     | ~0.073                |
+| Recognition, Unknown: FNR                   | 0                     | ~0.927                |
+| Recognition, Unknown: FPR                   | ~0.303                | ~0.010                |
 
+| Metric                                      | `HogRecognitionModel` | `HogRecognitionModel` |
+|---------------------------------------------|-----------------------|-----------------------|
+| Hyperparameters:  max neighbours distance   | 235                   | 235                   |
+| Hyperparameters:  max neighbours            | 50                    | 70                    |
+| Recognition, Known: Accuracy                | ~0.494                | ~0.413                |
+| Recognition, Unknown: TPR                   | ~0.116                | ~0.135                |
+| Recognition, Unknown: FNR                   | ~0.884                | ~0.865                |
+| Recognition, Unknown: FPR                   | ~0.015                | ~0.218                |
 
-| Metric                                  | `DnnRecognitionModel` | `DnnRecognitionModel` | `DnnRecognitionModel` | `DnnRecognitionModel` |
-|-----------------------------------------|-----------------------|-----------------------|-----------------------|-----------------------|
-| Hyperparameters:  unknown distance      | 0.7                   | 0.65                  | 0.55                  | 0.7                   |
-| Hyperparameters:  considered neighbours | 100                   | 50                    | 10                    | 250                   |
-| Recognition, Known: Accuracy            | ~0.987                | ~0.938                | ~0.926                | ~0.987                |
-| Recognition, Unknown: TPR               | ~0.997                | ~0.947                | ~0.360                | ~0.997                |
-| Recognition, Unknown: FNR               | ~0.003                | ~0.053                | ~0.640                | ~0.003                |
-| Recognition, Unknown: FPR               | ~0.033                | ~0.004                | ~0                    | ~0.033                |
+| Metric                                  | `DnnRecognitionModel` | `DnnRecognitionModel` |
+|-----------------------------------------|-----------------------|-----------------------|
+| Hyperparameters:  unknown distance      | 0.7                   | 0.65                  |
+| Hyperparameters:  considered neighbours | 100                   | 50                    |
+| Recognition, Known: Accuracy            | ~0.987                | ~0.938                |
+| Recognition, Unknown: TPR               | ~0.997                | ~0.947                |
+| Recognition, Unknown: FNR               | ~0.003                | ~0.053                |
+| Recognition, Unknown: FPR               | ~0.033                | ~0.004                |
+
+| Metric                                  |  `DnnRecognitionModel` | `DnnRecognitionModel` |
+|-----------------------------------------|------------------------|-----------------------|
+| Hyperparameters:  unknown distance      |  0.55                  | 0.7                   |
+| Hyperparameters:  considered neighbours |  10                    | 250                   |
+| Recognition, Known: Accuracy            |  ~0.926                | ~0.987                |
+| Recognition, Unknown: TPR               |  ~0.360                | ~0.997                |
+| Recognition, Unknown: FNR               |  ~0.640                | ~0.003                |
+| Recognition, Unknown: FPR               |  ~0                    | ~0.033                |
 
 #### Conclusion
 
